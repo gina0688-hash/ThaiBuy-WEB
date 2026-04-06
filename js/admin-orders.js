@@ -13,6 +13,7 @@ showUser(user)
 window.loadOrders = async function(){
   console.log("🚀 loadOrders開始")
  const keyword = document.getElementById("searchInput")?.value.trim() || ""
+const statusFilter = document.getElementById("statusFilter")?.value || "all"
 
   let query = supabase
     .from("orders")
@@ -66,7 +67,31 @@ console.log("orders:", orders)
   .eq("order_id", o.id)
 
 const money = calcOrderMoney(o, items || [])
-    
+const statusText = calcOrderStatus(items || []).text
+
+if(statusFilter !== "all"){
+  if(statusFilter === "new" && !(statusText.includes("新訂單") || statusText.includes("部分已購買"))){
+    continue
+  }
+
+  if(statusFilter === "collecting" && !(statusText.includes("已下單") || statusText.includes("等待商品回台"))){
+    continue
+  }
+
+  if(statusFilter === "shipping" && !(statusText.includes("已回台") || statusText.includes("部分出貨"))){
+    continue
+  }
+
+  if(statusFilter === "done" && !statusText.includes("已完成")){
+    continue
+  }
+
+  if(statusFilter === "cancelled" && !statusText.includes("已取消")){
+    continue
+  }
+}
+
+
 
     const div = document.createElement("div")
     div.className = "order-card"
@@ -446,7 +471,7 @@ ${
     `
 
     // ⭐ 分類
-    const s = calcOrderStatus(items).text
+   const s = statusText
 
     if(s.includes("新訂單") || s.includes("部分已購買")){
       newBox.appendChild(div)
