@@ -1,5 +1,6 @@
 import { supabase } from "./supabase.js"
 
+const queryOrderNumber = document.getElementById("queryOrderNumber")
 const queryEmail = document.getElementById("queryEmail")
 const queryPhone = document.getElementById("queryPhone")
 const queryBtn = document.getElementById("queryBtn")
@@ -16,22 +17,27 @@ queryPhone.addEventListener("keydown", (e) => {
 })
 
 async function handleQuery(){
-  const email = queryEmail.value.trim().toLowerCase()
-  const phone = normalizePhone(queryPhone.value)
+const orderNumber = queryOrderNumber.value.trim().toUpperCase()
+const email = queryEmail.value.trim().toLowerCase()
+const phone = normalizePhone(queryPhone.value)
 
-  if(!email || !phone){
-    renderEmpty("請輸入 Email 與電話", "需同時輸入下單時填寫的 Email 與電話才能查詢。")
-    return
-  }
+if(!orderNumber && (!email || !phone)){
+  renderEmpty(
+    "請輸入查詢資訊",
+    "可輸入訂單編號，或同時輸入下單時填寫的 Email 與電話才能查詢。"
+  )
+  return
+}
 
   queryBtn.disabled = true
   queryBtn.textContent = "查詢中..."
 
   try{
-    const { data, error } = await supabase.rpc("query_orders_by_email_phone", {
-      p_email: email,
-      p_phone: phone
-    })
+   const { data, error } = await supabase.rpc("query_orders_for_customer", {
+  p_order_number: orderNumber || null,
+  p_email: email || null,
+  p_phone: phone || null
+})
 
     if(error){
       console.error("rpc query error:", error)
@@ -83,7 +89,7 @@ function renderOrders(orders){
         ">
           <div>
             <div style="font-size:20px;font-weight:800;color:#3f352f;">
-              訂單編號：${escapeHtml(order.id)}
+              訂單編號：${escapeHtml(order.order_number || order.id)}
             </div>
             <div style="margin-top:6px;font-size:14px;color:#7a6558;line-height:1.8;">
               下單時間：${formatDateTime(order.created_at)}<br>

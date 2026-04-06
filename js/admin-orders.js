@@ -10,11 +10,9 @@ bindLogout()
 // ⭐ 這行你要留就留，不留也可以
 showUser(user)
 
-loadOrders()
-
-async function loadOrders(){
+window.loadOrders = async function(){
   console.log("🚀 loadOrders開始")
-  const keyword = document.getElementById("searchInput")?.value || ""
+ const keyword = document.getElementById("searchInput")?.value.trim() || ""
 
   let query = supabase
     .from("orders")
@@ -22,14 +20,26 @@ async function loadOrders(){
     .order("created_at", { ascending: false })
 
   // ⭐ 搜尋
-  if(keyword){
-    query = query.or(`
-      id.ilike.%${keyword}%,
-      customer_name.ilike.%${keyword}%,
-      phone.ilike.%${keyword}%,
-      email.ilike.%${keyword}%
-    `)
+if(keyword){
+  const upperKeyword = keyword.toUpperCase()
+
+  // ⭐ UUID（系統長ID）就精準搜尋 id
+  if(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(keyword)){
+    query = query.eq("id", keyword)
   }
+
+  // ⭐ 完整漂亮訂單編號就精準搜尋 order_number
+  else if(/^TB\d{8}-\d{4}$/i.test(upperKeyword)){
+    query = query.eq("order_number", upperKeyword)
+  }
+
+  // ⭐ 其他才模糊搜尋
+  else{
+    query = query.or(
+      `order_number.ilike.%${keyword}%,customer_name.ilike.%${keyword}%,phone.ilike.%${keyword}%,email.ilike.%${keyword}%`
+    )
+  }
+}
 
   const { data: orders, error } = await query
 
@@ -73,12 +83,16 @@ const money = calcOrderMoney(o, items || [])
 
     <!-- 左 -->
     <div>
-      <div style="font-weight:bold;">
-        🧾 ${o.customer_name}
-<span style="color:#6b7280;margin-left:6px;">
-  $${money.totalAmount}
-</span>
-      </div>
+     <div style="font-weight:bold;">
+  🧾 ${o.customer_name}
+  <span style="color:#6b7280;margin-left:6px;">
+    $${money.totalAmount}
+  </span>
+</div>
+
+<div style="font-size:13px;color:#f97316;margin-top:4px;font-weight:700;">
+  訂單編號：${o.order_number || o.id}
+</div>
 
      <div style="font-size:14px;color:#6b7280;margin-top:4px;font-weight:500;">
 ${
@@ -159,7 +173,8 @@ ${
   style="background:#ef4444;color:white;border:none;padding:6px 10px;border-radius:6px;margin-bottom:10px;">
   🔄 回復整筆訂單
 </button><br>
-        <b>訂單ID：</b>${o.id}<br>
+<b>訂單編號：</b>${o.order_number || "-"}<br>
+<b>系統ID：</b>${o.id}<br>
 <b>本名：</b>${o.customer_name || "-"}<br>
 <b>電話：</b>${o.phone || "-"}<br>
 <b>Email：</b>${o.email || "-"}<br>
@@ -888,3 +903,5 @@ async function showUser(user){
     el.style.fontWeight = "bold"
   }
 }
+
+window.loadOrders()

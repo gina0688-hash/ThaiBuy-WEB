@@ -289,7 +289,7 @@ if(!expectedRemitTime){
 
 const orderId = crypto.randomUUID()
 
-const { error: orderError } = await supabase
+const { data: orderData, error: orderError } = await supabase
   .from("orders")
   .insert({
     id: orderId,
@@ -310,12 +310,16 @@ const { error: orderError } = await supabase
     store_name: shippingMethod === "交貨便" ? storeName : null,
     store_code: shippingMethod === "交貨便" ? storeCode : null
   })
+  .select("id, order_number")
+  .single()
 
-  if(orderError){
-    console.error("order error:", orderError)
-    alert("訂單建立失敗")
-    return
-  }
+if(orderError){
+  console.error("order error:", orderError)
+  alert("訂單建立失敗")
+  return
+}
+
+const orderNumber = orderData.order_number
 
  const items = cart.flatMap(i => {
   const qty = Number(i.quantity || 1)
@@ -383,8 +387,7 @@ const { error: orderError } = await supabase
 }
 
 saveCart([])
-alert("訂單成功 🎉")
-window.location.href = "./index.html"
+window.location.href = `./order-success.html?orderNumber=${encodeURIComponent(orderNumber)}`
 }
 
 window.refreshCheckout = function(){
