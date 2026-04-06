@@ -30,6 +30,7 @@
   width:100%;
   height:220px;
   object-fit:cover;
+  display:block;
 }
 
 .product-info{
@@ -38,7 +39,8 @@
 
 .product-name{
   font-size:14px;
-  height:40px;
+  line-height:1.4;
+  min-height:40px;
   overflow:hidden;
 }
 
@@ -68,6 +70,10 @@
   background:var(--brand-orange);
 }
 
+.product-badge.instock{
+  background:#10b981;
+}
+
 .soldout-badge{
   position:absolute;
   top:10px;
@@ -92,11 +98,22 @@
   border-radius:6px;
   padding:6px 10px;
   cursor:pointer;
+  font-size:13px;
+}
+
+.add-btn:hover{
+  background:#ff683f;
+}
+
+.shop-page{
+  max-width:1400px;
+  margin:40px auto;
+  padding:0 24px;
 }
 
 .shop-layout{
   display:grid;
-  grid-template-columns:260px 1fr;
+  grid-template-columns:240px 1fr;
   gap:24px;
   align-items:start;
 }
@@ -104,6 +121,10 @@
 .shop-sidebar{
   position:sticky;
   top:20px;
+}
+
+.shop-main{
+  min-width:0;
 }
 
 .sidebar-card{
@@ -150,33 +171,6 @@
   color:white;
 }
 
-.shop-main{
-  min-width:0;
-}
-
-@media (max-width: 900px){
-  .shop-layout{
-    grid-template-columns:1fr;
-  }
-
-  .shop-sidebar{
-    position:static;
-  }
-}
-
-.shop-page{
-  max-width:1400px;
-  margin:40px auto;
-  padding:0 24px;
-}
-
-.shop-layout{
-  display:grid;
-  grid-template-columns:240px 1fr;
-  gap:24px;
-  align-items:start;
-}
-
 .sidebar-reset{
   background:#fff;
   border:1px solid #f1ddd2;
@@ -187,10 +181,19 @@
   background:#fff4e8;
 }
 
-.product-badge.instock{
-  background:#10b981;
+/* ===== 平板以下 ===== */
+@media (max-width: 900px){
+  .shop-layout{
+    grid-template-columns:1fr;
+    gap:18px;
+  }
+
+  .shop-sidebar{
+    position:static;
+  }
 }
 
+/* ===== 手機版 ===== */
 @media (max-width: 768px){
   .shop-page{
     margin:20px auto;
@@ -216,9 +219,8 @@
 
   .product-name{
     font-size:13px;
-    height:auto;
-    min-height:36px;
     line-height:1.4;
+    min-height:36px;
   }
 
   .product-price{
@@ -242,6 +244,7 @@
   .sidebar-card{
     padding:14px;
     border-radius:12px;
+    margin-bottom:12px;
   }
 
   .sidebar-card h3{
@@ -252,5 +255,58 @@
   .sidebar-link{
     font-size:13px;
     padding:9px 12px;
+  }
+}
+
+/* ===== 小手機 ===== */
+@media (max-width: 480px){
+  .shop-page{
+    padding:0 10px;
+  }
+
+  .product-grid{
+    grid-template-columns:repeat(2, minmax(0, 1fr));
+    gap:10px;
+  }
+
+  .product-img{
+    height:135px;
+  }
+
+  .product-name{
+    font-size:12px;
+    min-height:34px;
+  }
+
+  .product-price{
+    font-size:13px;
+  }
+
+  .product-badge,
+  .soldout-badge{
+    top:8px;
+    font-size:10px;
+    padding:4px 7px;
+  }
+
+  .product-badge{
+    left:8px;
+  }
+
+  .soldout-badge{
+    right:8px;
+  }
+
+  .add-btn{
+    right:6px;
+    bottom:6px;
+    padding:4px 7px;
+    font-size:11px;
+    border-radius:5px;
+  }
+
+  .sidebar-link{
+    font-size:12px;
+    padding:8px 10px;
   }
 }
