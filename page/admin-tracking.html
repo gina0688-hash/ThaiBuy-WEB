@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>貨態管理</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="../css/style.css">
+
+  <style>
+    body{
+      background:#f8f6f3;
+    }
+
+    .container{
+      max-width:1000px;
+      margin:40px auto;
+      padding:0 20px 40px;
+    }
+
+    .card{
+      background:#fff;
+      border-radius:18px;
+      padding:24px;
+      margin-bottom:20px;
+      box-shadow:0 8px 24px rgba(0,0,0,0.06);
+      border:1px solid #f1e7df;
+    }
+
+    .card h3{
+      margin-top:0;
+      margin-bottom:18px;
+      color:#d96b2b;
+    }
+
+    .form-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:16px;
+    }
+
+    .form-group{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+
+    .form-group.full{
+      grid-column:1 / -1;
+    }
+
+    label{
+      font-weight:700;
+      color:#5b4c43;
+      font-size:14px;
+    }
+
+    input, select{
+      width:100%;
+      box-sizing:border-box;
+      border:1px solid #e8d9cc;
+      border-radius:12px;
+      padding:12px 14px;
+      font-size:15px;
+      background:#fffdfb;
+      color:#4f433c;
+      outline:none;
+    }
+
+    input:focus, select:focus{
+      border-color:#f2a36b;
+      box-shadow:0 0 0 4px rgba(242,163,107,0.12);
+    }
+
+    .btn-row{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:20px;
+    }
+
+    .btn-primary{
+      border:none;
+      border-radius:999px;
+      padding:12px 18px;
+      background:linear-gradient(135deg,#ffb36b,#ff8b3d);
+      color:#fff;
+      font-size:14px;
+      font-weight:700;
+      cursor:pointer;
+      box-shadow:0 8px 18px rgba(255,138,61,0.16);
+    }
+
+    .btn-secondary{
+      border:none;
+      border-radius:999px;
+      padding:12px 18px;
+      background:#bbb;
+      color:#fff;
+      font-size:14px;
+      font-weight:700;
+      cursor:pointer;
+    }
+
+    .tracking-list{
+      display:grid;
+      gap:12px;
+    }
+
+    .tracking-row{
+      background:#fffaf6;
+      border:1px solid #f1dfd2;
+      border-radius:16px;
+      padding:16px;
+    }
+
+    .tracking-row p{
+      margin:0 0 8px;
+      line-height:1.8;
+      color:#4f433c;
+    }
+
+    .tracking-row p:last-child{
+      margin-bottom:0;
+    }
+
+    .row-actions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top:12px;
+    }
+
+    .btn-danger{
+      border:none;
+      border-radius:999px;
+      padding:10px 16px;
+      background:#e57373;
+      color:#fff;
+      font-size:14px;
+      font-weight:700;
+      cursor:pointer;
+    }
+
+    .empty-text{
+      color:#8b7768;
+      line-height:1.8;
+    }
+
+    @media (max-width:768px){
+      .container{
+        margin:24px auto;
+        padding:0 14px 30px;
+      }
+
+      .card{
+        padding:18px;
+        border-radius:16px;
+      }
+
+      .form-grid{
+        grid-template-columns:1fr;
+      }
+
+      .btn-row{
+        flex-direction:column;
+      }
+
+      .btn-primary,
+      .btn-secondary{
+        width:100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <img src="../LOGO.png" class="brand-logo" alt="THAI BUY logo">
+    <div>
+      <div class="brand-title">THAI BUY</div>
+      <div class="brand-subtitle">可愛又安心的泰國代購</div>
+    </div>
+  </div>
+
+  <div class="topbar-nav">
+    <a href="./admin-orders.html" class="topbar-link">訂單管理</a>
+    <a href="./admin-products.html" class="topbar-link">商品管理</a>
+    <a href="./admin-tracking.html" class="topbar-link active">貨態管理</a>
+    <a href="./admin-settlement.html" class="topbar-link">帳務管理</a>
+  </div>
+</div>
+
+<div class="container">
+  <h2>貨態管理</h2>
+
+  <div class="card">
+    <h3>新增 / 編輯貨態公告</h3>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label>批次月份</label>
+        <input id="batchLabel" type="text" placeholder="例如：2026/01">
+      </div>
+
+      <div class="form-group">
+        <label>排序</label>
+        <input id="sortOrder" type="number" value="0">
+      </div>
+
+      <div class="form-group full">
+        <label>系列名稱</label>
+        <input id="seriesName" type="text" placeholder="例如：AW Keep the Wonder 聯名系列">
+      </div>
+
+      <div class="form-group">
+        <label>目前階段</label>
+        <select id="stage">
+          <option value="official_pending">官方未出貨</option>
+          <option value="warehouse">已到集運倉</option>
+          <option value="packing">準備打包回台</option>
+          <option value="customs">已抵台，等待清關</option>
+          <option value="checking">我方點貨中</option>
+          <option value="ready_to_order">已打包完成，等待客人下單中</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>狀態備註</label>
+        <input id="statusNote" type="text" placeholder="例如：部分到倉 / 預購未出貨">
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button id="trackingSubmitBtn" class="btn-primary" onclick="addTracking()">新增貨態</button>
+      <button id="trackingCancelBtn" class="btn-secondary" onclick="cancelEditTracking()" style="display:none;">
+        取消編輯
+      </button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>目前貨態列表</h3>
+    <div id="trackingList" class="tracking-list">
+      <p class="empty-text">目前沒有貨態資料</p>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="../js/admin-tracking.js"></script>
+</body>
+</html>

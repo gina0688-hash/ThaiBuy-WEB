@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>購物須知</title>
+  <link rel="stylesheet" href="../css/style.css">
+
+  <style>
+    body{
+      background:
+        radial-gradient(circle at top left, #fff3e8 0%, #fff9f5 35%, #ffffff 72%);
+      color:#4f433c;
+    }
+
+    .notice-page{
+      max-width: 1080px;
+      margin: 40px auto 64px;
+      padding: 0 20px;
+    }
+
+    .notice-hero{
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(135deg, #ffb36b 0%, #ff944d 55%, #ff7a00 100%);
+      color: #fff;
+      border-radius: 28px;
+      padding: 38px 30px;
+      margin-bottom: 26px;
+      box-shadow: 0 18px 40px rgba(255,122,0,0.18);
+    }
+
+    .notice-hero::before{
+      content:"";
+      position:absolute;
+      width:220px;
+      height:220px;
+      border-radius:50%;
+      background:rgba(255,255,255,0.13);
+      top:-70px;
+      right:-40px;
+    }
+
+    .notice-hero::after{
+      content:"";
+      position:absolute;
+      width:140px;
+      height:140px;
+      border-radius:50%;
+      background:rgba(255,255,255,0.10);
+      bottom:-35px;
+      left:-24px;
+    }
+
+    .notice-hero > *{
+      position:relative;
+      z-index:1;
+    }
+
+    .hero-badge{
+      display:inline-block;
+      padding:7px 14px;
+      border-radius:999px;
+      background:rgba(255,255,255,0.18);
+      border:1px solid rgba(255,255,255,0.28);
+      color:#fff;
+      font-size:13px;
+      font-weight:700;
+      margin-bottom:12px;
+    }
+
+    .notice-hero h2{
+      margin:0 0 12px;
+      font-size:34px;
+      color:#fff;
+      font-weight:800;
+      letter-spacing:0.5px;
+    }
+
+    .notice-hero p{
+      margin:0;
+      color:rgba(255,255,255,0.96);
+      line-height:1.9;
+      font-size:15px;
+      max-width:780px;
+    }
+
+    .notice-warning-top{
+      margin-top:18px;
+      background:rgba(255,255,255,0.16);
+      border:1px solid rgba(255,255,255,0.25);
+      border-left:6px solid #fff2d9;
+      color:#fffaf2;
+      border-radius:16px;
+      padding:14px 16px;
+      font-weight:700;
+      line-height:1.8;
+      backdrop-filter: blur(4px);
+    }
+
+    .notice-grid{
+      display:grid;
+      gap:20px;
+    }
+
+    .notice-section{
+      background:rgba(255,255,255,0.95);
+      border:1px solid #f5e4d7;
+      border-radius:24px;
+      padding:24px 22px;
+      box-shadow:0 12px 28px rgba(0,0,0,0.05);
+    }
+
+    .notice-section-title{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      margin-bottom:18px;
+      padding:9px 15px;
+      border-radius:999px;
+      background:linear-gradient(135deg,#fff3e9,#ffe2ca);
+      color:#d96b2b;
+      font-size:17px;
+      font-weight:800;
+      box-shadow:0 6px 14px rgba(255,138,61,0.10);
+    }
+
+    .notice-items{
+      display:grid;
+      gap:14px;
+    }
+
+    .notice-item{
+      background:linear-gradient(180deg,#fffdfb 0%, #fff8f3 100%);
+      border:1px solid #f3e5da;
+      border-radius:18px;
+      padding:16px 18px;
+      line-height:1.95;
+      color:#4b4039;
+      box-shadow:0 6px 14px rgba(0,0,0,0.03);
+    }
+
+    .notice-item strong{
+      color:#2f2926;
+    }
+
+    .notice-label{
+      display:inline-flex;
+      align-items:center;
+      padding:5px 11px;
+      border-radius:999px;
+      font-weight:800;
+      color:#d96b2b;
+      background:#fff1e5;
+      margin-right:8px;
+      font-size:14px;
+      vertical-align:middle;
+    }
+
+    .notice-note{
+      margin-top:12px;
+      padding:12px 14px;
+      background:#fff8f1;
+      border:1px solid #ffe0c4;
+      border-left:5px solid #f2a36b;
+      border-radius:12px;
+      color:#7a5a45;
+      font-size:14px;
+      line-height:1.85;
+    }
+
+    .policy-list{
+      margin:12px 0 0 22px;
+      padding:0;
+    }
+
+    .policy-list li{
+      margin-bottom:14px;
+      line-height:1.95;
+      color:#4b4039;
+    }
+
+    .policy-note{
+      display:block;
+      margin-top:8px;
+      padding:10px 12px;
+      background:#fff8f3;
+      border-left:4px solid #f2a36b;
+      border-radius:10px;
+      color:#7a5a45;
+      font-size:14px;
+      line-height:1.8;
+    }
+
+    .final-warning{
+      margin-top:24px;
+      background:linear-gradient(135deg,#fff1e6 0%, #fff8f3 100%);
+      border:1px solid #ffd2b1;
+      border-left:6px solid #e9781f;
+      color:#9a5316;
+      border-radius:20px;
+      padding:18px 20px;
+      font-size:15px;
+      font-weight:700;
+      line-height:1.95;
+      box-shadow:0 8px 18px rgba(255,138,61,0.08);
+    }
+
+    @media (max-width: 768px){
+      .notice-page{
+        margin:24px auto 40px;
+        padding:0 14px;
+      }
+
+      .notice-hero,
+      .notice-section{
+        padding:20px 16px;
+        border-radius:18px;
+      }
+
+      .notice-hero h2{
+        font-size:26px;
+      }
+
+      .notice-item{
+        padding:14px;
+        border-radius:16px;
+      }
+
+      .notice-label{
+        display:inline-block;
+        margin-bottom:6px;
+      }
+
+      .final-warning{
+        border-radius:16px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="topbar-left">
+      <img src="../LOGO.png" class="brand-logo" alt="THAI BUY logo">
+      <div>
+        <div class="brand-title">THAI BUY</div>
+        <div class="brand-subtitle">可愛又安心的泰國代購</div>
+      </div>
+    </div>
+
+    <div class="topbar-nav">
+      <a href="./products.html" class="topbar-link">商品頁</a>
+      <a href="./order-query.html" class="topbar-link">訂單查詢</a>
+      <a href="./notice.html" class="topbar-link active">購物須知</a>
+      <a href="./tracking.html" class="topbar-link">貨態狀況</a>
+      <a href="./shipping.html" class="topbar-link">運送須知</a>
+      <a href="./contact.html" class="topbar-link">聯繫方式</a>
+      <a href="./news.html" class="topbar-link">最新活動</a>
+    </div>
+  </div>
+
+  <div class="notice-page">
+
+    <div class="notice-hero">
+      <div class="hero-badge">THAI BUY 購物說明</div>
+      <h2>ThaiBuy購物須知</h2>
+      <p>
+        本賣場為<strong>代購服務</strong>。<br>
+        商品實際出貨時間、包裝狀況、缺貨與否、商品內容等，皆以官方最終安排與實際出貨內容為準。
+      </p>
+
+      <div class="notice-warning-top">
+        ⚠️ 下單前請詳細閱讀以下規則與說明；完成下單即視為已閱讀並同意本頁所有內容。
+      </div>
+    </div>
+
+    <div class="notice-grid">
+
+      <section class="notice-section">
+        <div class="notice-section-title">下單前須知</div>
+
+        <div class="notice-items">
+          <div class="notice-item">
+            <span class="notice-label">商品金額</span>
+            商品金額皆不含國內運費。若商品後續抵台過程中，因材積、重量、國際運費、包材或其他實際產生之費用高於原先預估，皆須進行二次補款。
+          </div>
+
+          <div class="notice-item">
+            <span class="notice-label">開單時間</span>
+            預購商品為官網售完為止；庫存商品亦為售完為止，不另外保留名額。
+          </div>
+
+          <div class="notice-item">
+            <span class="notice-label">付款方式</span>
+            銀行轉帳 / LINE Pay
+          </div>
+
+          <div class="notice-item">
+            <span class="notice-label">資料填寫</span>
+            下單時請務必確認收件人姓名、手機號碼、地址、取貨門市等資訊是否正確；若因買家填寫錯誤導致退件、配送失敗或額外費用產生，相關費用需由買家自行負擔。
+          </div>
+
+          <div class="notice-item">
+            <span class="notice-label">商品差異</span>
+            商品顏色、尺寸、款式、材質、版本等資訊，可能因拍攝光線、螢幕顯示、官方批次或製作差異而略有不同，請以實際收到商品為準。
+          </div>
+        </div>
+      </section>
+
+      <section class="notice-section">
+        <div class="notice-section-title">付款與補款規則</div>
+
+        <div class="notice-items">
+          <div class="notice-item">
+            <span class="notice-label">一般訂單</span>
+            一般訂單請於通知後之指定期限內完成付款；若逾期未付款，將視同取消訂單，恕不另行保留商品名額或庫存。
+          </div>
+
+          <div class="notice-item">
+            <span class="notice-label">限量預購</span>
+            限量預購商品僅先收取定金 NT$500，成功購得後須於公告期限內完成補款；若超過公告 48 小時未補款，或欲取消訂單者，定金恕不退還。
+          </div>
+
+          <div class="notice-item">
+            <span class="notice-label">二次補款</span>
+            若代購商品於後續抵台過程中產生額外費用，將依實際成本進行二次補款；若無需二補，會另行告知。
+          </div>
+
+          <div class="notice-item">
+            <span class="notice-label">棄單說明</span>
+            若喊單後棄單、成功購得後不補款、已通知付款仍惡意失聯，將視情況列入黑名單，後續不再提供任何交易服務。
+          </div>
+        </div>
+      </section>
+
+      <section class="notice-section">
+        <div class="notice-section-title">官方與國際運送說明</div>
+
+        <div class="notice-items">
+          <div class="notice-item">
+            <span class="notice-label">出貨時間</span>
+            確認付款後，須等待官方出貨。因周邊等商品需等待廠商出貨，整體到貨時間可能較長，若無法等候請勿下單。
+            <div class="notice-note">
+              ※ 貨態查詢請依貨態狀況為主，勿反覆詢問是否已抵台，我方會自主更新貨態。
+            </div>
+          </div>
+
+          <div class="notice-item">
+            <span class="notice-label">官方異動</span>
+            若遇官方延期出貨、缺貨、砍單、取消販售、版本更動、特典異動、包裝更換或其他非我方可控因素，皆依官方最終公告與實際出貨內容為準。
+          </div>
+
+          <div class="notice-item">
+            <span class="notice-label">特典贈品</span>
+            若商品含官方特典、贈品、海報或其他附贈內容，均以官方實際出貨為準；若官方未附、漏附、數量不足或內容異動，我方恕無法保證一定提供。
+          </div>
+
+          <div class="notice-item">
+            <span class="notice-label">國際運送風險</span>
+            商品自海外寄送至台灣過程中，因國際物流、集運、報關、轉運等因素，外盒、包裝、紙類商品可能產生些微壓痕、折損、摩擦痕或碰撞；若對包裝完好度要求較高者，請審慎下單。
+          </div>
+
+          <div class="notice-item">
+            <span class="notice-label">不可抗力</span>
+            若因國際物流、海關查驗、航班延誤、天災或其他不可抗力因素造成配送延遲，我方不負延誤責任，但會盡力協助同步最新狀況。
+          </div>
+        </div>
+      </section>
+
+      <section class="notice-section">
+        <div class="notice-section-title">退換貨與售後規則</div>
+
+        <div class="notice-items">
+          <div class="notice-item">
+            <span class="notice-label">退換貨政策</span>
+            <ol class="policy-list">
+              <li>
+                代購商品屬客製化服務，無七天鑑賞期。下單付款後，我方會立即添購商品，因此下單後不得棄單，恕不接受退換貨；商品現貨出貨後，亦不接受退換貨。
+              </li>
+
+              <li>
+                寫真書、小卡、服飾、雜誌等任何周邊商品，若有毀損皆默認為廠損，皆不退款及退換貨，我方僅會盡可能協助向官方反應。
+              </li>
+
+              <li>
+                若下單後遇官方漏發且無法補發之狀況，將依缺貨品項退款，或可轉為預留金，留於下次購買時扣抵。
+              </li>
+
+              <li>
+                匯款完成後，不提供取消訂單、退款或退換貨。
+              </li>
+            </ol>
+          </div>
+
+          <div class="notice-item">
+            <span class="notice-label">開箱須知</span>
+            收到商品後請務必全程錄影開箱，若有任何問題請私訊官方，以利後續協助處理。
+          </div>
+
+          <div class="notice-item">
+            <span class="notice-label">售後期限</span>
+            若收到商品後有任何問題，請於簽收後 3 日內提供完整開箱影片與商品照片聯繫官方；逾期恕不受理。
+          </div>
+        </div>
+      </section>
+
+      <section class="notice-section">
+        <div class="notice-section-title">取貨與保留規則</div>
+
+        <div class="notice-items">
+          <div class="notice-item">
+            <span class="notice-label">運送方式</span>
+            賣貨便／交貨便
+            <div class="notice-note">
+              ※ 詳細說明請參閱網頁「運送須知」。
+            </div>
+          </div>
+
+          <div class="notice-item">
+            <span class="notice-label">未取貨處理</span>
+            包裹出貨後請於規定期限內完成取貨；若因未取貨導致退件，重新寄出之運費需由買家自行負擔。情節嚴重或多次未取貨者，將列入黑名單。
+          </div>
+
+          <div class="notice-item">
+            <span class="notice-label">商品保留</span>
+            抵台開單後之商品保留期限為 30 日。若需延長領貨時間請先私訊告知；若超出期限後通知三次仍未回應，將視為棄單，退還 60% 商品款項，並釋出商品。
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <div class="final-warning">
+      ⚠️ 請務必確認自己可接受等待時間、補款機制、官方異動、國際運送風險與本賣場所有規則後再下單；下單即視為同意以上所有事項。
+    </div>
+<footer class="site-footer">© ThaiBuy代購</footer>
+  </div>
+
+</body>
+</html>

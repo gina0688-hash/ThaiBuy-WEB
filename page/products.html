@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>商品頁</title>
+
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../css/products.css">
+<link rel="stylesheet" href="../css/checkout.css">
+
+<style>
+.product-card{
+  background:white;
+  padding:15px;
+  border-radius:10px;
+  margin-bottom:15px;
+  box-shadow:0 2px 10px rgba(0,0,0,0.05);
+  cursor:pointer;
+}
+
+.product-detail{
+  margin-top:10px;
+  padding:10px;
+  border-top:1px solid #eee;
+}
+
+.product-images img{
+  width:100px;
+  margin-right:5px;
+}
+
+.price{
+  font-size:20px;
+  font-weight:bold;
+  margin:10px 0;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<!-- 🛒 購物車按鈕 -->
+<div id="cartIcon" onclick="toggleCart()">
+    🛒 <span id="cartCount">0</span>
+  </div>
+  
+  <!-- 🛒 購物車彈窗 -->
+  <div id="cartPanel" onclick="event.stopPropagation()">
+    <h3>購物車</h3>
+    <div id="cartItems"></div>
+  
+    <div id="cartTotal"></div>
+  
+    <button class="btn-primary" onclick="goCheckout()">前往結帳</button>
+    <button class="btn-secondary" onclick="toggleCart()">繼續購物</button>
+  </div>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <img src="../LOGO.png" class="brand-logo" alt="THAI BUY logo">
+    <div>
+      <div class="brand-title">THAI BUY</div>
+      <div class="brand-subtitle">可愛又安心的泰國代購</div>
+    </div>
+  </div>
+
+  <div class="topbar-nav">
+    <a href="./products.html" class="topbar-link active">商品頁</a>
+    <a href="./order-query.html" class="topbar-link">訂單查詢</a>
+    <a href="./notice.html" class="topbar-link">購物須知</a>
+    <a href="./tracking.html" class="topbar-link">貨態狀況</a>
+    <a href="./shipping.html" class="topbar-link">運送須知</a>
+    <a href="./contact.html" class="topbar-link">聯繫方式</a>
+    <a href="./news.html" class="topbar-link">最新活動</a>
+  </div>
+</div>
+
+
+<div class="shop-page">
+
+  <h2>🛍 商品列表</h2>
+
+  <div class="shop-layout">
+
+    <aside class="shop-sidebar">
+      <div class="sidebar-card">
+  <h3>商品分類</h3>
+  <div class="sidebar-links">
+    <button class="sidebar-link active" id="resetFiltersBtn" onclick="resetAllFilters()">全部商品</button>
+    <button class="sidebar-link sidebar-reset" onclick="resetAllFilters()">重設篩選</button>
+  </div>
+</div>
+
+    <div class="sidebar-card">
+  <h3>系列</h3>
+  <div class="sidebar-links" id="seriesSidebar">
+    <button class="sidebar-link active" onclick="filterBySeries('all')">全部系列</button>
+  </div>
+</div>
+
+<div class="sidebar-card">
+  <h3>商品類型</h3>
+  <div class="sidebar-links">
+    <button class="sidebar-link preorder-filter active" data-preorder="all" onclick="filterByPreorderType('all')">全部</button>
+    <button class="sidebar-link preorder-filter" data-preorder="instock" onclick="filterByPreorderType('instock')">現貨</button>
+    <button class="sidebar-link preorder-filter" data-preorder="limited" onclick="filterByPreorderType('limited')">限量預購</button>
+    <button class="sidebar-link preorder-filter" data-preorder="normal" onclick="filterByPreorderType('normal')">一般預購</button>
+  </div>
+</div>
+
+      <div class="sidebar-card">
+  <h3>庫存狀態</h3>
+  <div class="sidebar-links">
+    <button class="sidebar-link stock-filter active" data-stock-filter="all" onclick="filterByStockStatus('all')">全部</button>
+    <button class="sidebar-link stock-filter" data-stock-filter="available" onclick="filterByStockStatus('available')">可購買</button>
+    <button class="sidebar-link stock-filter" data-stock-filter="soldout" onclick="filterByStockStatus('soldout')">SOLD OUT</button>
+  </div>
+</div>
+
+    </aside>
+
+    <section class="shop-main">
+      <div id="productGrid" class="product-grid"></div>
+    </section>
+
+  </div>
+<footer class="site-footer">© ThaiBuy代購</footer>
+</div>
+
+<script type="module" src="../js/products.js"></script>
+
+</body>
+</html>

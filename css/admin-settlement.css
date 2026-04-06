@@ -1,0 +1,279 @@
+.container{
+  max-width: 1100px;
+  margin: 30px auto;
+  padding: 0 20px;
+}
+
+.card{
+  background: #fff;
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+}
+
+.card h2{
+  margin-top: 0;
+  margin-bottom: 20px;
+}
+
+label{
+  display: block;
+  margin-top: 12px;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+input, select, textarea{
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  box-sizing: border-box;
+}
+
+textarea{
+  min-height: 90px;
+  resize: vertical;
+}
+
+.form-actions{
+  margin-top: 18px;
+  display: flex;
+  gap: 10px;
+}
+
+.batch-card{
+  border: 1px solid #eee;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.batch-header{
+  display: grid;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.settlement-table{
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.settlement-table th,
+.settlement-table td{
+  border-bottom: 1px solid #eee;
+  padding: 10px;
+  text-align: left;
+}
+
+@media (max-width: 768px){
+  .settlement-table{
+    font-size: 14px;
+  }
+
+  .batch-header{
+    font-size: 14px;
+  }
+}
+
+.batch-header-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap;
+}
+
+.batch-actions{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+.btn-sm{
+  width:auto;
+  padding:6px 12px;
+  font-size:14px;
+}
+
+.batch-summary{
+  display:flex;
+  gap:16px;
+  flex-wrap:wrap;
+  margin-top:8px;
+  font-weight:600;
+}
+
+.text-danger{
+  color:#dc2626;
+  font-weight:700;
+}
+
+.text-profit{
+  color:#16a34a;
+  font-weight:700;
+}
+
+.settlement-toolbar{
+  margin-bottom:16px;
+}
+
+.settlement-toolbar input{
+  width:100%;
+  max-width:360px;
+}
+
+.batch-date-group{
+  margin:28px 0 12px;
+  padding-bottom:6px;
+  border-bottom:2px solid #f1d2b6;
+}
+
+.batch-date-group h3{
+  margin:0;
+  color:#cc7a2f;
+  font-size:18px;
+}
+
+.small-muted{
+  font-size:12px;
+  color:#888;
+  margin-top:4px;
+}
+
+.settlement-overview{
+  margin-bottom:20px;
+}
+
+.overview-card{
+  display:grid;
+  grid-template-columns:repeat(3, 1fr);
+  gap:14px;
+  margin-bottom:8px;
+}
+
+.overview-item{
+  background:#fff7ef;
+  border:1px solid #f1d7bd;
+  border-radius:14px;
+  padding:16px;
+}
+
+.overview-label{
+  font-size:13px;
+  color:#8a6b52;
+  margin-bottom:8px;
+}
+
+.overview-value{
+  font-size:24px;
+  font-weight:700;
+  color:#333;
+}
+
+@media (max-width:768px){
+  .overview-card{
+    grid-template-columns:1fr;
+  }
+}
+
+.settlement-toolbar{
+  display:flex;
+  gap:12px;
+  margin-bottom:16px;
+  flex-wrap:wrap;
+}
+
+.settlement-toolbar input{
+  flex:1;
+  min-width:220px;
+}
+
+.settlement-toolbar select{
+  width:180px;
+}
+
+.batch-card-danger{
+  border:1px solid #efb3b3;
+  background:#fff7f7;
+}
+
+.danger-badge{
+  display:inline-block;
+  margin-left:8px;
+  padding:2px 8px;
+  border-radius:999px;
+  font-size:12px;
+  background:#d64545;
+  color:#fff;
+  vertical-align:middle;
+}
+
+.settlement-toolbar{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  margin-bottom:20px;
+}
+
+.settlement-toolbar-row{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+
+.settlement-toolbar-row input[type="text"]{
+  flex:1;
+  min-width:260px;
+}
+
+.settlement-toolbar-row select{
+  width:180px;
+  min-width:180px;
+}
+
+.settlement-toolbar-row-bottom{
+  justify-content:space-between;
+  align-items:flex-end;
+}
+
+.date-range-group{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+
+.date-range-label{
+  font-size:12px;
+  color:#888;
+  padding-left:2px;
+}
+
+.date-range-inputs{
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+}
+
+.date-range-inputs input[type="date"]{
+  width:180px;
+  min-width:180px;
+}
+
+@media (max-width:768px){
+  .settlement-toolbar-row,
+  .settlement-toolbar-row-bottom,
+  .date-range-inputs{
+    flex-direction:column;
+    align-items:stretch;
+  }
+
+  .settlement-toolbar-row select,
+  .date-range-inputs input[type="date"]{
+    width:100%;
+    min-width:unset;
+  }
+}

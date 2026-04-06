@@ -1,0 +1,238 @@
+body{
+  margin:0;
+  font-family:"Segoe UI", sans-serif;
+  background:var(--brand-bg);
+  color:var(--brand-text);
+}
+
+.container{
+  max-width:900px;
+  margin:40px auto;
+  padding:0 20px;
+}
+
+.card{
+  background:var(--brand-card);
+  border-radius:18px;
+  padding:20px;
+  margin-bottom:20px;
+  box-shadow:0 8px 24px rgba(74,13,18,0.08);
+  border:1px solid var(--brand-border);
+}
+
+h2{
+  margin-bottom:20px;
+}
+
+h3{
+  margin-top:20px;
+}
+
+label{
+  font-size:14px;
+  color:#666;
+}
+
+input, textarea, select{
+  width:100%;
+  padding:10px;
+  margin:8px 0 15px 0;
+  border:1px solid #ddd;
+  border-radius:8px;
+  font-size:14px;
+}
+
+button{
+  border:none;
+  padding:12px;
+  border-radius:8px;
+  cursor:pointer;
+  font-size:14px;
+}
+
+.btn-primary{
+  background:var(--brand-orange);
+  color:white;
+  width:100%;
+  margin-top:10px;
+  font-weight:700;
+}
+
+.btn-primary:hover{
+  background:var(--brand-orange-dark);
+}
+
+.btn-secondary{
+  background:#f3e7dc;
+  color:var(--brand-text);
+  margin-bottom:10px;
+}
+
+.btn-secondary:hover{
+  background:#ead7c7;
+}
+
+.btn-danger{
+  background:var(--brand-danger);
+  color:white;
+}
+
+.btn-danger:hover{
+  background:#bb352f;
+}
+
+:root{
+  --brand-orange: #ff7a00;
+  --brand-orange-dark: #e85d04;
+  --brand-red-brown: #4a0d12;
+  --brand-cream: #fff7ef;
+  --brand-bg: #f7f3ee;
+  --brand-card: #ffffff;
+  --brand-text: #3a1b1f;
+  --brand-subtext: #7a6a6d;
+  --brand-border: #f1ddd2;
+  --brand-danger: #d94841;
+}
+
+/* ⭐ 前台品牌列 */
+.brand-bar{
+  background:linear-gradient(135deg, #fff4e8, #ffe2cf);
+  border-bottom:1px solid var(--brand-border);
+  padding:18px 24px;
+}
+
+.brand-left{
+  display:flex;
+  align-items:center;
+  gap:16px;
+}
+
+.brand-logo{
+  width:84px;
+  height:84px;
+  object-fit:contain;
+  border-radius:18px;
+  background:white;
+  padding:2px;
+  box-shadow:0 4px 12px rgba(74,13,18,0.08);
+}
+
+.brand-title{
+  font-size:32px;
+  font-weight:900;
+  color:var(--brand-red-brown);
+  letter-spacing:1px;
+  line-height:1.1;
+}
+
+.brand-subtitle{
+  font-size:16px;
+  color:var(--brand-subtext);
+  margin-top:4px;
+}
+
+.topbar{
+  background:linear-gradient(135deg, #fff4e8, #ffe2cf);
+  border-bottom:1px solid var(--brand-border);
+  padding:16px 24px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:20px;
+  flex-wrap:wrap;
+}
+
+.topbar-left{
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+
+.brand-logo{
+  width:72px;
+  height:72px;
+  object-fit:contain;
+  border-radius:18px;
+  background:white;
+  padding:2px;
+  box-shadow:0 4px 12px rgba(74,13,18,0.08);
+}
+
+.brand-title{
+  font-size:30px;
+  font-weight:900;
+  color:var(--brand-red-brown);
+  letter-spacing:1px;
+  line-height:1.1;
+}
+
+.brand-subtitle{
+  font-size:15px;
+  color:var(--brand-subtext);
+  margin-top:4px;
+}
+
+.topbar-nav{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.topbar-link{
+  text-decoration:none;
+  color:var(--brand-red-brown);
+  font-size:14px;
+  font-weight:700;
+  padding:10px 14px;
+  border-radius:999px;
+  transition:0.2s;
+}
+
+.topbar-link:hover{
+  background:rgba(255,122,0,0.12);
+  color:var(--brand-orange-dark);
+}
+
+.topbar-link.active{
+  background:var(--brand-orange);
+  color:white;
+}
+
+@media (max-width:768px){
+  .topbar{
+    padding:14px 16px;
+  }
+
+  .brand-logo{
+    width:56px;
+    height:56px;
+  }
+
+  .brand-title{
+    font-size:22px;
+  }
+
+  .brand-subtitle{
+    font-size:13px;
+  }
+
+  .topbar-nav{
+    width:100%;
+    justify-content:flex-start;
+    gap:8px;
+  }
+
+  .topbar-link{
+    font-size:13px;
+    padding:8px 12px;
+  }
+}
+
+
+.site-footer{
+  text-align:center;
+  color:#9a8576;
+  font-size:14px;
+  margin:30px 0 20px;
+}

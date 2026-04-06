@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>帳務管理</title>
+
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../css/admin-settlement.css">
+</head>
+
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <img src="../LOGO.png" class="brand-logo" alt="THAI BUY logo">
+    <div>
+      <div class="brand-title">THAI BUY</div>
+      <div class="brand-subtitle">可愛又安心的泰國代購</div>
+    </div>
+  </div>
+
+  <div class="topbar-nav">
+    <a href="./admin-orders.html" class="topbar-link">訂單管理</a>
+    <a href="./admin-products.html" class="topbar-link">商品管理</a>
+    <a href="./admin-tracking.html" class="topbar-link">貨態管理</a>
+    <a href="./admin-settlement.html" class="topbar-link active">帳務管理</a>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- 批次主資料 -->
+  <div class="card">
+    <h2>新增帳務批次</h2>
+
+    <label>批次日期</label>
+    <input type="date" id="batch_date">
+
+    <label>批次名稱</label>
+    <input type="text" id="batch_name" placeholder="例如：泰國_2026-04-05_AW_PMG系列_01">
+
+    <label>購買來源</label>
+<input type="text" id="purchase_source" placeholder="例如：賴商店 / 官網 / 線下">
+
+<label>貨態編號</label>
+<input type="text" id="cargo_no" placeholder="例如：物流單號 / 集運單號">
+
+<label>入庫狀態</label>
+<select id="stock_status">
+  <option value="pending">未入庫</option>
+  <option value="in_transit">運送中</option>
+  <option value="arrived">已到貨未入庫</option>
+  <option value="stocked">已入庫</option>
+</select>
+
+<label>是否已打包回台</label>
+<select id="packed_status">
+  <option value="false">否</option>
+  <option value="true">是</option>
+</select>
+
+    <label>刷卡人</label>
+<select id="payer_name">
+  <option value="">請選擇刷卡人</option>
+  <option value="宜青">青</option>
+  <option value="夥伴A">媛媛</option>
+  <option value="夥伴B">夥伴B</option>
+</select>
+
+    <label>銀行</label>
+    <select id="bank_name">
+      <option value="">請選擇銀行</option>
+      <option value="台新">台新</option>
+      <option value="國泰">國泰</option>
+      <option value="聯邦">聯邦</option>
+      <option value="中信">中信</option>
+      <option value="玉山">玉山</option>
+    </select>
+
+    <label>卡號五碼</label>
+    <input type="text" id="card_name" placeholder="例如：01010">
+
+    <label>幣別</label>
+    <select id="currency">
+      <option value="TWD">TWD</option>
+      <option value="THB">THB</option>
+      <option value="CNY">CNY</option>
+      <option value="KRW">KRW</option>
+      <option value="JPY">JPY</option>
+      <option value="USD">USD</option>
+    </select>
+
+    <label>原幣金額</label>
+    <input type="number" id="amount_original" step="0.01" value="0">
+
+    <label>台幣出帳金額</label>
+    <input type="number" id="amount_twd_final" step="0.01" value="0">
+
+    <label>刷卡手續費</label>
+<input type="number" id="card_fee" step="0.01" value="0">
+
+    <label>匯率（自動計算）</label>
+    <input type="number" id="exchange_rate" step="0.0001" value="0" readonly>
+
+    <label>當地運費（已含在刷卡金額內，僅記錄）</label>
+<input type="number" id="local_shipping" step="0.01" value="0">
+
+    <label>回饋比例（例如 0.02）</label>
+    <input type="number" id="reward_rate" step="0.0001" value="0">
+
+    <label>回饋金額（自動計算，可手改）</label>
+    <input type="number" id="reward_amount" step="0.01" value="0">
+
+    <label>是否已抵用</label>
+    <select id="is_reward_used">
+      <option value="false">否</option>
+      <option value="true">是</option>
+    </select>
+
+    <label>備註</label>
+    <textarea id="batch_note"></textarea>
+
+    <div class="form-actions">
+      <button type="button" class="btn-primary" onclick="saveBatch()">建立批次</button>
+    </div>
+  </div>
+
+  <!-- 加入批次商品 -->
+  <div class="card" id="itemFormCard">
+  <h2>加入批次商品</h2>
+
+    <label>選擇批次</label>
+    <select id="batch_select"></select>
+
+    <label>商品</label>
+    <select id="product_select" onchange="loadVariantsForSettlement()">
+      <option value="">請先選商品</option>
+    </select>
+
+    <label>規格</label>
+    <select id="variant_select">
+      <option value="">請先選規格</option>
+    </select>
+
+    <label>購買數量</label>
+    <input type="number" id="item_qty" min="1" value="1">
+
+    <label>商品原幣單價</label>
+    <input type="number" id="unit_price_original" step="0.01" value="0">
+
+    <label>商品售價（可手動修改，留空則抓商品原售價）</label>
+<input type="number" id="sale_price_override" step="0.01" placeholder="可不填">
+
+<label>單件重量</label>
+<input type="number" id="unit_weight" step="0.001" value="0" placeholder="例如：0.35">
+
+  <label>每公斤國際運費</label>
+<input type="number" id="shipping_per_kg" step="0.01" value="160">
+
+
+
+<label>批次總重量</label>
+<input type="number" id="batch_total_weight" step="0.001" value="0" readonly>
+
+<label>國際運費（自動計算）</label>
+<input type="number" id="estimated_international_shipping" step="0.01" value="0" readonly>
+    <div class="form-actions">
+      <button type="button" class="btn-primary" onclick="saveBatchItem()">加入商品</button>
+    </div>
+
+<label>備註</label>
+<input type="text" id="item_note" placeholder="可不填">
+
+  </div>
+
+<!-- 批次列表 -->
+<div class="card">
+  <h2>批次列表</h2>
+
+<div class="settlement-toolbar">
+
+  <div class="settlement-toolbar-row">
+    <input type="text" id="batch_search" placeholder="搜尋批次名稱 / 貨態編號">
+
+    <select id="stock_status_search">
+      <option value="">全部入庫狀態</option>
+      <option value="pending">未入庫</option>
+      <option value="in_transit">運送中</option>
+      <option value="arrived">已到貨未入庫</option>
+      <option value="stocked">已入庫</option>
+    </select>
+
+    <select id="packed_status_search">
+      <option value="">全部打包狀態</option>
+      <option value="true">已打包回台</option>
+      <option value="false">未打包回台</option>
+    </select>
+  </div>
+
+  <div class="settlement-toolbar-row settlement-toolbar-row-bottom">
+    <div class="date-range-group">
+      <div class="date-range-label">開始時間 - 結束時間</div>
+      <div class="date-range-inputs">
+        <input type="date" id="batch_date_start">
+        <input type="date" id="batch_date_end">
+      </div>
+    </div>
+
+    <button type="button" class="btn-secondary" onclick="exportSettlementCsv()">匯出 CSV</button>
+  </div>
+
+</div>
+
+  <div id="settlement_overview" class="settlement-overview"></div>
+
+  <div id="batch_list"></div>
+</div>
+<footer class="site-footer">© ThaiBuy代購</footer>
+</div>
+
+<script type="module" src="../js/admin-settlement.js"></script>
+</body>
+</html>

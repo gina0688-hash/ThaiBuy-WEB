@@ -1,0 +1,30 @@
+.variant{
+  border:1px dashed #ddd;
+  padding:10px;
+  border-radius:8px;
+  margin-bottom:10px;
+}
+
+.product-item{
+  border:1px solid #eee;
+  padding:15px;
+  margin:10px 0;
+  border-radius:10px;
+  background:#fafafa;
+}
+
+.product-item b{
+  font-size:16px;
+}
+
+#preview div{
+  display:inline-block;
+  margin:5px;
+  text-align:center;
+}
+
+#preview img{
+  width:80px;
+  border-radius:6px;
+  border:1px solid #ddd;
+}

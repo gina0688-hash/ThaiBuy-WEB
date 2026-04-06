@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>商品詳細</title>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../css/product-detail.css">
+<link rel="stylesheet" href="../css/checkout.css">
+</head>
+
+<body>
+<!-- 🛒 購物車 -->
+<div id="cartIcon" onclick="toggleCart()">
+  🛒 <span id="cartCount">0</span>
+</div>
+
+<div id="cartPanel">
+  <h3>購物車</h3>
+  <div id="cartItems"></div>
+  <div id="cartTotal"></div>
+
+  <button class="btn-primary" onclick="goCheckout()">前往結帳</button>
+  <button onclick="toggleCart()">關閉</button>
+</div>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <img src="../LOGO.png" class="brand-logo" alt="THAI BUY logo">
+    <div>
+      <div class="brand-title">THAI BUY</div>
+      <div class="brand-subtitle">可愛又安心的泰國代購</div>
+    </div>
+  </div>
+
+  <div class="topbar-nav">
+    <a href="./products.html" class="topbar-link active">商品頁</a>
+    <a href="./order-query.html" class="topbar-link">訂單查詢</a>
+    <a href="./notice.html" class="topbar-link">購物須知</a>
+    <a href="./tracking.html" class="topbar-link">貨態狀況</a>
+    <a href="./shipping.html" class="topbar-link">運送須知</a>
+    <a href="./contact.html" class="topbar-link">聯繫方式</a>
+    <a href="./news.html" class="topbar-link">最新活動</a>
+  </div>
+</div>
+
+<div class="container">
+
+  <button class="back-btn" onclick="goBackHome()">← 回到主頁</button>
+  <div id="productDetail"></div>
+<footer class="site-footer">© ThaiBuy代購</footer>
+</div>
+
+<script type="module" src="../js/product-detail.js"></script>
+
+</body>
+</html>

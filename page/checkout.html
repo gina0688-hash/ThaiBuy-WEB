@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>結帳</title>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../css/checkout.css">
+</head>
+
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <img src="../LOGO.png" class="brand-logo" alt="THAI BUY logo">
+    <div>
+      <div class="brand-title">THAI BUY</div>
+      <div class="brand-subtitle">可愛又安心的泰國代購</div>
+    </div>
+  </div>
+
+  <div class="topbar-nav">
+    <a href="./products.html" class="topbar-link active">商品頁</a>
+    <a href="./order-query.html" class="topbar-link">訂單查詢</a>
+    <a href="./notice.html" class="topbar-link">購物須知</a>
+    <a href="./tracking.html" class="topbar-link">貨態狀況</a>
+    <a href="./shipping.html" class="topbar-link">運送須知</a>
+    <a href="./contact.html" class="topbar-link">聯繫方式</a>
+    <a href="./news.html" class="topbar-link">最新活動</a>
+  </div>
+</div>
+
+<div class="container">
+
+<h2>🧾 填寫訂單</h2>
+<label>本名</label>
+<input id="name" placeholder="本名">
+<label>電話</label>
+<input id="phone" placeholder="電話">
+<label>社群名字（如果有加入社群）</label>
+<input id="communityName" placeholder="社群名字（如果有加入社群）">
+<label>email（務必填寫正確以免查無訂單）</label>
+<input id="email" placeholder="Email">
+<label>匯款帳號末五碼</label>
+<input id="bankLast5" placeholder="匯款帳號末五碼">
+<label>預計匯款時間</label>
+<input type="datetime-local" id="expectedRemitTime">
+ 
+<select id="contactMethod">
+  
+  <option value="">請選擇聯繫方式</option>
+  <option value="IG">IG</option>
+  <option value="THREADS">THREADS</option>
+  <option value="LINE">LINE</option>
+</select>
+
+<input id="contactAccount" placeholder="聯繫帳號">
+
+<select id="shippingMethod" onchange="refreshCheckout()">
+  <option value="">請選擇運送方式</option>
+  <option value="交貨便">交貨便</option>
+  <option value="賣貨便">賣貨便</option>
+</select>
+
+<div id="shippingNotice" style="margin:12px 0; padding:12px; border-radius:10px; background:#f8fafc; color:#334155; font-size:14px; line-height:1.7;"></div>
+
+<div id="c2cFields" style="display:none; margin:12px 0; padding:12px; border-radius:10px; background:#f8fafc;">
+  <h4 style="margin-top:0;">交貨便收件資訊</h4>
+
+  <input id="receiverName" placeholder="收件本名">
+  <input id="receiverPhone" placeholder="收件電話">
+  <input id="storeName" placeholder="7-11 門市">
+  <input id="storeCode" placeholder="7-11 店號">
+</div>
+
+<h3>訂單內容</h3>
+<div id="orderSummary"></div>
+
+<div id="checkoutNotice" style="margin:12px 0; padding:12px; border-radius:10px; background:#fff7ed; color:#9a3412; font-size:14px; line-height:1.6;"></div>
+
+<h3>總金額</h3>
+<div id="total"></div>
+
+<button onclick="submitOrder()">送出訂單</button>
+<footer class="site-footer">© ThaiBuy代購</footer>
+</div>
+
+<script type="module" src="../js/checkout.js"></script>
+
+</body>
+</html>

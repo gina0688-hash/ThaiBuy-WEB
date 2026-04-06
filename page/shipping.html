@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>運送須知</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="../css/style.css">
+
+  <style>
+    body{
+      background: linear-gradient(180deg, #fff8f3 0%, #fffdfb 100%);
+    }
+
+    .container{
+      max-width: 1100px;
+      margin: 40px auto 60px;
+      padding: 0 20px;
+    }
+
+    .shipping-hero{
+      background: linear-gradient(135deg, #ffb36b 0%, #ff944d 55%, #ff7a00 100%);
+      color: #fff;
+      border-radius: 24px;
+      padding: 36px 28px;
+      margin-bottom: 24px;
+      box-shadow: 0 14px 30px rgba(255, 122, 0, 0.18);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .shipping-hero::before{
+      content: "";
+      position: absolute;
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.12);
+      top: -40px;
+      right: -40px;
+    }
+
+    .shipping-hero::after{
+      content: "";
+      position: absolute;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.08);
+      bottom: -30px;
+      left: -20px;
+    }
+
+    .shipping-hero *{
+      position: relative;
+      z-index: 1;
+    }
+
+    .shipping-badge{
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.18);
+      border: 1px solid rgba(255,255,255,0.25);
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .shipping-hero h2{
+      margin: 0 0 10px;
+      font-size: 32px;
+      color: #fff;
+    }
+
+    .shipping-hero p{
+      margin: 0;
+      font-size: 15px;
+      line-height: 1.9;
+      color: rgba(255,255,255,0.95);
+      max-width: 760px;
+    }
+
+    .card{
+      background: #fff;
+      border-radius: 22px;
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+      border: 1px solid #f5e6db;
+    }
+
+    .card h3{
+      margin-top: 0;
+      margin-bottom: 16px;
+      color: #e56d00;
+      font-size: 22px;
+    }
+
+    .section-desc{
+      color: #7a685c;
+      font-size: 14px;
+      line-height: 1.8;
+      margin-bottom: 16px;
+    }
+
+    .notice-grid{
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+
+    .notice-item{
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      background: #fff8f2;
+      border: 1px solid #ffe0c7;
+      border-radius: 16px;
+      padding: 14px;
+    }
+
+    .notice-no{
+      width: 30px;
+      height: 30px;
+      min-width: 30px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #ffb36b, #ff8b3d);
+      color: white;
+      font-weight: 700;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 2px;
+    }
+
+    .notice-item p{
+      margin: 0;
+      line-height: 1.85;
+      color: #4f433c;
+      font-size: 15px;
+    }
+
+    .notice-item b{
+      color: #d96a00;
+    }
+
+    .shipping-methods{
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 18px;
+    }
+
+    .method-box{
+      background: linear-gradient(180deg, #fffdfb 0%, #fff7f1 100%);
+      border: 1px solid #f8deca;
+      border-radius: 18px;
+      padding: 20px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.04);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .method-box::before{
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 6px;
+      background: linear-gradient(90deg, #ffb36b, #ff7a00);
+    }
+
+    .method-head{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+
+    .method-head h4{
+      margin: 0;
+      font-size: 22px;
+      color: #4a3b33;
+    }
+
+    .tag{
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .tag-safe{
+      background: #e9fff1;
+      color: #159947;
+    }
+
+    .tag-risk{
+      background: #fff1e3;
+      color: #d96a00;
+    }
+
+    .method-box ul{
+      margin: 0;
+      padding-left: 20px;
+      line-height: 1.9;
+      color: #57483f;
+      font-size: 15px;
+    }
+
+    .method-box li{
+      margin-bottom: 8px;
+    }
+
+    .method-box b{
+      color: #d96a00;
+    }
+
+    details{
+      margin-top: 14px;
+      background: #fff;
+      border: 1px dashed #ffc38a;
+      border-radius: 14px;
+      padding: 14px 16px;
+    }
+
+    summary{
+      cursor: pointer;
+      font-weight: 700;
+      color: #d96a00;
+    }
+
+    .detail-note{
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #f4e3d8;
+    }
+
+    .fee-list{
+      margin: 0;
+      padding-left: 20px;
+      line-height: 1.9;
+      color: #57483f;
+      font-size: 15px;
+    }
+
+    .warn-box{
+      background: linear-gradient(135deg, #fff2e6 0%, #fff9f4 100%);
+      border: 1px solid #ffd3ac;
+      border-radius: 18px;
+      padding: 18px 20px;
+      line-height: 1.9;
+      color: #7a4a1b;
+      font-size: 15px;
+    }
+
+    .warn-box strong{
+      color: #d96a00;
+    }
+
+    .final-agree{
+      text-align: center;
+      color: #866b59;
+      line-height: 1.9;
+      font-size: 15px;
+      margin-top: 8px;
+    }
+
+    .final-agree b{
+      color: #d96a00;
+    }
+
+    @media (max-width: 900px){
+      .notice-grid,
+      .shipping-methods{
+        grid-template-columns: 1fr;
+      }
+
+      .shipping-hero h2{
+        font-size: 26px;
+      }
+    }
+
+    @media (max-width: 600px){
+      .container{
+        margin: 24px auto 40px;
+        padding: 0 14px;
+      }
+
+      .shipping-hero{
+        padding: 26px 18px;
+        border-radius: 18px;
+      }
+
+      .shipping-hero h2{
+        font-size: 24px;
+      }
+
+      .card{
+        padding: 18px;
+        border-radius: 18px;
+      }
+
+      .card h3{
+        font-size: 20px;
+      }
+
+      .method-head h4{
+        font-size: 20px;
+      }
+
+      .notice-item{
+        padding: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <img src="../LOGO.png" class="brand-logo" alt="THAI BUY logo">
+    <div>
+      <div class="brand-title">THAI BUY</div>
+      <div class="brand-subtitle">可愛又安心的泰國代購</div>
+    </div>
+  </div>
+
+  <div class="topbar-nav">
+    <a href="./products.html" class="topbar-link">商品頁</a>
+    <a href="./order-query.html" class="topbar-link">訂單查詢</a>
+    <a href="./notice.html" class="topbar-link">購物須知</a>
+    <a href="./tracking.html" class="topbar-link">貨態狀況</a>
+    <a href="./shipping.html" class="topbar-link active">運送須知</a>
+    <a href="./contact.html" class="topbar-link">聯繫方式</a>
+    <a href="./news.html" class="topbar-link">最新活動</a>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="shipping-hero">
+    <div class="shipping-badge">THAI BUY 配送說明</div>
+    <h2>運送須知</h2>
+    <p>
+      為了讓每一筆代購都能更安心、更順利完成，請大家下單前先詳細閱讀配送與領貨說明。
+      完成下單後，即視為已閱讀並同意本頁所有規則與注意事項。
+    </p>
+  </div>
+
+  <div class="card">
+    <h3>重要提醒</h3>
+    <div class="section-desc">
+      下單前請先確認補款規則、商品到貨後的領取期限，以及包裹相關風險說明。
+    </div>
+
+    <div class="notice-grid">
+      <div class="notice-item">
+        <div class="notice-no">1</div>
+        <p>若選擇 <b>賣貨便／交貨便</b>，且後續需要二補，將會另行公告二補金額。</p>
+      </div>
+
+      <div class="notice-item">
+        <div class="notice-no">2</div>
+        <p>由於商品皆為 <b>國際包裹</b>，運送過程中可能發生些微碰撞，若對商品包裝完好度有要求者，請審慎下單。</p>
+      </div>
+
+      <div class="notice-item">
+        <div class="notice-no">3</div>
+        <p>收到商品後請務必 <b>全程錄影開箱</b>，若有任何問題請第一時間私訊官方。</p>
+      </div>
+
+      <div class="notice-item">
+        <div class="notice-no">4</div>
+        <p>商品保留 <b>30 天</b>，若需延長領貨時間請先私訊告知。</p>
+      </div>
+
+      <div class="notice-item">
+        <div class="notice-no">5</div>
+        <p>若超出期限，將通知三次；若皆無回應，將視為 <b>棄單</b>，僅退還 <b>60% 商品款項</b>，並釋出商品。</p>
+      </div>
+
+      <div class="notice-item">
+        <div class="notice-no">6</div>
+        <p>棄單一次將列入 <b>黑名單</b>，並社群掛黑，後續不再提供交易服務。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>配送方式</h3>
+    <div class="section-desc">
+      我們提供以下兩種運送方式，實際是否開放將依商品性質與表單公告為主。
+    </div>
+
+    <div class="shipping-methods">
+      <div class="method-box">
+        <div class="method-head">
+          <h4>📦 交貨便</h4>
+          <span class="tag tag-safe">有保險</span>
+        </div>
+
+        <ul>
+          <li>屬於 <b>有保險</b> 的配送項目。</li>
+          <li>需先匯款運費，並 <b>直接加總在訂單總金額上</b>。</li>
+          <li>選擇此方式者，須於下單時一併選擇，並填寫完整運送資訊。</li>
+        </ul>
+
+        <details>
+          <summary>▼ 點我查看運費算法詳細說明</summary>
+          <div class="detail-note">
+            <ul class="fee-list">
+              <li>1000 元商品價值：運費 60 元</li>
+              <li>1000～2000 元商品價值：運費 70 元</li>
+              <li>2000～3000 元商品價值：運費 80 元</li>
+              <li>3000～4000 元商品價值：運費 90 元</li>
+              <li>4000～5000 元商品價值：運費 100 元</li>
+            </ul>
+
+            <div class="warn-box" style="margin-top:14px;">
+              <strong>系統會自動判定運費金額。</strong><br>
+              若商品總價值超過 5000 元，仍想使用全品項保險者，請先私訊我們，需拆成兩單寄送並加總兩筆運費。<br><br>
+              例如：7000 元商品 → 5000 + 2000 → 運費 100 + 80 = <strong>180 元</strong>
+            </div>
+          </div>
+        </details>
+      </div>
+
+      <div class="method-box">
+        <div class="method-head">
+          <h4>📦 賣貨便</h4>
+          <span class="tag tag-risk">無保險</span>
+        </div>
+
+        <ul>
+          <li>屬於 <b>無保險</b> 的配送項目。</li>
+          <li><b>無須先加總在訂單總金額上</b>。</li>
+          <li>商品抵達超商後，若無二補，將支付 <b>最低商品價格 20 元 + 運費 38 元</b>。</li>
+          <li>其中 <b>20 元會內退於包裹內</b>，請勿自行先扣除。</li>
+          <li>選擇此方式者，若貨品遺失，<b>恕無法賠償</b>。</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>包裹風險提醒</h3>
+    <div class="warn-box">
+      國際包裹在運送過程中，外盒可能因物流搬運產生些微碰撞、壓痕或包材耗損，此類情況不列入瑕疵退換貨範圍。<br>
+      若商品本身有問題，請務必在 <strong>收到貨後全程錄影開箱</strong>，並盡快私訊官方協助處理。<br>我方會盡可能協助聯繫官方確認後續處理，但實際處理結果依官方回應為主。<br><br>
+      另外，若選擇 <strong>無保險配送方式</strong>，包裹若有遺失情形，將無法提供賠償，請務必自行評估後再選擇。
+    </div>
+  </div>
+
+  <div class="final-agree">
+    下單前請詳閱表單上的所有注意事項與說明。<br>
+    <b>完成下單即視為同意以上所有事項。</b>
+  </div>
+  
+<footer class="site-footer">© ThaiBuy代購</footer>
+</div>
+
+</body>
+</html>

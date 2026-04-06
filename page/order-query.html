@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>訂單查詢</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="../css/style.css">
+
+  <style>
+    body{
+      background:
+        radial-gradient(circle at top left, #fff3e8 0%, #fff9f5 35%, #ffffff 72%);
+      color:#4f433c;
+    }
+
+    .query-page{
+      max-width: 1080px;
+      margin: 40px auto 64px;
+      padding: 0 20px;
+    }
+
+    .query-hero{
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(135deg, #ffb36b 0%, #ff944d 55%, #ff7a00 100%);
+      color: #fff;
+      border-radius: 28px;
+      padding: 38px 30px;
+      margin-bottom: 26px;
+      box-shadow: 0 18px 40px rgba(255,122,0,0.18);
+    }
+
+    .query-hero::before{
+      content:"";
+      position:absolute;
+      width:220px;
+      height:220px;
+      border-radius:50%;
+      background:rgba(255,255,255,0.13);
+      top:-70px;
+      right:-40px;
+    }
+
+    .query-hero::after{
+      content:"";
+      position:absolute;
+      width:140px;
+      height:140px;
+      border-radius:50%;
+      background:rgba(255,255,255,0.10);
+      bottom:-35px;
+      left:-24px;
+    }
+
+    .query-hero > *{
+      position:relative;
+      z-index:1;
+    }
+
+    .hero-badge{
+      display:inline-block;
+      padding:7px 14px;
+      border-radius:999px;
+      background:rgba(255,255,255,0.18);
+      border:1px solid rgba(255,255,255,0.28);
+      color:#fff;
+      font-size:13px;
+      font-weight:700;
+      margin-bottom:12px;
+    }
+
+    .query-hero h2{
+      margin:0 0 12px;
+      font-size:34px;
+      color:#fff;
+      font-weight:800;
+      letter-spacing:0.5px;
+    }
+
+    .query-hero p{
+      margin:0;
+      color:rgba(255,255,255,0.96);
+      line-height:1.9;
+      font-size:15px;
+      max-width:760px;
+    }
+
+    .query-grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:20px;
+    }
+
+    .query-card{
+      background:rgba(255,255,255,0.95);
+      border:1px solid #f5e4d7;
+      border-radius:24px;
+      padding:24px 22px;
+      box-shadow:0 12px 28px rgba(0,0,0,0.05);
+    }
+
+    .query-card.full{
+      grid-column: 1 / -1;
+    }
+
+    .section-title{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      margin-bottom:18px;
+      padding:9px 15px;
+      border-radius:999px;
+      background:linear-gradient(135deg,#fff3e9,#ffe2ca);
+      color:#d96b2b;
+      font-size:17px;
+      font-weight:800;
+      box-shadow:0 6px 14px rgba(255,138,61,0.10);
+    }
+
+    .section-desc{
+      margin:0;
+      color:#7a6558;
+      line-height:1.85;
+      font-size:15px;
+    }
+
+    .query-form{
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+    }
+
+    .query-form label{
+      font-size:15px;
+      font-weight:700;
+      color:#5b4c43;
+    }
+
+    .query-form input{
+      width:100%;
+      box-sizing:border-box;
+      border:1px solid #f0d9c7;
+      background:#fffaf6;
+      border-radius:16px;
+      padding:14px 16px;
+      font-size:15px;
+      color:#4f433c;
+      outline:none;
+      transition:0.2s ease;
+    }
+
+    .query-form input:focus{
+      border-color:#ffad67;
+      box-shadow:0 0 0 4px rgba(255,173,103,0.15);
+      background:#fff;
+    }
+
+    .query-btn{
+      border:none;
+      border-radius:999px;
+      padding:13px 20px;
+      background:linear-gradient(135deg,#ffb36b,#ff8b3d);
+      color:#fff;
+      font-size:15px;
+      font-weight:700;
+      cursor:pointer;
+      box-shadow:0 10px 20px rgba(255,138,61,0.18);
+      transition:0.2s ease;
+    }
+
+        .query-btn:hover{
+      transform:translateY(-1px);
+      opacity:0.96;
+    }
+
+    .contact-links{
+      margin-top:16px;
+      display:grid;
+      gap:10px;
+    }
+
+.contact-btn{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  text-decoration:none;
+  border-radius:16px;
+  padding:14px 16px;
+  font-size:15px;
+  font-weight:800;
+  transition:0.2s ease;
+  box-shadow:0 8px 18px rgba(255,138,61,0.10);
+}
+
+ .contact-btn:hover{
+  transform:translateY(-1px);
+  box-shadow:0 10px 20px rgba(255,138,61,0.12);
+  opacity:0.98;
+}
+
+
+    .contact-btn.line{
+  background:linear-gradient(135deg,#fff3e9,#ffe2ca);
+  border:1px solid #f3c9a7;
+  color:#d96b2b;
+}
+
+
+
+    .small-tip{
+      margin-top:14px;
+      color:#a06d4c;
+      font-size:14px;
+      line-height:1.8;
+    }
+
+    .tip-box{
+      background:linear-gradient(180deg,#fffdfb 0%, #fff8f3 100%);
+      border:1px solid #f3e5da;
+      border-radius:18px;
+      padding:18px;
+      box-shadow:0 6px 14px rgba(0,0,0,0.03);
+      line-height:1.95;
+      color:#4b4039;
+      font-size:15px;
+    }
+
+    .tip-box strong{
+      color:#d96b2b;
+    }
+
+    .result-empty{
+      background:linear-gradient(180deg,#fffdfb 0%, #fff8f3 100%);
+      border:1px dashed #f0ccb0;
+      border-radius:20px;
+      padding:28px 22px;
+      text-align:center;
+      box-shadow:0 6px 14px rgba(0,0,0,0.03);
+    }
+
+    .result-icon{
+      width:72px;
+      height:72px;
+      margin:0 auto 14px;
+      border-radius:20px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:34px;
+      background:linear-gradient(135deg,#fff1e5,#ffd9ba);
+      box-shadow:0 8px 18px rgba(255,138,61,0.10);
+    }
+
+    .result-empty h3{
+      margin:0 0 10px;
+      font-size:24px;
+      color:#3f352f;
+    }
+
+    .result-empty p{
+      margin:0;
+      color:#7a6558;
+      line-height:1.9;
+      font-size:15px;
+    }
+
+    .footer-copy{
+      text-align:center;
+      color:#9a8576;
+      font-size:14px;
+      margin-top:26px;
+      padding-bottom:10px;
+    }
+
+    @media (max-width: 900px){
+      .query-grid{
+        grid-template-columns:1fr;
+      }
+
+      .query-hero h2{
+        font-size:26px;
+      }
+    }
+
+    @media (max-width: 768px){
+      .query-page{
+        margin:24px auto 40px;
+        padding:0 14px;
+      }
+
+      .query-hero,
+      .query-card{
+        padding:20px 16px;
+        border-radius:18px;
+      }
+
+      .query-hero h2{
+        font-size:24px;
+      }
+
+      .result-empty{
+        padding:22px 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <img src="../LOGO.png" class="brand-logo" alt="THAI BUY logo">
+    <div>
+      <div class="brand-title">THAI BUY</div>
+      <div class="brand-subtitle">可愛又安心的泰國代購</div>
+    </div>
+  </div>
+
+  <div class="topbar-nav">
+    <a href="./products.html" class="topbar-link">商品頁</a>
+    <a href="./order-query.html" class="topbar-link active">訂單查詢</a>
+    <a href="./notice.html" class="topbar-link">購物須知</a>
+    <a href="./tracking.html" class="topbar-link">貨態狀況</a>
+    <a href="./shipping.html" class="topbar-link">運送須知</a>
+    <a href="./contact.html" class="topbar-link">聯繫方式</a>
+    <a href="./news.html" class="topbar-link">最新活動</a>
+  </div>
+</div>
+
+<div class="query-page">
+
+  <div class="query-hero">
+    <div class="hero-badge">THAI BUY 訂單服務</div>
+    <h2>訂單查詢</h2>
+    <p>
+      可於此頁查詢訂單狀態、商品內容、收款進度與後續出貨資訊。
+    </p>
+  </div>
+
+  <div class="query-grid">
+
+    <div class="query-card">
+      <div class="section-title">查詢你的訂單</div>
+      <p class="section-desc">
+        可以輸入Email以及電話，快速查詢目前訂單狀況。
+      </p>
+    </div>
+
+        <div class="query-card">
+      <div class="section-title">查詢提醒</div>
+      <div class="tip-box">
+        <strong>建議查詢資訊</strong><br>
+        可使用Email以及電話進行查詢。<br>
+        若查無資料，請聯繫客服人員協助確認訂單狀況。
+
+        <div class="contact-links">
+          <a class="contact-btn line" href="https://lin.ee/PiLP7NP" target="_blank">
+            💬 LINE ID：@373ujbuu
+          </a>
+
+        </div>
+      </div>
+    </div>
+
+  <div class="query-card full">
+  <div class="section-title">輸入查詢資訊</div>
+
+  <div class="query-form">
+    <label for="queryEmail">Email</label>
+    <input id="queryEmail" type="email" placeholder="請輸入下單時填寫的 Email">
+
+    <label for="queryPhone">電話</label>
+    <input id="queryPhone" type="text" placeholder="請輸入下單時填寫的電話">
+
+    <button id="queryBtn" class="query-btn" type="button">查詢訂單</button>
+  </div>
+</div>
+
+<div class="query-card full">
+  <div class="section-title">查詢結果</div>
+
+  <div id="queryResult">
+    <div class="result-empty">
+      <div class="result-icon">📦</div>
+      <h3>尚未查詢訂單</h3>
+      <p>
+        這裡之後會顯示訂單狀態、商品內容、收款狀況與出貨進度。<br>
+        請先輸入 Email 與電話進行查詢。
+      </p>
+    </div>
+  </div>
+</div>
+</div>
+
+  <div class="footer-copy">© ThaiBuy代購</div>
+
+</div>
+<script type="module" src="../js/order-query.js"></script>
+</body>
+</html>

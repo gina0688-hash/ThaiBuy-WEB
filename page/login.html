@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>登入</title>
+
+<link rel="stylesheet" href="../css/style.css">
+
+<style>
+.login-box{
+  max-width:400px;
+  margin:100px auto;
+  padding:30px;
+  background:white;
+  border-radius:12px;
+  box-shadow:0 5px 20px rgba(0,0,0,0.1);
+}
+
+.login-box h2{
+  text-align:center;
+  margin-bottom:20px;
+}
+
+.login-box input{
+  width:100%;
+  padding:10px;
+  margin-bottom:15px;
+  border:1px solid #ddd;
+  border-radius:6px;
+}
+
+.login-box button{
+  width:100%;
+  padding:10px;
+  background:#2563eb;
+  color:white;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+}
+
+.login-box button:hover{
+  background:#1d4ed8;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="brand-bar">
+  <div class="brand-left">
+    <img src="../LOGO.png" class="brand-logo" alt="THAI BUY logo">
+    <div>
+      <div class="brand-title">THAI BUY</div>
+      <div class="brand-subtitle">可愛又安心的泰國代購</div>
+    </div>
+  </div>
+</div>
+
+
+<div class="login-box">
+
+  <h2>🔐 後台登入</h2>
+
+  <input id="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Password">
+
+  <button onclick="login()">登入</button>
+<footer class="site-footer">© ThaiBuy代購</footer>
+</div>
+
+<script type="module" src="../js/login.js"></script>
+
+</body>
+</html>

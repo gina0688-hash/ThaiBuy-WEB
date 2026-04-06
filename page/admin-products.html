@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>商品管理</title>
+
+<!-- ⭐ 載入 CSS -->
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../css/admin-products.css">
+
+</head>
+
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <img src="../LOGO.png" class="brand-logo" alt="THAI BUY logo">
+    <div>
+      <div class="brand-title">THAI BUY</div>
+      <div class="brand-subtitle">可愛又安心的泰國代購</div>
+    </div>
+  </div>
+
+  <div class="topbar-nav">
+    <a href="./admin-orders.html" class="topbar-link">訂單管理</a>
+    <a href="./admin-products.html" class="topbar-link active">商品管理</a>
+    <a href="./admin-tracking.html" class="topbar-link">貨態管理</a>
+    <a href="./admin-settlement.html" class="topbar-link">帳務管理</a>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ⭐ 商品新增 -->
+ <div class="card">
+  <h2 id="formTitle">🛍 新增商品</h2>
+
+    <label>上架日期</label>
+    <input type="date" id="release_date">
+
+<label>商品名稱</label>
+<input id="name" placeholder="例如：寫真書">
+
+<label>商品系列</label>
+<div style="display:flex; gap:8px; margin-bottom:15px;">
+  <select id="series_id" style="flex:1;">
+    <option value="">請選擇系列</option>
+  </select>
+  <button type="button" class="btn-secondary" onclick="createSeries()">＋新增系列</button>
+</div>
+
+<label>上架狀態</label>
+<select id="is_active">
+  <option value="true">上架中</option>
+  <option value="false">下架</option>
+</select>
+
+<label>預購類型</label>
+<select id="preorder_type" onchange="toggleDepositFields()">
+  <option value="instock">現貨</option>
+  <option value="normal">一般預購</option>
+  <option value="limited">限量預購</option>
+</select>
+
+<div id="depositBlock" style="display:none;">
+  <label>是否需要訂金</label>
+  <select id="deposit_required" onchange="toggleDepositAmount()">
+    <option value="false">否</option>
+    <option value="true">是</option>
+  </select>
+
+  <div id="depositAmountWrap" style="display:none;">
+    <label>訂金金額</label>
+    <input type="number" id="deposit_amount" min="0" value="500" placeholder="例如：500">
+  </div>
+</div>
+
+<label>商品描述</label>
+<textarea id="desc" placeholder="商品介紹"></textarea>
+
+
+
+
+<label>預購說明</label>
+<textarea id="preorder_note"></textarea>
+
+<label>付款方式</label>
+<input id="payment_method" placeholder="例如：ATM / 匯款">
+
+<label>運送方式</label>
+<input id="shipping_method" placeholder="例如：7-11 / 宅配">
+
+    <label>商品圖片</label>
+<input type="file" id="images" multiple onchange="previewImages()">
+
+<div id="preview"></div>
+
+    <h3>規格設定</h3>
+
+  <div id="variants"></div>
+
+<div class="form-actions">
+  <button type="button" class="btn-secondary" onclick="addVariant()">＋新增規格</button>
+  <button type="button" class="btn-cancel" id="cancelEditBtn" onclick="cancelEdit()" style="display:none;">取消編輯</button>
+  <button type="button" class="btn-primary" id="submitBtn" onclick="saveProduct()">送出商品</button>
+</div>
+</div>
+  <!-- ⭐ 商品列表 -->
+ <!-- ⭐ 商品列表 -->
+<div class="card">
+  <h3>商品列表</h3>
+
+<div style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap;">
+  <input
+    id="searchKeyword"
+    placeholder="搜尋商品名稱 / 描述 / 規格"
+    style="flex:1; min-width:220px;"
+  >
+
+  <select id="searchSeries" style="min-width:180px;">
+    <option value="">全部系列</option>
+  </select>
+
+  <select id="searchStatus" style="min-width:140px;">
+    <option value="">全部狀態</option>
+    <option value="true">上架中</option>
+    <option value="false">已下架</option>
+  </select>
+
+  <button type="button" class="btn-secondary" onclick="loadProducts()">
+    搜尋
+  </button>
+</div>
+
+  <div id="productList"></div>
+</div>
+<footer class="site-footer">© ThaiBuy代購</footer>
+</div>
+
+<!-- ⭐ JS -->
+<script type="module" src="../js/admin-products.js"></script>
+
+</body>
+</html>

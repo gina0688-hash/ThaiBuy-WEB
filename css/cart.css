@@ -1,0 +1,325 @@
+/* ===== 全域 ===== */
+body{
+    margin:0;
+    font-family: "Segoe UI", sans-serif;
+    background:#f5f6fa;
+  }
+  
+  .container{
+    max-width:900px;
+    margin:40px auto;
+    padding:0 20px;
+  }
+  
+  /* ===== 卡片 ===== */
+  .card, .product-card{
+    background:white;
+    border-radius:12px;
+    padding:20px;
+    margin-bottom:20px;
+    box-shadow:0 5px 20px rgba(0,0,0,0.08);
+  }
+  
+  /* ===== 標題 ===== */
+  h2{
+    margin-bottom:20px;
+  }
+  
+  /* ===== 輸入框 ===== */
+  input, textarea, select{
+    width:100%;
+    padding:10px;
+    margin:8px 0 15px 0;
+    border:1px solid #ddd;
+    border-radius:8px;
+    font-size:14px;
+  }
+  
+  /* ===== 按鈕 ===== */
+  button{
+    border:none;
+    padding:12px;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:14px;
+  }
+  
+  .btn-primary{
+    background:#4f46e5;
+    color:white;
+    width:100%;
+  }
+  
+  .btn-primary:hover{
+    background:#4338ca;
+  }
+  
+  .btn-secondary{
+    background:#eee;
+  }
+  
+  .btn-danger{
+    background:#ef4444;
+    color:white;
+  }
+  
+  /* ===== 商品卡 ===== */
+  .product-card{
+    cursor:pointer;
+    transition:0.2s;
+  }
+  
+  .product-card:hover{
+    transform:translateY(-2px);
+  }
+  
+  /* ===== 商品詳細 ===== */
+  .product-detail{
+    margin-top:10px;
+    padding-top:10px;
+    border-top:1px solid #eee;
+  }
+  
+  /* ===== 商品圖片 ===== */
+  .product-images{
+    display:flex;
+    gap:10px;
+    margin-bottom:10px;
+  }
+  
+  .product-images img{
+    width:100px;
+    border-radius:8px;
+    border:1px solid #ddd;
+  }
+  
+  /* ===== 價格 ===== */
+  .price{
+    font-size:22px;
+    font-weight:bold;
+    margin:10px 0;
+    color:#111;
+  }
+  
+  /* ===== 訂單區塊 ===== */
+  .order-item{
+    padding:10px;
+    border-bottom:1px solid #eee;
+  }
+  
+  /* ===== 總金額 ===== */
+  #total{
+    font-size:24px;
+    font-weight:bold;
+    margin:10px 0;
+    color:#4f46e5;
+  }
+  
+  /* ===== 圖片預覽 ===== */
+  #preview div{
+    display:inline-block;
+    margin:5px;
+    text-align:center;
+  }
+  
+  #preview img{
+    width:80px;
+    border-radius:6px;
+    border:1px solid #ddd;
+  }
+
+
+  /* 🛒 右上角 icon */
+#cartIcon{
+    position:fixed;
+    top:20px;
+    right:20px;
+    background:#4f46e5;
+    color:white;
+    padding:10px 15px;
+    border-radius:20px;
+    cursor:pointer;
+    z-index:1000;
+  }
+  
+  /* 🛒 彈出購物車 */
+  #cartPanel{
+    position:fixed;
+    top:60px;
+    right:20px;
+    width:300px;
+    background:white;
+    border-radius:10px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.2);
+    padding:15px;
+    display:none;
+    z-index:1000;
+  }
+  
+  /* 單筆商品 */
+  .cart-item{
+    border-bottom:1px solid #eee;
+    padding:8px 0;
+  }
+
+  /* 商品 grid */
+.product-grid{
+    display:grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap:20px;
+  }
+  
+  /* 商品卡 */
+  .product-card{
+    background:white;
+    border-radius:12px;
+    overflow:hidden;
+    box-shadow:0 4px 15px rgba(0,0,0,0.08);
+    transition:0.2s;
+    cursor:pointer;
+  }
+  
+  .product-card:hover{
+    transform:translateY(-5px);
+  }
+  
+  /* 商品圖片 */
+  .product-img{
+    width:100%;
+    height:220px;
+    object-fit:cover;
+  }
+  
+  /* 商品內容 */
+  .product-info{
+    padding:10px;
+  }
+  
+  .product-name{
+    font-size:14px;
+    height:40px;
+    overflow:hidden;
+  }
+  
+  .product-price{
+    font-weight:bold;
+    margin-top:5px;
+  }
+  
+  /* 購物車按鈕 */
+  .add-btn{
+    position:absolute;
+    right:10px;
+    bottom:10px;
+    background:#ff7a59;
+    color:white;
+    border:none;
+    border-radius:6px;
+    padding:6px 10px;
+    cursor:pointer;
+  }
+  
+  /* 圖片容器 */
+  .product-img-wrap{
+    position:relative;
+  }
+
+  .order-card{
+    background:white;
+    padding:15px;
+    border-radius:10px;
+    margin-bottom:15px;
+    box-shadow:0 2px 6px rgba(0,0,0,0.1);
+  }
+  
+  .order-summary{
+    font-weight:bold;
+    cursor:pointer;
+  }
+  
+  .order-summary:hover{
+    color:#4f46e5;
+  }
+  
+  .order-detail{
+    margin-top:10px;
+  }
+
+  .compact-block{
+    margin:6px 0 !important;
+    padding:8px 10px !important;
+  }
+  
+  .compact-input{
+    margin:0 !important;
+    padding:6px 8px !important;
+    width:120px;
+  }
+
+  .product-img-wrap{
+  position:relative;
+}
+
+.product-badge{
+  position:absolute;
+  top:10px;
+  left:10px;
+  z-index:2;
+  padding:6px 10px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:600;
+  color:white;
+  background:#6b7280;
+}
+
+.product-badge.limited{
+  background:#ef4444;
+}
+
+.product-badge.normal{
+  background:#6366f1;
+}
+
+.add-btn{
+  position:absolute;
+  right:10px;
+  bottom:10px;
+  z-index:2;
+}
+
+.soldout-badge{
+  position:absolute;
+  top:10px;
+  right:10px;
+  background:#e53935;
+  color:#fff;
+  font-size:12px;
+  font-weight:bold;
+  padding:6px 10px;
+  border-radius:999px;
+  z-index:3;
+}
+
+.product-card{
+  position:relative;
+}
+
+.product-card.soldout{
+  opacity:0.85;
+}
+
+.back-btn{
+  margin-bottom:20px;
+  padding:10px 16px;
+  border:none;
+  border-radius:10px;
+  background:#f3f4f6;
+  color:#333;
+  font-size:14px;
+  cursor:pointer;
+}
+
+.back-btn:hover{
+  background:#e5e7eb;
+}

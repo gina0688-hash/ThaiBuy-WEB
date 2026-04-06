@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>訂單管理</title>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../css/admin-orders.css">
+</head>
+
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <img src="../LOGO.png" class="brand-logo" alt="THAI BUY logo">
+    <div>
+      <div class="brand-title">THAI BUY</div>
+      <div class="brand-subtitle">可愛又安心的泰國代購</div>
+    </div>
+  </div>
+
+ <div class="topbar-nav">
+    <a href="./admin-orders.html" class="topbar-link active">訂單管理</a>
+    <a href="./admin-products.html" class="topbar-link">商品管理</a>
+    <a href="./admin-tracking.html" class="topbar-link">貨態管理</a>
+    <a href="./admin-settlement.html" class="topbar-link">帳務管理</a>
+  </div>
+</div>
+
+<div class="container">
+
+  <div style="display:flex;justify-content:space-between;align-items:center;">
+    <h2>訂單管理</h2>
+  
+    <div id="userBox" style="font-size:14px;color:#374151;">
+      👤 ...
+    </div>
+  </div>
+
+  <!-- ⭐ 搜尋 -->
+<div style="margin-bottom:20px">
+  <input id="searchInput"
+    placeholder="搜尋 ID / 姓名 / 電話 / Email"
+    style="width:100%;padding:10px;font-size:14px"
+    oninput="loadOrders()">
+</div>
+
+<!-- ⭐ 新訂單 -->
+<h3>🆕 新訂單</h3>
+<div id="order-new"></div>
+
+<!-- ⭐ 等待回台 -->
+<h3>📦 等待回台</h3>
+<div id="order-collecting"></div>
+
+<!-- ⭐ 運送中 -->
+<h3>🚚 等待運送中</h3>
+<div id="order-shipping"></div>
+
+<!-- ⭐ 完成 -->
+<h3>✅ 寄送完成</h3>
+<div id="order-done"></div>
+
+</div>
+
+<script type="module" src="../js/admin-orders.js"></script>
+
+</body>
+</html>

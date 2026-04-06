@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>最新活動</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="../css/style.css">
+
+  <style>
+    body{
+      background:
+        radial-gradient(circle at top left, #fff3e8 0%, #fff9f5 35%, #ffffff 72%);
+      color:#4f433c;
+    }
+
+    .news-page{
+      max-width: 1080px;
+      margin: 40px auto 64px;
+      padding: 0 20px;
+    }
+
+    .news-hero{
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(135deg, #ffb36b 0%, #ff944d 55%, #ff7a00 100%);
+      color: #fff;
+      border-radius: 28px;
+      padding: 38px 30px;
+      margin-bottom: 26px;
+      box-shadow: 0 18px 40px rgba(255,122,0,0.18);
+    }
+
+    .news-hero::before{
+      content:"";
+      position:absolute;
+      width:220px;
+      height:220px;
+      border-radius:50%;
+      background:rgba(255,255,255,0.13);
+      top:-70px;
+      right:-40px;
+    }
+
+    .news-hero::after{
+      content:"";
+      position:absolute;
+      width:140px;
+      height:140px;
+      border-radius:50%;
+      background:rgba(255,255,255,0.10);
+      bottom:-35px;
+      left:-24px;
+    }
+
+    .news-hero > *{
+      position:relative;
+      z-index:1;
+    }
+
+    .hero-badge{
+      display:inline-block;
+      padding:7px 14px;
+      border-radius:999px;
+      background:rgba(255,255,255,0.18);
+      border:1px solid rgba(255,255,255,0.28);
+      color:#fff;
+      font-size:13px;
+      font-weight:700;
+      margin-bottom:12px;
+    }
+
+    .news-hero h2{
+      margin:0 0 12px;
+      font-size:34px;
+      color:#fff;
+      font-weight:800;
+      letter-spacing:0.5px;
+    }
+
+    .news-hero p{
+      margin:0;
+      color:rgba(255,255,255,0.96);
+      line-height:1.9;
+      font-size:15px;
+      max-width:760px;
+    }
+
+    .news-grid{
+      display:grid;
+      grid-template-columns: 1.15fr 0.95fr;
+      gap:20px;
+    }
+
+    .news-card{
+      background:rgba(255,255,255,0.95);
+      border:1px solid #f5e4d7;
+      border-radius:24px;
+      padding:24px 22px;
+      box-shadow:0 12px 28px rgba(0,0,0,0.05);
+    }
+
+    .section-title{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      margin-bottom:18px;
+      padding:9px 15px;
+      border-radius:999px;
+      background:linear-gradient(135deg,#fff3e9,#ffe2ca);
+      color:#d96b2b;
+      font-size:17px;
+      font-weight:800;
+      box-shadow:0 6px 14px rgba(255,138,61,0.10);
+    }
+
+    .empty-state{
+      background:linear-gradient(180deg,#fffdfb 0%, #fff8f3 100%);
+      border:1px solid #f3e5da;
+      border-radius:20px;
+      padding:26px 22px;
+      text-align:center;
+      box-shadow:0 6px 14px rgba(0,0,0,0.03);
+    }
+
+    .empty-icon{
+      width:72px;
+      height:72px;
+      margin:0 auto 14px;
+      border-radius:20px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:34px;
+      background:linear-gradient(135deg,#fff1e5,#ffd9ba);
+      box-shadow:0 8px 18px rgba(255,138,61,0.10);
+    }
+
+    .empty-state h3{
+      margin:0 0 10px;
+      font-size:24px;
+      color:#3f352f;
+    }
+
+    .empty-state p{
+      margin:0;
+      color:#7a6558;
+      line-height:1.9;
+      font-size:15px;
+    }
+
+    .community-list{
+      display:grid;
+      gap:14px;
+    }
+
+    .community-item{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      background:linear-gradient(180deg,#fffdfb 0%, #fff8f3 100%);
+      border:1px solid #f3e5da;
+      border-radius:18px;
+      padding:16px 18px;
+      box-shadow:0 6px 14px rgba(0,0,0,0.03);
+      flex-wrap:wrap;
+    }
+
+    .community-left{
+      display:flex;
+      align-items:flex-start;
+      gap:14px;
+      min-width:0;
+      flex:1;
+    }
+
+    .community-icon{
+      width:46px;
+      height:46px;
+      min-width:46px;
+      border-radius:14px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:22px;
+      background:linear-gradient(135deg,#fff1e5,#ffd9ba);
+      box-shadow:0 6px 14px rgba(255,138,61,0.10);
+    }
+
+    .community-info{
+      min-width:0;
+    }
+
+    .community-name{
+      margin:0 0 4px;
+      font-size:17px;
+      font-weight:800;
+      color:#3f352f;
+    }
+
+    .community-id{
+      margin:0;
+      color:#7a6558;
+      font-size:15px;
+      line-height:1.8;
+      word-break:break-all;
+    }
+
+    .community-id b{
+      color:#d96b2b;
+    }
+
+    .community-link{
+      display:inline-block;
+      padding:10px 16px;
+      border-radius:999px;
+      background:linear-gradient(135deg,#ffb36b,#ff8b3d);
+      color:#fff;
+      text-decoration:none;
+      font-size:14px;
+      font-weight:700;
+      box-shadow:0 8px 18px rgba(255,138,61,0.18);
+      transition:0.2s ease;
+      white-space:nowrap;
+    }
+
+    .community-link:hover{
+      transform:translateY(-1px);
+      opacity:0.95;
+    }
+
+    .news-note{
+      margin-top:18px;
+      background:linear-gradient(135deg,#fff1e6 0%, #fff8f3 100%);
+      border:1px solid #ffd2b1;
+      border-left:6px solid #e9781f;
+      color:#9a5316;
+      border-radius:18px;
+      padding:16px 18px;
+      font-size:14px;
+      font-weight:700;
+      line-height:1.9;
+      box-shadow:0 8px 18px rgba(255,138,61,0.08);
+    }
+
+    @media (max-width: 900px){
+      .news-grid{
+        grid-template-columns:1fr;
+      }
+
+      .news-hero h2{
+        font-size:26px;
+      }
+    }
+
+    @media (max-width: 768px){
+      .news-page{
+        margin:24px auto 40px;
+        padding:0 14px;
+      }
+
+      .news-hero,
+      .news-card{
+        padding:20px 16px;
+        border-radius:18px;
+      }
+
+      .community-item{
+        padding:14px;
+        border-radius:16px;
+      }
+
+      .news-hero h2{
+        font-size:24px;
+      }
+
+      .community-link{
+        width:100%;
+        text-align:center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <img src="../LOGO.png" class="brand-logo" alt="THAI BUY logo">
+    <div>
+      <div class="brand-title">THAI BUY</div>
+      <div class="brand-subtitle">可愛又安心的泰國代購</div>
+    </div>
+  </div>
+
+  <div class="topbar-nav">
+    <a href="./products.html" class="topbar-link">商品頁</a>
+    <a href="./order-query.html" class="topbar-link">訂單查詢</a>
+    <a href="./notice.html" class="topbar-link">購物須知</a>
+    <a href="./tracking.html" class="topbar-link">貨態狀況</a>
+    <a href="./shipping.html" class="topbar-link">運送須知</a>
+    <a href="./contact.html" class="topbar-link">聯繫方式</a>
+    <a href="./news.html" class="topbar-link active">最新活動</a>
+  </div>
+</div>
+
+<div class="news-page">
+
+  <div class="news-hero">
+    <div class="hero-badge">THAI BUY 最新消息</div>
+    <h2>最新活動</h2>
+    <p>
+      這裡會放上開團資訊、限時消息、優惠活動與最新公告。
+      目前暫無活動，歡迎先加入社群，獲得即時新資訊。
+    </p>
+  </div>
+
+  <div class="news-grid">
+
+    <div class="news-card">
+      <div class="section-title">目前活動狀態</div>
+
+      <div class="empty-state">
+        <div class="empty-icon">🧡</div>
+        <h3>目前暫無活動公告</h3>
+        <p>
+          目前尚未開啟新的優惠活動或限定連線。<br>
+          之後若有最新消息、開團資訊、截止時間或到貨提醒，
+          都會於官方社群同步更新。
+        </p>
+      </div>
+
+      <div class="news-note">
+        加入 THAI BUY 官方社群，即可更快收到最新開團、補款公告、到貨通知與限定消息。
+      </div>
+    </div>
+
+    <div class="news-card">
+      <div class="section-title">加入社群獲得即時新資訊</div>
+
+      <div class="community-list">
+
+        <div class="community-item">
+          <div class="community-left">
+            <div class="community-icon">💬</div>
+            <div class="community-info">
+              <p class="community-name">Instagram</p>
+              <p class="community-id"><b>IG ID：</b>thaibuyyy</p>
+            </div>
+          </div>
+          <a class="community-link" href="https://www.instagram.com/thaibuyyy?igsh=Z3JraHA5NDcyYzBs&utm_source=qr" target="_blank" rel="noopener noreferrer">
+            前往 IG
+          </a>
+        </div>
+
+        <div class="community-item">
+          <div class="community-left">
+            <div class="community-icon">💬</div>
+            <div class="community-info">
+              <p class="community-name">LINE</p>
+              <p class="community-id"><b>LINE ID：</b>@373ujbuu</p>
+            </div>
+          </div>
+          <a class="community-link" href="https://lin.ee/PiLP7NP" target="_blank" rel="noopener noreferrer">
+            前往 LINE
+          </a>
+        </div>
+
+        <div class="community-item">
+          <div class="community-left">
+            <div class="community-icon">💬</div>
+            <div class="community-info">
+              <p class="community-name">Threads</p>
+              <p class="community-id"><b>Threads：</b>thaibuyyy</p>
+            </div>
+          </div>
+          <a class="community-link" href="https://www.threads.com/@thaibuyyy?igshid=NTc4MTIwNjQ2YQ==" target="_blank" rel="noopener noreferrer">
+            前往 Threads
+          </a>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+<footer class="site-footer">© ThaiBuy代購</footer>
+</div>
+
+</body>
+</html>
