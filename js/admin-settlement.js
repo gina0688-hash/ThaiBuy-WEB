@@ -192,9 +192,10 @@ function calcItemMetrics(batch, items, item, estimatedInternationalShipping = 0)
 
 async function saveBatch(){
   const batch_date = document.getElementById("batch_date").value
-  const batch_name = document.getElementById("batch_name").value.trim()
-  const purchase_source = document.getElementById("purchase_source").value.trim()
-  const cargo_no = document.getElementById("cargo_no").value.trim()
+const batch_name = document.getElementById("batch_name").value.trim()
+const purchase_source = document.getElementById("purchase_source").value.trim()
+const official_order_no = document.getElementById("official_order_no").value.trim()
+const cargo_no = document.getElementById("cargo_no").value.trim()
   const stock_status = document.getElementById("stock_status").value
   const packed_status = document.getElementById("packed_status").value === "true"
   const payer_name = document.getElementById("payer_name").value
@@ -252,6 +253,7 @@ const payload = {
   batch_date,
   batch_name,
   purchase_source,
+  official_order_no,
   cargo_no,
   stock_status,
   stocked_at,
@@ -305,7 +307,8 @@ function clearBatchForm(){
 
   document.getElementById("batch_date").value = ""
   document.getElementById("batch_name").value = ""
- document.getElementById("purchase_source").value = ""
+document.getElementById("purchase_source").value = ""
+document.getElementById("official_order_no").value = ""
 document.getElementById("cargo_no").value = ""
 document.getElementById("stock_status").value = "pending"
 document.getElementById("packed_status").value = "false"
@@ -352,6 +355,7 @@ async function editBatch(batchId){
  document.getElementById("batch_date").value = data.batch_date || ""
 document.getElementById("batch_name").value = data.batch_name || ""
 document.getElementById("purchase_source").value = data.purchase_source || ""
+document.getElementById("official_order_no").value = data.official_order_no || ""
 document.getElementById("cargo_no").value = data.cargo_no || ""
 document.getElementById("stock_status").value = data.stock_status || "pending"
 document.getElementById("packed_status").value = String(!!data.packed_status)
@@ -806,6 +810,7 @@ batchCard.className = hasNegativeProfit ? "batch-card batch-card-danger" : "batc
           </div>
         </div>
         <div>購買來源：${batch.purchase_source || "-"}</div>
+<div>官方訂單編號：${batch.official_order_no || "-"}</div>
 <div>貨態編號：${batch.cargo_no || "-"}</div>
 <div>入庫狀態：${formatStockStatus(batch.stock_status)}</div>
 <div>入庫時間：${formatDateTime(batch.stocked_at)}</div>
@@ -919,13 +924,15 @@ async function filterBatchList(){
 
   const filtered = allBatchRows.filter(batch => {
     const batchName = String(batch.batch_name || "").toLowerCase()
-    const cargoNo = String(batch.cargo_no || "").toLowerCase()
-    const batchDate = String(batch.batch_date || "")
+const officialOrderNo = String(batch.official_order_no || "").toLowerCase()
+const cargoNo = String(batch.cargo_no || "").toLowerCase()
+const batchDate = String(batch.batch_date || "")
 
-    const matchKeyword =
-      !keyword ||
-      batchName.includes(keyword) ||
-      cargoNo.includes(keyword)
+const matchKeyword =
+  !keyword ||
+  batchName.includes(keyword) ||
+  officialOrderNo.includes(keyword) ||
+  cargoNo.includes(keyword)
 
     const matchStockStatus =
       !stockStatus ||
@@ -985,14 +992,16 @@ async function exportSettlementCsv(){
   const endDate = document.getElementById("batch_date_end")?.value || ""
 
   const filtered = allBatchRows.filter(batch => {
-    const batchName = String(batch.batch_name || "").toLowerCase()
-    const cargoNo = String(batch.cargo_no || "").toLowerCase()
-    const batchDate = String(batch.batch_date || "")
+  const batchName = String(batch.batch_name || "").toLowerCase()
+const officialOrderNo = String(batch.official_order_no || "").toLowerCase()
+const cargoNo = String(batch.cargo_no || "").toLowerCase()
+const batchDate = String(batch.batch_date || "")
 
-    const matchKeyword =
-      !keyword ||
-      batchName.includes(keyword) ||
-      cargoNo.includes(keyword)
+const matchKeyword =
+  !keyword ||
+  batchName.includes(keyword) ||
+  officialOrderNo.includes(keyword) ||
+  cargoNo.includes(keyword)
 
     const matchStockStatus =
       !stockStatus ||
@@ -1020,10 +1029,11 @@ async function exportSettlementCsv(){
   })
 
   const rows = [[
-    "批次日期",
-    "批次名稱",
-    "購買來源",
-    "貨態編號",
+  "批次日期",
+  "批次名稱",
+  "購買來源",
+  "官方訂單編號",
+  "貨態編號",
     "入庫狀態",
     "入庫時間",
     "是否已打包回台",
@@ -1055,12 +1065,13 @@ async function exportSettlementCsv(){
     const itemList = items || []
 
     if(itemList.length === 0){
-      rows.push([
-        batch.batch_date || "",
-        batch.batch_name || "",
-        batch.purchase_source || "",
-        batch.cargo_no || "",
-        formatStockStatus(batch.stock_status),
+     rows.push([
+  batch.batch_date || "",
+  batch.batch_name || "",
+  batch.purchase_source || "",
+  batch.official_order_no || "",
+  batch.cargo_no || "",
+  formatStockStatus(batch.stock_status),
         formatDateTime(batch.stocked_at),
         batch.packed_status ? "是" : "否",
         formatDateTime(batch.packed_at),
@@ -1081,11 +1092,12 @@ async function exportSettlementCsv(){
           : Number(item.product_variants?.price || 0)
 
       rows.push([
-        batch.batch_date || "",
-        batch.batch_name || "",
-        batch.purchase_source || "",
-        batch.cargo_no || "",
-        formatStockStatus(batch.stock_status),
+  batch.batch_date || "",
+  batch.batch_name || "",
+  batch.purchase_source || "",
+  batch.official_order_no || "",
+  batch.cargo_no || "",
+  formatStockStatus(batch.stock_status),
         formatDateTime(batch.stocked_at),
         batch.packed_status ? "是" : "否",
         formatDateTime(batch.packed_at),

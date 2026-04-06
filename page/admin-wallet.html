@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>儲值金管理</title>
+
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../css/admin-wallet.css">
+</head>
+
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <img src="../LOGO.png" class="brand-logo" alt="THAI BUY logo">
+    <div>
+      <div class="brand-title">THAI BUY</div>
+      <div class="brand-subtitle">可愛又安心的泰國代購</div>
+    </div>
+  </div>
+
+  <div class="topbar-nav">
+    <a href="./admin-orders.html" class="topbar-link">訂單管理</a>
+    <a href="./admin-products.html" class="topbar-link">商品管理</a>
+    <a href="./admin-tracking.html" class="topbar-link">貨態管理</a>
+    <a href="./admin-settlement.html" class="topbar-link">帳務管理</a>
+    <a href="./admin-expenses.html" class="topbar-link">內帳支出</a>
+    <a href="./admin-wallet.html" class="topbar-link active">儲值金管理</a>
+    <a href="./admin-711-income.html" class="topbar-link">7-11入帳</a>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="card">
+    <h2>新增儲值帳戶</h2>
+
+    <label>客戶姓名</label>
+    <input type="text" id="customer_name" placeholder="例如：王小美">
+
+    <label>客戶電話</label>
+    <input type="text" id="customer_phone" placeholder="例如：0912345678">
+
+    <label>客戶 Email</label>
+    <input type="text" id="customer_email" placeholder="例如：xxx@gmail.com">
+
+    <label>備註</label>
+    <textarea id="wallet_note" placeholder="例如：常有訂金保留 / 被砍單轉儲值"></textarea>
+
+    <div class="form-actions">
+      <button type="button" class="btn-primary" onclick="saveWallet()">建立帳戶</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>儲值金異動</h2>
+
+    <label>選擇客戶帳戶</label>
+    <select id="wallet_select"></select>
+
+    <label>異動日期</label>
+    <input type="date" id="log_date">
+
+    <label>異動類型</label>
+    <select id="change_type">
+      <option value="">請選擇異動類型</option>
+      <option value="訂金轉儲值">訂金轉儲值</option>
+      <option value="砍單轉儲值">砍單轉儲值</option>
+      <option value="人工加值">人工加值</option>
+      <option value="下單扣抵">下單扣抵</option>
+      <option value="退款扣回">退款扣回</option>
+      <option value="其他">其他</option>
+    </select>
+
+    <label>異動金額</label>
+    <input type="number" id="log_amount" step="0.01" value="0">
+    <div class="small-muted">加值請輸入正數，扣抵請輸入負數，例如 -300</div>
+
+    <label>異動備註</label>
+    <textarea id="log_note" placeholder="例如：原訂單 O20260406 被砍單，轉為儲值"></textarea>
+
+    <div class="form-actions">
+  <button type="button" class="btn-primary" id="saveWalletLogBtn" onclick="saveWalletLog()">新增異動</button>
+  <button type="button" class="btn-cancel" id="cancelWalletLogEditBtn" onclick="cancelWalletLogEdit()" style="display:none;">取消編輯</button>
+</div>
+  </div>
+
+  <div class="card">
+    <h2>儲值金查詢</h2>
+
+    <div class="wallet-toolbar">
+      <input type="text" id="wallet_search" placeholder="搜尋客戶姓名 / 電話 / Email">
+    </div>
+
+    <div id="wallet_overview" class="wallet-overview"></div>
+    <div id="wallet_list"></div>
+  </div>
+
+</div>
+
+<footer class="site-footer">© ThaiBuy代購</footer>
+
+<script type="module" src="../js/admin-wallet.js"></script>
+</body>
+</html>

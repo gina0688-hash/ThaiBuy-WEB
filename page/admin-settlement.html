@@ -24,6 +24,9 @@
     <a href="./admin-products.html" class="topbar-link">商品管理</a>
     <a href="./admin-tracking.html" class="topbar-link">貨態管理</a>
     <a href="./admin-settlement.html" class="topbar-link active">帳務管理</a>
+    <a href="./admin-expenses.html" class="topbar-link">內帳支出</a>
+    <a href="./admin-wallet.html" class="topbar-link">儲值金管理</a>
+    <a href="./admin-711-income.html" class="topbar-link">7-11入帳</a>
   </div>
   
 </div>
@@ -42,6 +45,9 @@
 
     <label>購買來源</label>
 <input type="text" id="purchase_source" placeholder="例如：賴商店 / 官網 / 線下">
+
+<label>官方訂單編號</label>
+<input type="text" id="official_order_no" placeholder="例如：官網訂單編號 / 平台訂單編號">
 
 <label>貨態編號</label>
 <input type="text" id="cargo_no" placeholder="例如：物流單號 / 集運單號">
@@ -181,7 +187,7 @@
 <div class="settlement-toolbar">
 
   <div class="settlement-toolbar-row">
-    <input type="text" id="batch_search" placeholder="搜尋批次名稱 / 貨態編號">
+    <input type="text" id="batch_search" placeholder="搜尋批次名稱 / 官方訂單編號 / 貨態編號">
 
     <select id="stock_status_search">
       <option value="">全部入庫狀態</option>

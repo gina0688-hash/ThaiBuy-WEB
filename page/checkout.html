@@ -2,6 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>結帳</title>
 <link rel="stylesheet" href="../css/style.css">
 <link rel="stylesheet" href="../css/checkout.css">
@@ -14,12 +15,12 @@
     <img src="../LOGO.png" class="brand-logo" alt="THAI BUY logo">
     <div>
       <div class="brand-title">THAI BUY</div>
-      <div class="brand-subtitle">泰國代購</div>
+      <div class="brand-subtitle">可愛又安心的泰國代購</div>
     </div>
   </div>
 
   <div class="topbar-nav">
-    <a href="./index.html" class="topbar-link active">商品頁</a>
+    <a href="./index.html" class="topbar-link">商品頁</a>
     <a href="./order-query.html" class="topbar-link">訂單查詢</a>
     <a href="./notice.html" class="topbar-link">購物須知</a>
     <a href="./tracking.html" class="topbar-link">貨態狀況</a>
@@ -29,59 +30,178 @@
   </div>
 </div>
 
-<div class="container">
+<div class="checkout-page">
 
-<h2>🧾 填寫訂單</h2>
-<label>本名</label>
-<input id="name" placeholder="本名">
-<label>電話</label>
-<input id="phone" placeholder="電話">
-<label>社群名字（如果有加入社群）</label>
-<input id="communityName" placeholder="社群名字（如果有加入社群）">
-<label>email（務必填寫正確以免查無訂單）</label>
-<input id="email" placeholder="Email">
-<label>匯款帳號末五碼</label>
-<input id="bankLast5" placeholder="匯款帳號末五碼">
-<label>預計匯款時間</label>
-<input type="datetime-local" id="expectedRemitTime">
- 
-<select id="contactMethod">
-  
-  <option value="">請選擇聯繫方式</option>
-  <option value="IG">IG</option>
-  <option value="THREADS">THREADS</option>
-  <option value="LINE">LINE</option>
-</select>
+  <div class="checkout-header">
+    <div class="checkout-header-text">
+      <div class="checkout-kicker">CHECKOUT</div>
+      <h1>填寫訂單</h1>
+      <p>請先填寫完整資料並送出訂單，送單成功後系統會顯示匯款資訊。</p>
+    </div>
+  </div>
 
-<input id="contactAccount" placeholder="聯繫帳號">
+  <div class="checkout-layout">
 
-<select id="shippingMethod" onchange="refreshCheckout()">
-  <option value="">請選擇運送方式</option>
-  <option value="交貨便">交貨便</option>
-  <option value="賣貨便">賣貨便</option>
-</select>
+    <!-- 左側：表單 -->
+    <div class="checkout-main">
 
-<div id="shippingNotice" style="margin:12px 0; padding:12px; border-radius:10px; background:#f8fafc; color:#334155; font-size:14px; line-height:1.7;"></div>
+      <section class="checkout-card">
+        <div class="card-title-row">
+          <h2>聯絡資料</h2>
+          <span class="card-badge">必填</span>
+        </div>
 
-<div id="c2cFields" style="display:none; margin:12px 0; padding:12px; border-radius:10px; background:#f8fafc;">
-  <h4 style="margin-top:0;">交貨便收件資訊</h4>
+        <div class="form-grid two-col">
+          <div class="field full">
+            <label for="name">本名</label>
+            <input id="name" placeholder="請填寫真實姓名">
+          </div>
 
-  <input id="receiverName" placeholder="收件本名">
-  <input id="receiverPhone" placeholder="收件電話">
-  <input id="storeName" placeholder="7-11 門市">
-  <input id="storeCode" placeholder="7-11 店號">
+          <div class="field">
+            <label for="phone">電話</label>
+            <input id="phone" placeholder="請填寫電話">
+          </div>
+
+          <div class="field">
+            <label for="email">Email</label>
+            <input id="email" placeholder="請填寫正確 Email">
+            <small>務必填寫正確，以免後續查無訂單</small>
+          </div>
+
+          <div class="field full">
+            <label for="communityName">社群名字（若有加入社群）</label>
+            <input id="communityName" placeholder="例如：IG 名稱 / 社群暱稱">
+          </div>
+        </div>
+      </section>
+
+      <section class="checkout-card">
+        <div class="card-title-row">
+          <h2>付款資料</h2>
+          <span class="card-badge soft">送單後匯款</span>
+        </div>
+
+        <div class="form-grid two-col">
+          <div class="field">
+            <label for="bankLast5">匯款帳號末五碼</label>
+            <input id="bankLast5" placeholder="請填寫末五碼">
+          </div>
+
+          <div class="field">
+            <label for="expectedRemitTime">預計匯款時間</label>
+            <input type="datetime-local" id="expectedRemitTime">
+          </div>
+        </div>
+
+        <div class="hint-box">
+          送出訂單後，系統會顯示匯款帳號與付款提醒，請再依成功頁資訊完成匯款。
+        </div>
+      </section>
+
+      <section class="checkout-card">
+        <div class="card-title-row">
+          <h2>聯繫方式</h2>
+        </div>
+
+        <div class="form-grid two-col">
+          <div class="field">
+            <label for="contactMethod">聯繫平台</label>
+            <select id="contactMethod">
+              <option value="">請選擇聯繫方式</option>
+              <option value="IG">IG</option>
+              <option value="THREADS">THREADS</option>
+              <option value="LINE">LINE</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="contactAccount">聯繫帳號</label>
+            <input id="contactAccount" placeholder="請填寫你的帳號">
+          </div>
+        </div>
+      </section>
+
+      <section class="checkout-card">
+        <div class="card-title-row">
+          <h2>運送方式</h2>
+        </div>
+
+        <div class="form-grid two-col">
+          <div class="field full">
+            <label for="shippingMethod">配送方式</label>
+            <select id="shippingMethod" onchange="refreshCheckout()">
+              <option value="">請選擇運送方式</option>
+              <option value="交貨便">交貨便</option>
+              <option value="賣貨便">賣貨便</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="shippingNotice" class="info-box"></div>
+
+        <div id="c2cFields" class="sub-card" style="display:none;">
+          <h3>交貨便收件資訊</h3>
+
+          <div class="form-grid two-col">
+            <div class="field">
+              <label for="receiverName">收件本名</label>
+              <input id="receiverName" placeholder="請填寫收件本名">
+            </div>
+
+            <div class="field">
+              <label for="receiverPhone">收件電話</label>
+              <input id="receiverPhone" placeholder="請填寫收件電話">
+            </div>
+
+            <div class="field">
+              <label for="storeName">7-11 門市</label>
+              <input id="storeName" placeholder="請填寫門市名稱">
+            </div>
+
+            <div class="field">
+              <label for="storeCode">7-11 店號</label>
+              <input id="storeCode" placeholder="請填寫店號">
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- 右側：訂單摘要 -->
+    <aside class="checkout-side">
+      <section class="checkout-card summary-card">
+        <div class="card-title-row">
+          <h2>訂單摘要</h2>
+          <span class="card-badge accent">確認後送出</span>
+        </div>
+
+        <div id="orderSummary" class="summary-list"></div>
+
+        <div id="checkoutNotice" class="warning-box"></div>
+
+        <div class="total-box">
+  <div class="total-title">付款資訊</div>
+  <div id="total"></div>
 </div>
 
-<h3>訂單內容</h3>
-<div id="orderSummary"></div>
+<div class="agreement-box">
+  <label class="agreement-label">
+    <input type="checkbox" id="agreeNotice">
+    <span>我已閱讀並同意所有 ThaiBuy 代購下單規則、購物須知與運送相關說明</span>
+  </label>
+</div>
 
-<div id="checkoutNotice" style="margin:12px 0; padding:12px; border-radius:10px; background:#fff7ed; color:#9a3412; font-size:14px; line-height:1.6;"></div>
+<button class="checkout-submit" onclick="submitOrder()">送出訂單</button>
+        <div class="submit-note">
+          送單成功後會顯示訂單編號與匯款資訊
+        </div>
+      </section>
+    </aside>
 
-<h3>總金額</h3>
-<div id="total"></div>
+  </div>
 
-<button onclick="submitOrder()">送出訂單</button>
-<footer class="site-footer">© ThaiBuy代購</footer>
+  <footer class="site-footer">© ThaiBuy代購</footer>
 </div>
 
 <script type="module" src="../js/checkout.js"></script>

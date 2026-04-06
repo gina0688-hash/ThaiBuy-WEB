@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="../css/style.css">
 </head>
 
-<body style="background:#f8f8f8;">
+<body style="margin:0;background:linear-gradient(180deg,#fffaf5 0%,#fff7ed 100%);">
 
   <div class="topbar">
     <div class="topbar-left">
@@ -19,32 +19,102 @@
     </div>
   </div>
 
-  <div style="max-width:720px;margin:60px auto;padding:20px;">
-    <div style="background:#fff;border-radius:18px;padding:32px 24px;box-shadow:0 8px 30px rgba(0,0,0,0.08);text-align:center;">
-      <div style="font-size:42px;margin-bottom:10px;">🎉</div>
-      <h1 style="margin:0 0 16px 0;font-size:28px;">訂單送出成功</h1>
+  <div style="max-width:760px;margin:50px auto;padding:20px;">
+    <div style="background:rgba(255,255,255,0.96);border:1px solid rgba(255,145,77,0.14);border-radius:24px;padding:36px 24px;box-shadow:0 14px 36px rgba(0,0,0,0.08);text-align:center;">
 
-      <p style="font-size:16px;color:#555;margin-bottom:10px;">
-        請記下你的訂單編號：
+      <div style="font-size:46px;margin-bottom:10px;">🎉</div>
+      <h1 style="margin:0 0 12px 0;font-size:30px;color:#1f2937;">訂單送出成功</h1>
+
+      <p style="font-size:15px;color:#6b7280;line-height:1.8;margin:0 0 22px 0;">
+        請先記下你的訂單編號，並依下方資訊完成匯款。
       </p>
 
-      <div id="orderNumberBox"
-           style="margin:20px auto;padding:18px 20px;border-radius:14px;background:#fff7f3;border:2px dashed #ff7a3d;font-size:30px;font-weight:bold;color:#ff6b35;letter-spacing:1px;">
+      <!-- 訂單編號 -->
+      <div style="background:#fff7ed;border:1px solid #fdba74;border-radius:20px;padding:22px 18px;margin-bottom:20px;">
+        <div style="font-size:13px;color:#9a3412;font-weight:700;letter-spacing:1px;margin-bottom:10px;">
+          ORDER NUMBER
+        </div>
+
+        <div id="orderNumberBox"
+             style="margin:0 auto;padding:16px 18px;border-radius:14px;background:#ffffff;border:2px dashed #fb923c;font-size:30px;font-weight:800;color:#ea580c;letter-spacing:1px;">
+        </div>
+
+        <div style="margin-top:14px;">
+          <button onclick="copyOrderNumber()"
+                  style="padding:12px 20px;border:none;border-radius:12px;background:linear-gradient(135deg,#fb923c,#f97316);color:#fff;font-size:15px;font-weight:700;cursor:pointer;">
+            複製訂單編號
+          </button>
+        </div>
       </div>
 
-      <p style="font-size:14px;color:#666;line-height:1.8;margin-top:18px;">
-        後續查詢訂單、聯繫客服時，可提供此編號。
-      </p>
+      <!-- 應匯款金額 -->
+      <div style="background:linear-gradient(135deg,#fff7ed,#ffedd5);border:1px solid #fdba74;border-radius:20px;padding:24px 20px;margin-bottom:20px;">
+        <div style="font-size:14px;color:#9a3412;font-weight:700;letter-spacing:1px;margin-bottom:8px;">
+          AMOUNT TO PAY
+        </div>
+
+        <div style="font-size:15px;color:#7c2d12;margin-bottom:10px;">
+          應匯款金額
+        </div>
+
+        <div id="amountBox"
+             style="font-size:38px;font-weight:900;color:#ea580c;line-height:1.2;">
+          TWD $0
+        </div>
+      </div>
+
+      <!-- 銀行資訊 -->
+      <div style="background:#fffaf5;border:1px solid #fed7aa;border-radius:20px;padding:24px 20px;margin-bottom:20px;text-align:left;">
+        <div style="font-size:18px;font-weight:800;color:#9a3412;margin-bottom:16px;">
+          匯款資訊
+        </div>
+
+        <div style="display:grid;gap:12px;">
+          <div style="background:#fff;border:1px solid #f3e8dc;border-radius:14px;padding:14px 16px;">
+            <div style="font-size:13px;color:#9ca3af;margin-bottom:4px;">銀行代碼</div>
+            <div style="font-size:20px;font-weight:800;color:#1f2937;">822</div>
+          </div>
+
+          <div style="background:#fff;border:1px solid #f3e8dc;border-radius:14px;padding:14px 16px;">
+            <div style="font-size:13px;color:#9ca3af;margin-bottom:4px;">銀行帳號</div>
+            <div id="bankAccountBox" style="font-size:24px;font-weight:800;color:#1f2937;letter-spacing:1px;word-break:break-all;">
+              0000012540093141
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
+          <button onclick="copyBankAccount()"
+                  style="padding:12px 18px;border:none;border-radius:12px;background:#fff7ed;color:#c2410c;font-size:14px;font-weight:700;cursor:pointer;border:1px solid #fdba74;">
+            複製銀行帳號
+          </button>
+        </div>
+      </div>
+
+      <!-- 提醒 -->
+      <div style="background:#fff7ed;border:1px solid #fdba74;border-radius:18px;padding:18px 18px;text-align:left;">
+        <div style="font-size:17px;font-weight:800;color:#9a3412;margin-bottom:10px;">
+          匯款提醒
+        </div>
+
+        <div style="font-size:14px;color:#7c2d12;line-height:1.9;">
+          1. 請依本頁顯示之應匯款金額完成匯款。<br>
+          2. 匯款後請保留轉帳明細。<br>
+          3. 匯款時請確認金額與帳號是否正確。<br>
+          4. 後續查詢訂單或聯繫客服時，請提供訂單編號。<br>
+          5. 若你填寫了匯款帳號末五碼，我們會依訂單資料協助對帳。
+        </div>
+      </div>
 
       <div style="margin-top:28px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
-        <button onclick="copyOrderNumber()"
-                style="padding:12px 20px;border:none;border-radius:10px;background:#ff6b35;color:#fff;font-size:15px;cursor:pointer;">
-          複製訂單編號
-        </button>
-
         <a href="./index.html"
-           style="display:inline-block;padding:12px 20px;border-radius:10px;background:#eee;color:#333;text-decoration:none;font-size:15px;">
+           style="display:inline-block;padding:12px 20px;border-radius:12px;background:#eee;color:#333;text-decoration:none;font-size:15px;font-weight:700;">
           回首頁
+        </a>
+
+        <a href="./order-query.html"
+           style="display:inline-block;padding:12px 20px;border-radius:12px;background:#fff7ed;color:#c2410c;text-decoration:none;font-size:15px;font-weight:700;border:1px solid #fdba74;">
+          前往訂單查詢
         </a>
       </div>
     </div>
@@ -53,12 +123,20 @@
   <script>
     const params = new URLSearchParams(window.location.search)
     const orderNumber = params.get("orderNumber") || "查無訂單編號"
+    const amount = Number(params.get("amount") || 0)
 
     document.getElementById("orderNumberBox").textContent = orderNumber
+    document.getElementById("amountBox").textContent = `TWD $${amount.toLocaleString()}`
 
     function copyOrderNumber(){
       navigator.clipboard.writeText(orderNumber)
       alert("訂單編號已複製")
+    }
+
+    function copyBankAccount(){
+      const bankAccount = document.getElementById("bankAccountBox").textContent.trim()
+      navigator.clipboard.writeText(bankAccount)
+      alert("銀行帳號已複製")
     }
   </script>
 

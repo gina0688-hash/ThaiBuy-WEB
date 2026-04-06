@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>7-11入帳管理</title>
+
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../css/admin-711-income.css">
+</head>
+
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <img src="../LOGO.png" class="brand-logo" alt="THAI BUY logo">
+    <div>
+      <div class="brand-title">THAI BUY</div>
+      <div class="brand-subtitle">可愛又安心的泰國代購</div>
+    </div>
+  </div>
+
+  <div class="topbar-nav">
+    <a href="./admin-orders.html" class="topbar-link">訂單管理</a>
+    <a href="./admin-products.html" class="topbar-link">商品管理</a>
+    <a href="./admin-tracking.html" class="topbar-link">貨態管理</a>
+    <a href="./admin-settlement.html" class="topbar-link">帳務管理</a>
+    <a href="./admin-expenses.html" class="topbar-link">內帳支出</a>
+    <a href="./admin-wallet.html" class="topbar-link">儲值金管理</a>
+    <a href="./admin-711-income.html" class="topbar-link active">7-11入帳</a>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="card">
+    <h2>新增 7-11 入帳紀錄</h2>
+
+    <label>入帳日期</label>
+    <input type="date" id="income_date">
+
+    <label>平台訂單編號</label>
+    <input type="text" id="platform_order_no" placeholder="例如：賣貨便訂單編號">
+
+    <label>客戶姓名</label>
+    <input type="text" id="customer_name" placeholder="例如：7-11">
+
+<label>入帳戶頭</label>
+<select id="received_account">
+  <option value="">請選擇入帳戶頭</option>
+  <option value="青">青</option>
+  <option value="媛媛">媛媛</option>
+</select>
+
+    <label>入帳金額</label>
+    <input type="number" id="amount" step="0.01" value="0">
+
+    <label>是否已加回帳務</label>
+    <select id="is_counted">
+      <option value="false">否</option>
+      <option value="true">是</option>
+    </select>
+
+    <label>備註</label>
+    <textarea id="note" placeholder="例如：二補 / 賣貨便入帳 / 7-11收款"></textarea>
+
+    <div class="form-actions">
+      <button type="button" class="btn-primary" onclick="saveIncome()">新增紀錄</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>7-11 入帳查詢</h2>
+
+    <div class="income-toolbar">
+      <input type="text" id="income_search" placeholder="搜尋訂單編號 / 客戶姓名 / 備註">
+
+      <select id="counted_search">
+        <option value="">全部狀態</option>
+        <option value="true">已加回帳務</option>
+        <option value="false">未加回帳務</option>
+      </select>
+    </div>
+
+    <div class="income-toolbar income-toolbar-bottom">
+      <div class="date-range-group">
+        <div class="date-range-label">開始時間 - 結束時間</div>
+        <div class="date-range-inputs">
+          <input type="date" id="income_date_start">
+          <input type="date" id="income_date_end">
+        </div>
+      </div>
+    </div>
+
+    <div id="income_overview" class="income-overview"></div>
+    <div id="income_list"></div>
+  </div>
+
+</div>
+
+<footer class="site-footer">© ThaiBuy代購</footer>
+
+<script type="module" src="../js/admin-711-income.js"></script>
+</body>
+</html>

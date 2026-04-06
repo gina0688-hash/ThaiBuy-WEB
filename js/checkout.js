@@ -198,6 +198,7 @@ const contactMethod = document.getElementById("contactMethod").value
   const receiverPhone = document.getElementById("receiverPhone")?.value.trim() || ""
   const storeName = document.getElementById("storeName")?.value.trim() || ""
   const storeCode = document.getElementById("storeCode")?.value.trim() || ""
+const agreeNotice = document.getElementById("agreeNotice")?.checked
 
   if(!name){
     alert("請填本名")
@@ -238,7 +239,10 @@ if(!expectedRemitTime){
     alert("請選擇運送方式")
     return
   }
-
+if(!agreeNotice){
+  alert("請先勾選同意 ThaiBuy 代購下單規則")
+  return
+}
   if(shippingMethod === "交貨便"){
     if(!receiverName){
       alert("請填寫交貨便收件本名")
@@ -387,7 +391,7 @@ const orderNumber = orderData.order_number
 }
 
 saveCart([])
-window.location.href = `./order-success.html?orderNumber=${encodeURIComponent(orderNumber)}`
+window.location.href = `./order-success.html?orderNumber=${encodeURIComponent(orderNumber)}&amount=${encodeURIComponent(total)}`
 }
 
 window.refreshCheckout = function(){

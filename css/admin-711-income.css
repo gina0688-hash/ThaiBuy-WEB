@@ -1,0 +1,155 @@
+.container{
+  max-width: 1100px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
+
+.card{
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+}
+
+.card h2{
+  margin-top: 0;
+  margin-bottom: 20px;
+}
+
+.card label{
+  display: block;
+  margin: 14px 0 8px;
+  font-weight: 600;
+  color: #333;
+}
+
+.card input,
+.card select,
+.card textarea{
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.card textarea{
+  min-height: 90px;
+  resize: vertical;
+}
+
+.form-actions{
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.income-toolbar{
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.income-toolbar-bottom{
+  align-items: flex-end;
+}
+
+.date-range-group{
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.date-range-label{
+  font-size: 12px;
+  color: #888;
+}
+
+.date-range-inputs{
+  display: flex;
+  gap: 10px;
+}
+
+.income-overview{
+  margin-bottom: 20px;
+}
+
+.overview-card{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.overview-item{
+  min-width: 180px;
+  background: #f8f8f8;
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+
+.overview-label{
+  font-size: 13px;
+  color: #777;
+  margin-bottom: 6px;
+}
+
+.overview-value{
+  font-size: 20px;
+  font-weight: bold;
+  color: #111;
+}
+
+.income-table{
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.income-table th,
+.income-table td{
+  padding: 12px 10px;
+  border-bottom: 1px solid #eee;
+  text-align: left;
+  vertical-align: top;
+}
+
+.income-table th{
+  background: #fafafa;
+}
+
+.text-danger{
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.text-profit{
+  color: #16a34a;
+  font-weight: 600;
+}
+
+.btn-sm{
+  padding: 8px 12px;
+  font-size: 13px;
+}
+
+@media (max-width: 768px){
+  .income-toolbar{
+    flex-direction: column;
+  }
+
+  .date-range-inputs{
+    flex-direction: column;
+  }
+
+  .income-table{
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .overview-item{
+    width: 100%;
+  }
+}

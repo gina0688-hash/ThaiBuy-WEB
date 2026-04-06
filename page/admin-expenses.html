@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>內帳支出管理</title>
+
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../css/admin-expenses.css">
+</head>
+
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <img src="../LOGO.png" class="brand-logo" alt="THAI BUY logo">
+    <div>
+      <div class="brand-title">THAI BUY</div>
+      <div class="brand-subtitle">可愛又安心的泰國代購</div>
+    </div>
+  </div>
+
+  <div class="topbar-nav">
+    <a href="./admin-orders.html" class="topbar-link">訂單管理</a>
+    <a href="./admin-products.html" class="topbar-link">商品管理</a>
+    <a href="./admin-tracking.html" class="topbar-link">貨態管理</a>
+    <a href="./admin-settlement.html" class="topbar-link">帳務管理</a>
+    <a href="./admin-expenses.html" class="topbar-link active">內帳支出</a>
+    <a href="./admin-wallet.html" class="topbar-link">儲值金管理</a>
+    <a href="./admin-711-income.html" class="topbar-link">7-11入帳</a>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- 新增支出 -->
+  <div class="card">
+    <h2>新增內帳支出</h2>
+
+    <label>支出日期</label>
+    <input type="date" id="expense_date">
+
+    <label>支出類型</label>
+    <select id="expense_type">
+      <option value="">請選擇類型</option>
+      <option value="包材">包材</option>
+      <option value="贈品">贈品</option>
+      <option value="停車費">停車費</option>
+      <option value="油資">油資</option>
+      <option value="運費">運費</option>
+      <option value="雜支">雜支</option>
+      <option value="其他">紅包</option>
+      <option value="其他">其他</option>
+    </select>
+
+    <label>金額</label>
+    <input type="number" id="amount" step="0.01" value="0">
+
+    <label>付款方式</label>
+    <select id="payment_method">
+      <option value="">請選擇付款方式</option>
+      <option value="現金">現金</option>
+      <option value="刷卡">刷卡</option>
+      <option value="轉帳">轉帳</option>
+      <option value="其他">其他</option>
+    </select>
+
+    <label>備註</label>
+    <textarea id="note" placeholder="例如：購買泡泡紙 / 停車費 / 贈品小卡"></textarea>
+
+    <div class="form-actions">
+      <button type="button" class="btn-primary" onclick="saveExpense()">新增支出</button>
+    </div>
+  </div>
+
+  <!-- 搜尋 -->
+  <div class="card">
+    <h2>支出查詢</h2>
+
+    <div class="expense-toolbar">
+      <input type="text" id="search_keyword" placeholder="搜尋備註 / 類型">
+
+      <select id="search_type">
+        <option value="">全部類型</option>
+        <option value="包材">包材</option>
+        <option value="贈品">贈品</option>
+        <option value="停車費">停車費</option>
+        <option value="油資">油資</option>
+        <option value="運費">運費</option>
+        <option value="雜支">雜支</option>
+        <option value="其他">其他</option>
+      </select>
+    </div>
+
+    <div class="expense-toolbar expense-toolbar-bottom">
+      <div class="date-range-group">
+        <div class="date-range-label">開始時間 - 結束時間</div>
+        <div class="date-range-inputs">
+          <input type="date" id="search_start_date">
+          <input type="date" id="search_end_date">
+        </div>
+      </div>
+    </div>
+
+    <div id="expense_overview" class="expense-overview"></div>
+    <div id="expense_list"></div>
+  </div>
+
+</div>
+
+<footer class="site-footer">© ThaiBuy代購</footer>
+
+<script type="module" src="../js/admin-expenses.js"></script>
+</body>
+</html>
