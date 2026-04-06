@@ -190,3 +190,67 @@
 .product-badge.instock{
   background:#10b981;
 }
+
+@media (max-width: 768px){
+  .shop-page{
+    margin:20px auto;
+    padding:0 14px;
+  }
+
+  .product-grid{
+    grid-template-columns:repeat(2, minmax(0, 1fr));
+    gap:14px;
+  }
+
+  .product-card{
+    border-radius:10px;
+  }
+
+  .product-img{
+    height:160px;
+  }
+
+  .product-info{
+    padding:8px;
+  }
+
+  .product-name{
+    font-size:13px;
+    height:auto;
+    min-height:36px;
+    line-height:1.4;
+  }
+
+  .product-price{
+    font-size:14px;
+    margin-top:4px;
+  }
+
+  .product-badge,
+  .soldout-badge{
+    font-size:11px;
+    padding:5px 8px;
+  }
+
+  .add-btn{
+    right:8px;
+    bottom:8px;
+    padding:5px 8px;
+    font-size:12px;
+  }
+
+  .sidebar-card{
+    padding:14px;
+    border-radius:12px;
+  }
+
+  .sidebar-card h3{
+    font-size:15px;
+    margin-bottom:10px;
+  }
+
+  .sidebar-link{
+    font-size:13px;
+    padding:9px 12px;
+  }
+}
