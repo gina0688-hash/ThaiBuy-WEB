@@ -139,12 +139,14 @@ function render(){
     productChargeTotal = orderDepositAmount
   }
 
-  const shippingFee = shippingMethod === "交貨便"
-    ? calcC2CShippingFee(originalItemsTotal)
-    : 0
+const shippingFee = shippingMethod === "交貨便"
+  ? calcC2CShippingFee(originalItemsTotal)
+  : 0
 
-    const orderTotal = originalItemsTotal + shippingFee
-  const finalTotal = productChargeTotal 
+const orderTotal = originalItemsTotal + shippingFee
+const finalTotal = hasLimitedDeposit
+  ? productChargeTotal
+  : productChargeTotal + shippingFee
 
 document.getElementById("total").innerHTML = hasLimitedDeposit
   ? `
@@ -284,11 +286,13 @@ if(!agreeNotice){
     return sum + Number(i.original_price || 0) * Number(i.quantity || 1)
   }, 0)
 
-  const shippingFee = shippingMethod === "交貨便"
-    ? calcC2CShippingFee(originalItemsTotal)
-    : 0
+const shippingFee = shippingMethod === "交貨便"
+  ? calcC2CShippingFee(originalItemsTotal)
+  : 0
 
-  const total = productChargeTotal + shippingFee
+const total = hasLimitedDeposit
+  ? productChargeTotal
+  : productChargeTotal + shippingFee
   
 
 const orderId = crypto.randomUUID()
