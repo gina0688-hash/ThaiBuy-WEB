@@ -161,5 +161,5 @@ window.addDetailToCart = function(){
 renderCart()
 
 window.goBackHome = function(){
-  window.location.href = "./products.html"
+  window.location.href = "./index.html"
 }

@@ -384,7 +384,7 @@ const { error: orderError } = await supabase
 
 saveCart([])
 alert("訂單成功 🎉")
-window.location.href = "./products.html"
+window.location.href = "./index.html"
 }
 
 window.refreshCheckout = function(){
