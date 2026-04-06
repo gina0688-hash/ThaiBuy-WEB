@@ -151,10 +151,10 @@ button{
 .brand-logo{
   width:72px;
   height:72px;
-  object-fit:contain;
+  object-fit:cover;
   border-radius:18px;
   background:white;
-  padding:2px;
+  padding:0;
   box-shadow:0 4px 12px rgba(74,13,18,0.08);
 }
 
@@ -204,9 +204,9 @@ button{
     padding:14px 16px;
   }
 
-  .brand-logo{
-    width:56px;
-    height:56px;
+   .brand-logo{
+    width:64px;
+    height:64px;
   }
 
   .brand-title{
