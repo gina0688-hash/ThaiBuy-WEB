@@ -1,11 +1,15 @@
 
 import { supabase } from "./supabase.js"
-import { loadAuth } from "./auth.js"
+import { loadAuth, bindLogout } from "./auth.js"
 
 const user = await loadAuth()
+if(!user) throw new Error("未登入")
 
-// ⭐ 顯示使用者
+bindLogout()
+
+// ⭐ 這行你要留就留，不留也可以
 showUser(user)
+
 loadOrders()
 
 async function loadOrders(){
@@ -866,10 +870,8 @@ function getUserColor(name){
 }
 
 async function showUser(user){
-
   if(!user) return
 
-  // 取得 profiles 名字
   const { data } = await supabase
     .from("profiles")
     .select("name")
@@ -877,15 +879,12 @@ async function showUser(user){
     .single()
 
   const name = data?.name || user.email
+  const color = getUserColor(name)
 
-  const el = document.getElementById("userBox")
+  const el = document.getElementById("currentUser")
   if(el){
-    const color = getUserColor(name)
-
-el.innerHTML = `
-  <span style="color:${color};font-weight:bold;">
-    👤 ${name}
-  </span>
-`
+    el.textContent = `👤 ${name}`
+    el.style.color = color
+    el.style.fontWeight = "bold"
   }
 }
