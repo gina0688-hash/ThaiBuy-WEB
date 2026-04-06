@@ -154,23 +154,100 @@ function renderOrders(orders){
           </div>
         </div>
 
-        ${
-          order.need_second_payment && money.secondPaymentAmount > 0
-          ? `
-            <div style="
-              margin-bottom:14px;
-              background:#fff7ed;
-              border:1px solid #fed7aa;
-              border-radius:16px;
-              padding:14px;
-              color:#9a3412;
-              line-height:1.8;
-            ">
-              <b>補款提醒：</b> 尚有補款金額 <b>$${money.secondPaymentAmount}</b>
+       ${
+  order.need_second_payment && Number(order.second_payment_amount || money.secondPaymentAmount || 0) > 0
+  ? `
+    <div style="
+      margin-bottom:14px;
+      background:#fff7ed;
+      border:1px solid #fed7aa;
+      border-radius:16px;
+      padding:14px;
+      color:#9a3412;
+      line-height:1.8;
+    ">
+      <b>補款提醒：</b> 尚有補款金額
+      <b>$${Number(order.second_payment_amount || money.secondPaymentAmount || 0)}</b><br>
+      補款狀態：<b>${formatSecondPaymentStatus(order.second_payment_status)}</b>
+    </div>
+
+    ${
+      order.second_payment_status === "paid"
+        ? `
+          <div style="
+            margin-bottom:14px;
+            background:#ecfdf5;
+            border:1px solid #bbf7d0;
+            border-radius:16px;
+            padding:14px;
+            color:#166534;
+            line-height:1.8;
+          ">
+            <b>補款完成</b><br>
+            我們已確認收到你的補款，謝謝你。
+          </div>
+        `
+        : order.second_payment_status === "submitted"
+        ? `
+          <div style="
+            margin-bottom:14px;
+            background:#eff6ff;
+            border:1px solid #bfdbfe;
+            border-radius:16px;
+            padding:14px;
+            color:#1d4ed8;
+            line-height:1.8;
+          ">
+            <b>已送出補款資訊</b><br>
+            目前正在等待我們確認入帳，請留意後續通知。
+          </div>
+        `
+        : `
+          <div style="
+            margin-bottom:14px;
+            background:#fff;
+            border:1px solid #f3e5da;
+            border-radius:18px;
+            padding:16px;
+          ">
+            <div style="font-weight:800;color:#4f433c;margin-bottom:10px;">
+              補款資料填寫
             </div>
-          `
-          : ""
-        }
+
+            <div style="display:grid;gap:10px;">
+              <input
+                id="secondLast5-${order.id}"
+                type="text"
+                placeholder="請輸入補款帳號末五碼"
+                style="width:100%;box-sizing:border-box;border:1px solid #f0d9c7;background:#fffaf6;border-radius:14px;padding:12px 14px;font-size:14px;"
+              >
+
+              <input
+  id="secondTime-${order.id}"
+  type="datetime-local"
+  style="width:100%;box-sizing:border-box;border:1px solid #f0d9c7;background:#fffaf6;border-radius:14px;padding:12px 14px;font-size:14px;"
+>
+
+              <textarea
+                id="secondNote-${order.id}"
+                placeholder="備註（選填）"
+                style="width:100%;box-sizing:border-box;border:1px solid #f0d9c7;background:#fffaf6;border-radius:14px;padding:12px 14px;font-size:14px;min-height:90px;"
+              ></textarea>
+
+              <button
+                type="button"
+                onclick="submitSecondPayment('${order.id}')"
+                style="border:none;border-radius:999px;padding:12px 18px;background:linear-gradient(135deg,#ffb36b,#ff8b3d);color:#fff;font-size:14px;font-weight:800;cursor:pointer;"
+              >
+                我已完成補款
+              </button>
+            </div>
+          </div>
+        `
+    }
+  `
+  : ""
+}
 
         ${
           money.refundAmount > 0
@@ -301,31 +378,31 @@ function calcOrderMoney(order, items){
     ? calcC2CShippingFee(originalItemsTotal)
     : 0
 
-  const hasDeposit = !!order.need_second_payment
-
-  let firstCharge = 0
-
-  if(activeItems.length === 0){
-    firstCharge = hasDeposit ? 500 : 0
-  }else if(hasDeposit){
-    firstCharge = 500
-  }else{
-    firstCharge = originalItemsTotal
-  }
+  const isDepositOrder = !!order.is_deposit_order
+  const needSecondPayment = !!order.need_second_payment
 
   const finalFullAmount = originalItemsTotal + shippingFee
 
-  const secondPaymentAmount = hasDeposit
-    ? Math.max(finalFullAmount - firstCharge, 0)
-    : 0
+  let firstCharge = 0
+  let secondPaymentAmount = 0
+  let refundAmount = 0
+  let totalAmount = 0
 
-  const refundAmount = hasDeposit
-    ? Math.max(firstCharge - finalFullAmount, 0)
-    : 0
-
-  const totalAmount = hasDeposit
-    ? firstCharge
-    : finalFullAmount
+  if(isDepositOrder){
+    firstCharge = Number(order.total_amount || 500)
+    secondPaymentAmount = needSecondPayment
+      ? Number(order.second_payment_amount || Math.max(finalFullAmount - firstCharge, 0))
+      : 0
+    refundAmount = Math.max(firstCharge - finalFullAmount, 0)
+    totalAmount = firstCharge
+  }else{
+    firstCharge = Number(order.total_amount || finalFullAmount)
+    secondPaymentAmount = needSecondPayment
+      ? Number(order.second_payment_amount || 0)
+      : 0
+    refundAmount = Number(order.refund_amount || 0)
+    totalAmount = firstCharge
+  }
 
   return {
     activeItems,
@@ -426,4 +503,49 @@ function escapeHtml(str){
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#39;")
+}
+
+function formatSecondPaymentStatus(status){
+  return {
+    unpaid: "尚未補款",
+    submitted: "已送出，等待確認",
+    paid: "補款完成"
+  }[status] || "尚未補款"
+}
+
+window.submitSecondPayment = async function(orderId){
+  const last5 = document.getElementById(`secondLast5-${orderId}`)?.value.trim() || ""
+  const remitRaw = document.getElementById(`secondTime-${orderId}`)?.value || ""
+const remitTime = remitRaw ? remitRaw.replace("T", " ") : ""
+  const note = document.getElementById(`secondNote-${orderId}`)?.value.trim() || ""
+
+  if(!last5){
+    alert("請填寫補款帳號末五碼")
+    return
+  }
+
+ if(!remitTime){
+  alert("請選擇補款日期時間")
+  return
+}
+
+  const { error } = await supabase
+    .from("orders")
+    .update({
+      second_payment_last5: last5,
+      second_payment_time: remitTime,
+      second_payment_note: note,
+      second_payment_status: "submitted"
+    })
+    .eq("id", orderId)
+
+  if(error){
+    console.error(error)
+    alert("補款資料送出失敗，請稍後再試")
+    return
+  }
+
+  alert("已送出補款資訊，請等待對帳確認")
+
+  handleQuery()
 }

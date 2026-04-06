@@ -146,7 +146,7 @@ ${
 }
 
 ${
-  o.need_second_payment && money.secondPaymentAmount > 0
+  o.need_second_payment && Number(o.second_payment_amount || 0) > 0
   ? `<span style="color:#f59e0b;">💰需補款</span>`
   : ""
 }
@@ -252,6 +252,7 @@ ${
       }
     </div>
 
+
     <label style="display:flex;align-items:center;gap:6px;font-size:13px;">
       <input type="checkbox"
         ${o.need_second_payment ? "checked" : ""}
@@ -261,10 +262,32 @@ ${
 
   </div>
 
+
+<div style="margin-top:8px;font-size:14px;line-height:1.8;">
+  <div>補款狀態：<b>${formatSecondPaymentStatus(o.second_payment_status)}</b></div>
+  <div>補款末五碼：${o.second_payment_last5 || "-"}</div>
+  <div>補款時間：${o.second_payment_time || "-"}</div>
+  <div>補款備註：${o.second_payment_note || "-"}</div>
+</div>
+
+${
+  o.second_payment_status === "submitted"
+    ? `
+      <button
+        onclick="confirmSecondPayment('${o.id}')"
+        style="margin-top:10px;background:#16a34a;color:white;border:none;padding:8px 12px;border-radius:8px;"
+      >
+        ✅ 確認補款完成
+      </button>
+    `
+    : ""
+}
+
+
 <div style="margin-top:4px;">
   補款金額：
   <input type="number"
-    value="${money.secondPaymentAmount || 0}"
+    value="${o.second_payment_amount || 0}"
     style="width:120px;margin:0;"
     onchange="updateSecondAmount('${o.id}', this.value)">
 </div>
@@ -413,12 +436,12 @@ ${
 </div>
 
 ${
-  o.need_second_payment && money.secondPaymentAmount > 0
+  o.need_second_payment && Number(o.second_payment_amount || 0) > 0
     ? `
       <div style="margin-bottom:4px;">
         應補款：
         <span style="font-weight:bold;color:#dc2626;">
-          $${money.secondPaymentAmount}
+          $${Number(o.second_payment_amount || 0)}
         </span>
       </div>
     `
@@ -542,7 +565,11 @@ window.updateSecondAmount = async function(id, value){
 
   if(error){
     console.error(error)
+    alert("補款金額更新失敗")
+    return
   }
+
+  await loadOrders()
 }
 
 
@@ -618,32 +645,31 @@ function calcOrderMoney(order, items){
     ? calcC2CShippingFee(originalItemsTotal)
     : 0
 
-  const hasDeposit = !!order.need_second_payment
-
-  // ⭐ 限量預購目前固定整單先收 500
-  let firstCharge = 0
-
-  if(activeItems.length === 0){
-    firstCharge = hasDeposit ? 500 : 0
-  }else if(hasDeposit){
-    firstCharge = 500
-  }else{
-    firstCharge = originalItemsTotal
-  }
+  const isDepositOrder = !!order.is_deposit_order
+  const needSecondPayment = !!order.need_second_payment
 
   const finalFullAmount = originalItemsTotal + shippingFee
 
-  const secondPaymentAmount = hasDeposit
-    ? Math.max(finalFullAmount - firstCharge, 0)
-    : 0
+  let firstCharge = 0
+  let secondPaymentAmount = 0
+  let refundAmount = 0
+  let totalAmount = 0
 
-  const refundAmount = hasDeposit
-    ? Math.max(firstCharge - finalFullAmount, 0)
-    : 0
-
-  const totalAmount = hasDeposit
-    ? firstCharge
-    : finalFullAmount
+  if(isDepositOrder){
+    firstCharge = activeItems.length === 0 ? 500 : 500
+    secondPaymentAmount = needSecondPayment
+      ? Number(order.second_payment_amount || Math.max(finalFullAmount - firstCharge, 0))
+      : 0
+    refundAmount = Math.max(firstCharge - finalFullAmount, 0)
+    totalAmount = firstCharge
+  }else{
+    firstCharge = Number(order.total_amount || finalFullAmount)
+    secondPaymentAmount = needSecondPayment
+      ? Number(order.second_payment_amount || 0)
+      : 0
+    refundAmount = Number(order.refund_amount || 0)
+    totalAmount = firstCharge
+  }
 
   return {
     activeItems,
@@ -661,7 +687,7 @@ async function recalcOrder(orderId){
 
   const { data: order, error: orderError } = await supabase
     .from("orders")
-    .select("id, shipping_method, need_second_payment")
+    .select("id, shipping_method, need_second_payment, is_deposit_order, total_amount, second_payment_amount, refund_amount")
     .eq("id", orderId)
     .single()
 
@@ -682,13 +708,17 @@ async function recalcOrder(orderId){
 
   const money = calcOrderMoney(order, items || [])
 
+  const updateData = {
+    refund_amount: money.refundAmount
+  }
+
+  if(order.is_deposit_order){
+    updateData.total_amount = money.totalAmount
+  }
+
   const { error: updateError } = await supabase
     .from("orders")
-    .update({
-  total_amount: money.totalAmount,
-  second_payment_amount: money.secondPaymentAmount,
-  refund_amount: money.refundAmount
-})
+    .update(updateData)
     .eq("id", orderId)
 
   if(updateError){
@@ -930,3 +960,48 @@ async function showUser(user){
 }
 
 window.loadOrders()
+
+function formatSecondPaymentStatus(status){
+  return {
+    unpaid: "尚未補款",
+    submitted: "已送出，等待確認",
+    paid: "補款完成"
+  }[status] || "尚未補款"
+}
+
+window.confirmSecondPayment = async function(orderId){
+
+  const { data: order, error: fetchError } = await supabase
+    .from("orders")
+    .select("total_amount, second_payment_amount")
+    .eq("id", orderId)
+    .single()
+
+  if(fetchError || !order){
+    console.error(fetchError)
+    alert("讀取訂單失敗")
+    return
+  }
+
+  const currentTotal = Number(order.total_amount || 0)
+  const secondAmount = Number(order.second_payment_amount || 0)
+
+  const { error } = await supabase
+    .from("orders")
+    .update({
+      total_amount: currentTotal + secondAmount,
+      need_second_payment: false,
+      second_payment_status: "paid",
+      second_payment_confirmed_at: new Date().toISOString()
+    })
+    .eq("id", orderId)
+
+  if(error){
+    console.error(error)
+    alert("確認補款失敗")
+    return
+  }
+
+  alert("已確認補款完成")
+  loadOrders()
+}
