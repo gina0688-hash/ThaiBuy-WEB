@@ -41,7 +41,8 @@ async function loadProduct(){
     .eq("product_id", id)
     .order("sort_order")
 
-  const safeVariants = variants || []
+  const safeVariants = (variants || []).filter(v => Number(v.stock || 0) > 0)
+const soldOutVariants = (variants || []).filter(v => Number(v.stock || 0) <= 0)
   const safeImages = images || []
 
   const container = document.getElementById("productDetail")
@@ -226,29 +227,46 @@ async function loadProduct(){
             選擇規格
           </div>
 
-          <select
-            id="variantSelect"
-            style="
-              width:100%;
-              height:44px;
-              border:1px solid #d8d0c8;
-              border-radius:10px;
-              padding:0 12px;
-              font-size:15px;
-              background:#fff;
-            "
+          ${
+  safeVariants.length > 0
+    ? `
+      <select
+        id="variantSelect"
+        style="
+          width:100%;
+          height:44px;
+          border:1px solid #d8d0c8;
+          border-radius:10px;
+          padding:0 12px;
+          font-size:15px;
+          background:#fff;
+        "
+      >
+        ${safeVariants.map(v=>`
+          <option
+            value="${v.price}"
+            data-stock="${v.stock ?? 0}"
+            data-variant-name="${v.name}"
+            data-variant-id="${v.id}"
           >
-            ${safeVariants.map(v=>`
-              <option
-                value="${v.price}"
-                data-stock="${v.stock ?? 0}"
-                data-variant-name="${v.name}"
-                data-variant-id="${v.id}"
-              >
-                ${v.name} - TWD $${v.price}（庫存：${v.stock ?? 0}）
-              </option>
-            `).join("")}
-          </select>
+            ${v.name} - TWD $${v.price}（庫存：${v.stock ?? 0}）
+          </option>
+        `).join("")}
+      </select>
+    `
+    : `
+      <div style="
+        padding:12px 14px;
+        border-radius:10px;
+        background:#fff3f3;
+        color:#c62828;
+        border:1px solid #f2c7c7;
+        font-size:14px;
+      ">
+        此商品目前已售完
+      </div>
+    `
+}
 
           <div id="stockInfo" style="
             margin-top:12px;
@@ -264,16 +282,35 @@ async function loadProduct(){
           "></div>
         </div>
 
-        <button
-          class="btn-primary"
-          onclick="addDetailToCart()"
-          style="
-            width:100%;
-            margin-bottom:18px;
-          "
-        >
-          加入購物車
-        </button>
+        ${
+  safeVariants.length > 0
+    ? `
+      <button
+        class="btn-primary"
+        onclick="addDetailToCart()"
+        style="
+          width:100%;
+          margin-bottom:18px;
+        "
+      >
+        加入購物車
+      </button>
+    `
+    : `
+      <button
+        class="btn-primary"
+        disabled
+        style="
+          width:100%;
+          margin-bottom:18px;
+          opacity:0.6;
+          cursor:not-allowed;
+        "
+      >
+        已售完
+      </button>
+    `
+}
 
       </div>
 
