@@ -26,10 +26,13 @@ async function init(){
   })
 
   document.getElementById("search_type")?.addEventListener("change", filterExpenseList)
+  document.getElementById("search_reimbursed")?.addEventListener("change", filterExpenseList)
   document.getElementById("search_start_date")?.addEventListener("change", filterExpenseList)
   document.getElementById("search_end_date")?.addEventListener("change", filterExpenseList)
 
   document.getElementById("expense_date").value = getTodayDate()
+  document.getElementById("is_reimbursed").value = "false"
+
   await loadExpenses()
 }
 
@@ -57,6 +60,7 @@ async function saveExpense(){
   const expense_type = document.getElementById("expense_type").value
   const amount = Number(document.getElementById("amount").value || 0)
   const payment_method = document.getElementById("payment_method").value
+  const is_reimbursed = document.getElementById("is_reimbursed").value === "true"
   const note = document.getElementById("note").value.trim()
 
   if(!expense_date || !expense_type || amount <= 0){
@@ -69,6 +73,7 @@ async function saveExpense(){
     expense_type,
     amount,
     payment_method,
+    is_reimbursed,
     note
   }
 
@@ -107,6 +112,7 @@ function clearExpenseForm(){
   document.getElementById("expense_type").value = ""
   document.getElementById("amount").value = 0
   document.getElementById("payment_method").value = ""
+  document.getElementById("is_reimbursed").value = "false"
   document.getElementById("note").value = ""
 
   const btn = document.getElementById("saveExpenseBtn")
@@ -139,6 +145,7 @@ async function editExpense(expenseId){
   document.getElementById("expense_type").value = data.expense_type || ""
   document.getElementById("amount").value = data.amount ?? 0
   document.getElementById("payment_method").value = data.payment_method || ""
+  document.getElementById("is_reimbursed").value = String(Boolean(data.is_reimbursed))
   document.getElementById("note").value = data.note || ""
 
   const btn = document.getElementById("saveExpenseBtn")
@@ -202,6 +209,10 @@ async function renderExpenseList(rows){
   }
 
   const totalAmount = rows.reduce((sum, row) => sum + Number(row.amount || 0), 0)
+  const reimbursedAmount = rows
+    .filter(row => row.is_reimbursed)
+    .reduce((sum, row) => sum + Number(row.amount || 0), 0)
+  const unreimbursedAmount = totalAmount - reimbursedAmount
 
   const typeTotals = {}
   for(const row of rows){
@@ -215,6 +226,16 @@ async function renderExpenseList(rows){
         <div class="overview-item">
           <div class="overview-label">支出總額</div>
           <div class="overview-value">NT$ ${totalAmount.toFixed(2)}</div>
+        </div>
+
+        <div class="overview-item">
+          <div class="overview-label">已補回</div>
+          <div class="overview-value">NT$ ${reimbursedAmount.toFixed(2)}</div>
+        </div>
+
+        <div class="overview-item">
+          <div class="overview-label">未補回</div>
+          <div class="overview-value">NT$ ${unreimbursedAmount.toFixed(2)}</div>
         </div>
 
         ${Object.entries(typeTotals).map(([type, amount]) => `
@@ -235,6 +256,7 @@ async function renderExpenseList(rows){
           <th>類型</th>
           <th>金額</th>
           <th>付款方式</th>
+          <th>是否補回</th>
           <th>備註</th>
           <th>操作</th>
         </tr>
@@ -246,6 +268,7 @@ async function renderExpenseList(rows){
             <td>${row.expense_type || "-"}</td>
             <td>${Number(row.amount || 0).toFixed(2)}</td>
             <td>${row.payment_method || "-"}</td>
+            <td>${row.is_reimbursed ? "已補回" : "未補回"}</td>
             <td>${row.note || "-"}</td>
             <td>
               <button type="button" class="btn-secondary btn-sm" onclick="editExpense('${row.id}')">編輯</button>
@@ -261,6 +284,7 @@ async function renderExpenseList(rows){
 async function filterExpenseList(){
   const keyword = document.getElementById("search_keyword")?.value.trim().toLowerCase() || ""
   const type = document.getElementById("search_type")?.value || ""
+  const reimbursed = document.getElementById("search_reimbursed")?.value || ""
   const startDate = document.getElementById("search_start_date")?.value || ""
   const endDate = document.getElementById("search_end_date")?.value || ""
 
@@ -268,6 +292,7 @@ async function filterExpenseList(){
     const expenseType = String(row.expense_type || "").toLowerCase()
     const note = String(row.note || "").toLowerCase()
     const expenseDate = String(row.expense_date || "")
+    const rowReimbursed = String(Boolean(row.is_reimbursed))
 
     const matchKeyword =
       !keyword ||
@@ -277,6 +302,10 @@ async function filterExpenseList(){
     const matchType =
       !type ||
       row.expense_type === type
+
+    const matchReimbursed =
+      !reimbursed ||
+      rowReimbursed === reimbursed
 
     const matchStartDate =
       !startDate ||
@@ -289,6 +318,7 @@ async function filterExpenseList(){
     return (
       matchKeyword &&
       matchType &&
+      matchReimbursed &&
       matchStartDate &&
       matchEndDate
     )

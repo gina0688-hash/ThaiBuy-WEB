@@ -49,24 +49,29 @@
       <option value="油資">油資</option>
       <option value="運費">運費</option>
       <option value="雜支">雜支</option>
-      <option value="其他">紅包</option>
+      <option value="紅包">紅包</option>
       <option value="其他">其他</option>
     </select>
 
     <label>金額</label>
     <input type="number" id="amount" step="0.01" value="0">
+<label>付款方式</label>
+<select id="payment_method">
+  <option value="">請選擇付款方式</option>
+  <option value="現金">現金</option>
+  <option value="刷卡">刷卡</option>
+  <option value="轉帳">轉帳</option>
+  <option value="其他">其他</option>
+</select>
 
-    <label>付款方式</label>
-    <select id="payment_method">
-      <option value="">請選擇付款方式</option>
-      <option value="現金">現金</option>
-      <option value="刷卡">刷卡</option>
-      <option value="轉帳">轉帳</option>
-      <option value="其他">其他</option>
-    </select>
+<label>是否補回</label>
+<select id="is_reimbursed">
+  <option value="false">未補回</option>
+  <option value="true">已補回</option>
+</select>
 
-    <label>備註</label>
-    <textarea id="note" placeholder="例如：購買泡泡紙 / 停車費 / 贈品小卡"></textarea>
+<label>備註</label>
+<textarea id="note" placeholder="例如：購買泡泡紙 / 停車費 / 贈品小卡"></textarea>
 
     <div class="form-actions">
       <button type="button" class="btn-primary" onclick="saveExpense()">新增支出</button>
@@ -77,21 +82,26 @@
   <div class="card">
     <h2>支出查詢</h2>
 
-    <div class="expense-toolbar">
-      <input type="text" id="search_keyword" placeholder="搜尋備註 / 類型">
+ <div class="expense-toolbar">
+  <input type="text" id="search_keyword" placeholder="搜尋備註 / 類型">
 
-      <select id="search_type">
-        <option value="">全部類型</option>
-        <option value="包材">包材</option>
-        <option value="贈品">贈品</option>
-        <option value="停車費">停車費</option>
-        <option value="油資">油資</option>
-        <option value="運費">運費</option>
-        <option value="雜支">雜支</option>
-        <option value="其他">其他</option>
-      </select>
-    </div>
+  <select id="search_type">
+    <option value="">全部類型</option>
+    <option value="包材">包材</option>
+    <option value="贈品">贈品</option>
+    <option value="停車費">停車費</option>
+    <option value="油資">油資</option>
+    <option value="運費">運費</option>
+    <option value="雜支">雜支</option>
+    <option value="其他">其他</option>
+  </select>
 
+  <select id="search_reimbursed">
+    <option value="">全部補回狀態</option>
+    <option value="false">未補回</option>
+    <option value="true">已補回</option>
+  </select>
+</div>
     <div class="expense-toolbar expense-toolbar-bottom">
       <div class="date-range-group">
         <div class="date-range-label">開始時間 - 結束時間</div>
