@@ -139,33 +139,33 @@ function render(){
     productChargeTotal = orderDepositAmount
   }
 
-const shippingFee = shippingMethod === "交貨便"
-  ? calcC2CShippingFee(originalItemsTotal)
-  : 0
+  const shippingFee = shippingMethod === "交貨便"
+    ? calcC2CShippingFee(originalItemsTotal)
+    : 0
 
-const orderTotal = originalItemsTotal + shippingFee
-const finalTotal = hasLimitedDeposit
-  ? productChargeTotal
-  : productChargeTotal + shippingFee
+  const orderTotal = originalItemsTotal + shippingFee
+  const finalTotal = hasLimitedDeposit
+    ? productChargeTotal
+    : productChargeTotal + shippingFee
 
-document.getElementById("total").innerHTML = hasLimitedDeposit
-  ? `
-    <div>商品金額：TWD $${originalItemsTotal}</div>
-    <div>運費：TWD $${shippingFee}</div>
-    <div>總金額：TWD $${orderTotal}</div>
-    <div>訂金金額：TWD $${productChargeTotal}</div>
-    <div style="font-size:28px;font-weight:bold;margin-top:8px;">
-      此次收款：TWD $${finalTotal}
-    </div>
-  `
-  : `
-    <div>商品金額：TWD $${originalItemsTotal}</div>
-    <div>運費：TWD $${shippingFee}</div>
-    <div>總金額：TWD $${orderTotal}</div>
-    <div style="font-size:28px;font-weight:bold;margin-top:8px;">
-      此次收款：TWD $${finalTotal}
-    </div>
-  `
+  document.getElementById("total").innerHTML = hasLimitedDeposit
+    ? `
+      <div>商品金額：TWD $${originalItemsTotal}</div>
+      <div>運費：TWD $${shippingFee}</div>
+      <div>總金額：TWD $${orderTotal}</div>
+      <div>訂金金額：TWD $${productChargeTotal}</div>
+      <div style="font-size:28px;font-weight:bold;margin-top:8px;">
+        此次收款：TWD $${finalTotal}
+      </div>
+    `
+    : `
+      <div>商品金額：TWD $${originalItemsTotal}</div>
+      <div>運費：TWD $${shippingFee}</div>
+      <div>總金額：TWD $${orderTotal}</div>
+      <div style="font-size:28px;font-weight:bold;margin-top:8px;">
+        此次收款：TWD $${finalTotal}
+      </div>
+    `
 
   window.updateShippingNotice()
   window.toggleC2CFields()
@@ -185,22 +185,21 @@ document.getElementById("total").innerHTML = hasLimitedDeposit
   }
 }
 
-// ⭐ 下單
 window.submitOrder = async function(){
   const name = document.getElementById("name").value.trim()
   const phone = document.getElementById("phone").value.trim()
   const communityName = document.getElementById("communityName").value.trim()
-const email = document.getElementById("email").value.trim()
-const bankLast5 = document.getElementById("bankLast5").value.trim()
-const expectedRemitTime = document.getElementById("expectedRemitTime").value.trim()
-const contactMethod = document.getElementById("contactMethod").value
+  const email = document.getElementById("email").value.trim()
+  const bankLast5 = document.getElementById("bankLast5").value.trim()
+  const expectedRemitTime = document.getElementById("expectedRemitTime").value.trim()
+  const contactMethod = document.getElementById("contactMethod").value
   const contactAccount = document.getElementById("contactAccount").value.trim()
   const shippingMethod = document.getElementById("shippingMethod").value
   const receiverName = document.getElementById("receiverName")?.value.trim() || ""
   const receiverPhone = document.getElementById("receiverPhone")?.value.trim() || ""
   const storeName = document.getElementById("storeName")?.value.trim() || ""
   const storeCode = document.getElementById("storeCode")?.value.trim() || ""
-const agreeNotice = document.getElementById("agreeNotice")?.checked
+  const agreeNotice = document.getElementById("agreeNotice")?.checked
 
   if(!name){
     alert("請填本名")
@@ -212,20 +211,20 @@ const agreeNotice = document.getElementById("agreeNotice")?.checked
     return
   }
 
-if(!email){
-  alert("請填Email")
-  return
-}
+  if(!email){
+    alert("請填Email")
+    return
+  }
 
-if(!bankLast5){
-  alert("請填匯款帳號末五碼")
-  return
-}
+  if(!bankLast5){
+    alert("請填匯款帳號末五碼")
+    return
+  }
 
-if(!expectedRemitTime){
-  alert("請填預計匯款時間")
-  return
-}
+  if(!expectedRemitTime){
+    alert("請填預計匯款時間")
+    return
+  }
 
   if(!contactMethod){
     alert("請選擇聯繫方式")
@@ -241,10 +240,12 @@ if(!expectedRemitTime){
     alert("請選擇運送方式")
     return
   }
-if(!agreeNotice){
-  alert("請先勾選同意 ThaiBuy 代購下單規則")
-  return
-}
+
+  if(!agreeNotice){
+    alert("請先勾選同意 ThaiBuy 代購下單規則")
+    return
+  }
+
   if(shippingMethod === "交貨便"){
     if(!receiverName){
       alert("請填寫交貨便收件本名")
@@ -286,126 +287,59 @@ if(!agreeNotice){
     return sum + Number(i.original_price || 0) * Number(i.quantity || 1)
   }, 0)
 
-const shippingFee = shippingMethod === "交貨便"
-  ? calcC2CShippingFee(originalItemsTotal)
-  : 0
+  const shippingFee = shippingMethod === "交貨便"
+    ? calcC2CShippingFee(originalItemsTotal)
+    : 0
 
-const total = hasLimitedDeposit
-  ? productChargeTotal
-  : productChargeTotal + shippingFee
-  
+  const total = hasLimitedDeposit
+    ? productChargeTotal
+    : productChargeTotal + shippingFee
 
-const orderId = crypto.randomUUID()
-
-const { error: orderError } = await supabase
-  .from("orders")
-  .insert({
-    id: orderId,
-    customer_name: name,
-    phone: phone,
-    community_name: communityName,
-    email: email,
-    bank_last5: bankLast5,
-    expected_remit_time: expectedRemitTime,
-    contact_method: contactMethod,
-    contact_account: contactAccount,
-    total_amount: total,
-    status: "pending",
-    need_second_payment: hasLimitedDeposit,
-    is_deposit_order: hasLimitedDeposit,
-    second_payment_status: hasLimitedDeposit ? "unpaid" : null,
-    shipping_method: shippingMethod,
-    receiver_name: shippingMethod === "交貨便" ? receiverName : null,
-    receiver_phone: shippingMethod === "交貨便" ? receiverPhone : null,
-    store_name: shippingMethod === "交貨便" ? storeName : null,
-    store_code: shippingMethod === "交貨便" ? storeCode : null
-  })
-
-if(orderError){
-  console.error("order error full:", orderError)
-  alert(`訂單建立失敗：${orderError.message || "未知錯誤"}`)
-  return
-}
-
-const { data: orderNumberData, error: orderNumberError } = await supabase
-  .rpc("get_order_number_by_id", { p_id: orderId })
-  .single()
-
-if(orderNumberError){
-  console.error("order number fetch error:", orderNumberError)
-  alert("訂單已建立成功，但讀取訂單編號失敗")
-  return
-}
-
-const orderNumber = orderNumberData.order_number
-
- const items = cart.flatMap(i => {
-  const qty = Number(i.quantity || 1)
-
-  return Array.from({ length: qty }, () => ({
-    order_id: orderId,
+  const rpcItems = cart.map(i => ({
     product_id: i.product_id || null,
     variant_id: i.variant_id || null,
     product_name: i.product_name || i.name,
     variant_name: i.variant,
-    price: i.original_price,
-    quantity: 1
+    price: Number(i.original_price || 0),
+    quantity: Number(i.quantity || 1)
   }))
-})
 
-  const { error: itemError } = await supabase
-    .from("order_items")
-    .insert(items)
+  const { data, error } = await supabase.rpc("create_order_with_items_and_stock", {
+    p_customer_name: name,
+    p_phone: phone,
+    p_community_name: communityName || null,
+    p_email: email,
+    p_bank_last5: bankLast5,
+    p_expected_remit_time: expectedRemitTime,
+    p_contact_method: contactMethod,
+    p_contact_account: contactAccount,
+    p_total_amount: total,
+    p_need_second_payment: hasLimitedDeposit,
+    p_is_deposit_order: hasLimitedDeposit,
+    p_second_payment_status: hasLimitedDeposit ? "unpaid" : null,
+    p_shipping_method: shippingMethod,
+    p_receiver_name: shippingMethod === "交貨便" ? receiverName : null,
+    p_receiver_phone: shippingMethod === "交貨便" ? receiverPhone : null,
+    p_store_name: shippingMethod === "交貨便" ? storeName : null,
+    p_store_code: shippingMethod === "交貨便" ? storeCode : null,
+    p_items: rpcItems
+  })
 
-  if(itemError){
-    console.error("item error:", itemError)
-    alert("商品寫入失敗")
+  if(error){
+    console.error("create_order_with_items_and_stock error:", error)
+    alert(`訂單建立失敗：${error.message || "未知錯誤"}`)
     return
   }
 
-  for(const i of cart){
-
-  if(!i.variant_id){
-    alert(`商品缺少 variant_id：${i.product_name || i.name} / ${i.variant}`)
+  if(!data?.success){
+    alert(`訂單建立失敗：${data?.message || "未知錯誤"}`)
     return
   }
 
-  const { data: variant, error: stockReadError } = await supabase
-    .from("product_variants")
-    .select("stock")
-    .eq("id", i.variant_id)
-    .single()
+  const orderNumber = data.order_number || data.order_id
 
-  if(stockReadError){
-    console.error("stock read error:", stockReadError)
-    alert(`讀取庫存失敗：${i.product_name || i.name} / ${i.variant}`)
-    return
-  }
-
-  const currentStock = Number(variant?.stock || 0)
-  const qty = Number(i.quantity || 0)
-
-  if(currentStock < qty){
-    alert(`庫存不足：${i.product_name || i.name} / ${i.variant}`)
-    return
-  }
-
-  const { error: stockUpdateError } = await supabase
-    .from("product_variants")
-    .update({
-      stock: currentStock - qty
-    })
-    .eq("id", i.variant_id)
-
-  if(stockUpdateError){
-    console.error("stock update error:", stockUpdateError)
-    alert(`扣庫存失敗：${i.product_name || i.name} / ${i.variant}`)
-    return
-  }
-}
-
-saveCart([])
-window.location.href = `./order-success.html?orderNumber=${encodeURIComponent(orderNumber)}&amount=${encodeURIComponent(total)}`
+  saveCart([])
+  window.location.href = `./order-success.html?orderNumber=${encodeURIComponent(orderNumber)}&amount=${encodeURIComponent(total)}`
 }
 
 window.refreshCheckout = function(){
