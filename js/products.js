@@ -126,10 +126,11 @@ if(p.preorder_type === "limited"){
 
 async function loadSeries(){
 
-  const { data: series, error } = await supabase
-    .from("product_series")
-    .select("*")
-    .order("created_at", { ascending: false })
+ const { data: series, error } = await supabase
+  .from("product_series")
+  .select("*")
+  .eq("show_in_filter", true)
+  .order("created_at", { ascending: false })
 
   if(error){
     console.error("load series error:", error)
