@@ -311,8 +311,10 @@ const { data: orderData, error: orderError } = await supabase
     contact_account: contactAccount,
     total_amount: total,
     status: "pending",
-    need_second_payment: hasLimitedDeposit,
-    shipping_method: shippingMethod,
+   need_second_payment: hasLimitedDeposit,
+is_deposit_order: hasLimitedDeposit,
+second_payment_status: hasLimitedDeposit ? "unpaid" : null,
+shipping_method: shippingMethod,
     receiver_name: shippingMethod === "交貨便" ? receiverName : null,
     receiver_phone: shippingMethod === "交貨便" ? receiverPhone : null,
     store_name: shippingMethod === "交貨便" ? storeName : null,
@@ -322,8 +324,8 @@ const { data: orderData, error: orderError } = await supabase
   .single()
 
 if(orderError){
-  console.error("order error:", orderError)
-  alert("訂單建立失敗")
+  console.error("order error full:", orderError)
+  alert(`訂單建立失敗：${orderError.message || "未知錯誤"}`)
   return
 }
 
