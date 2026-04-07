@@ -297,7 +297,7 @@ const total = hasLimitedDeposit
 
 const orderId = crypto.randomUUID()
 
-const { data: orderData, error: orderError } = await supabase
+const { error: orderError } = await supabase
   .from("orders")
   .insert({
     id: orderId,
@@ -311,17 +311,15 @@ const { data: orderData, error: orderError } = await supabase
     contact_account: contactAccount,
     total_amount: total,
     status: "pending",
-   need_second_payment: hasLimitedDeposit,
-is_deposit_order: hasLimitedDeposit,
-second_payment_status: hasLimitedDeposit ? "unpaid" : null,
-shipping_method: shippingMethod,
+    need_second_payment: hasLimitedDeposit,
+    is_deposit_order: hasLimitedDeposit,
+    second_payment_status: hasLimitedDeposit ? "unpaid" : null,
+    shipping_method: shippingMethod,
     receiver_name: shippingMethod === "交貨便" ? receiverName : null,
     receiver_phone: shippingMethod === "交貨便" ? receiverPhone : null,
     store_name: shippingMethod === "交貨便" ? storeName : null,
     store_code: shippingMethod === "交貨便" ? storeCode : null
   })
-  .select("id, order_number")
-  .single()
 
 if(orderError){
   console.error("order error full:", orderError)
@@ -329,7 +327,7 @@ if(orderError){
   return
 }
 
-const orderNumber = orderData.order_number
+const orderNumber = orderId
 
  const items = cart.flatMap(i => {
   const qty = Number(i.quantity || 1)
