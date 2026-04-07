@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>自用紀錄</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/admin-self-usage.css">
+</head>
+
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <img src="../LOGO.png" class="brand-logo" alt="THAI BUY logo">
+    <div>
+      <div class="brand-title">THAI BUY</div>
+      <div class="brand-subtitle">可愛又安心的泰國代購</div>
+    </div>
+  </div>
+
+  <div class="topbar-nav">
+   <a href="./admin-orders.html" class="topbar-link">訂單管理</a>
+    <a href="./admin-products.html" class="topbar-link">商品管理</a>
+    <a href="./admin-tracking.html" class="topbar-link">貨態管理</a>
+    <a href="./admin-settlement.html" class="topbar-link">帳務管理</a>
+    <a href="./admin-expenses.html" class="topbar-link">內帳支出</a>
+    <a href="./admin-wallet.html" class="topbar-link">儲值金管理</a>
+    <a href="./admin-711-income.html" class="topbar-link">7-11入帳</a>
+    <a href="./admin-self-usage.html" class="topbar-link active">自用紀錄</a>
+  </div>
+</div>
+
+<div class="container">
+  <div class="page-header">
+    <div>
+      <h1>自用紀錄</h1>
+      <p class="page-desc">記錄自己拿走的系列 / 品項 / 金額，方便扣除與銷售利潤重疊的部分。</p>
+    </div>
+    <button id="openFormBtn" class="primary-btn">＋ 新增紀錄</button>
+  </div>
+
+  <!-- 統計卡 -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">筆數</div>
+      <div class="stat-value" id="statCount">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">自用成本總額</div>
+      <div class="stat-value" id="statTotalCost">$0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">自用售價總額</div>
+      <div class="stat-value" id="statTotalSale">$0</div>
+    </div>
+    <div class="stat-card highlight">
+      <div class="stat-label">重疊利潤總額</div>
+      <div class="stat-value" id="statTotalProfit">$0</div>
+    </div>
+  </div>
+
+<div class="holder-summary-card">
+  <div class="table-head">
+    <h2>誰花了多少</h2>
+    <div class="table-subtext">依拿走的人統計花費成本 / 原售價 / 重疊利潤</div>
+  </div>
+
+  <div id="holderSummaryList" class="holder-summary-list">
+    <div class="empty-holder-row">目前沒有資料</div>
+  </div>
+</div>
+
+
+  <!-- 篩選 -->
+  <div class="filter-card">
+    <div class="filter-grid">
+      <div class="field">
+        <label>關鍵字</label>
+        <input type="text" id="keyword" placeholder="搜尋系列 / 品項 / 規格 / 備註 / 人名">
+      </div>
+
+      <div class="field">
+  <label>拿走的人</label>
+  <select id="holderFilter">
+    <option value="">全部</option>
+    <option value="青">青</option>
+    <option value="媛媛">媛媛</option>
+  </select>
+</div>
+
+      <div class="field">
+        <label>開始日期</label>
+        <input type="date" id="startDate">
+      </div>
+
+      <div class="field">
+        <label>結束日期</label>
+        <input type="date" id="endDate">
+      </div>
+    </div>
+
+    <div class="filter-actions">
+      <button id="searchBtn" class="secondary-btn">搜尋</button>
+      <button id="resetBtn" class="ghost-btn">重設</button>
+    </div>
+  </div>
+
+  <!-- 表單 -->
+  <div id="formCard" class="form-card hidden">
+    <div class="form-head">
+      <h2 id="formTitle">新增自用紀錄</h2>
+      <button id="closeFormBtn" class="icon-btn" type="button">✕</button>
+    </div>
+
+    <form id="usageForm">
+      <input type="hidden" id="recordId">
+
+      <div class="form-grid">
+        <div class="field">
+          <label>拿走日期</label>
+          <input type="date" id="takenDate" required>
+        </div>
+
+       <div class="field">
+  <label>誰拿走的</label>
+  <select id="holderName" required>
+    <option value="">請選擇</option>
+    <option value="青">青</option>
+    <option value="媛媛">媛媛</option>
+  </select>
+</div>
+
+        <div class="field">
+  <label>系列</label>
+  <select id="seriesName" required>
+    <option value="">載入中...</option>
+  </select>
+</div>
+
+        <div class="field">
+          <label>品項</label>
+          <input type="text" id="itemName" placeholder="例如：T恤 / 小卡 / 外套" required>
+        </div>
+
+        <div class="field">
+          <label>規格 / 尺寸 / 顏色</label>
+          <input type="text" id="variantName" placeholder="可不填">
+        </div>
+
+        <div class="field">
+          <label>數量</label>
+          <input type="number" id="qty" min="1" value="1" required>
+        </div>
+
+        <div class="field">
+          <label>成本單價</label>
+          <input type="number" id="costPrice" min="0" step="0.01" placeholder="0" required>
+        </div>
+
+        <div class="field">
+          <label>原售價單價</label>
+          <input type="number" id="salePrice" min="0" step="0.01" placeholder="0" required>
+        </div>
+
+        <div class="field field-full">
+          <label>備註</label>
+          <textarea id="note" rows="3" placeholder="可填寫原因、用途、補充說明"></textarea>
+        </div>
+      </div>
+
+      <div class="preview-box">
+        <div class="preview-item">
+          <span>單件差額</span>
+          <strong id="previewUnitProfit">$0</strong>
+        </div>
+        <div class="preview-item">
+          <span>總成本</span>
+          <strong id="previewTotalCost">$0</strong>
+        </div>
+        <div class="preview-item">
+          <span>總售價</span>
+          <strong id="previewTotalSale">$0</strong>
+        </div>
+        <div class="preview-item highlight">
+          <span>總重疊利潤</span>
+          <strong id="previewTotalProfit">$0</strong>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="primary-btn" id="saveBtn">儲存紀錄</button>
+        <button type="button" class="ghost-btn" id="cancelBtn">取消</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- 列表 -->
+  <div class="table-card">
+    <div class="table-head">
+      <h2>紀錄列表</h2>
+      <div class="table-subtext">可直接編輯或刪除</div>
+    </div>
+
+    <div class="table-wrap">
+      <table class="usage-table">
+        <thead>
+          <tr>
+            <th>日期</th>
+            <th>拿走的人</th>
+            <th>系列</th>
+            <th>品項</th>
+            <th>規格</th>
+            <th>數量</th>
+            <th>成本</th>
+            <th>售價</th>
+            <th>差額</th>
+            <th>總差額</th>
+            <th>備註</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="usageTableBody">
+          <tr>
+            <td colspan="12" class="empty-row">目前沒有資料</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="../js/admin-self-usage.js"></script>
+</body>
+</html>
