@@ -17,27 +17,53 @@ queryPhone.addEventListener("keydown", (e) => {
 })
 
 async function handleQuery(){
-const orderNumber = queryOrderNumber.value.trim().toUpperCase()
-const email = queryEmail.value.trim().toLowerCase()
-const phone = normalizePhone(queryPhone.value)
+  const orderNumber = queryOrderNumber.value.trim().toUpperCase()
+  const email = queryEmail.value.trim().toLowerCase()
+  const phone = normalizePhone(queryPhone.value)
 
-if(!orderNumber && (!email || !phone)){
-  renderEmpty(
-    "請輸入查詢資訊",
-    "可輸入訂單編號，或同時輸入下單時填寫的 Email 與電話才能查詢。"
-  )
-  return
-}
+  const hasOrderNumber = !!orderNumber
+  const hasEmail = !!email
+  const hasPhone = !!phone
+
+  // 1. 完全沒填
+  if(!hasOrderNumber && !hasEmail && !hasPhone){
+    alert("請輸入查詢資訊。\n只能使用「訂單編號」或「Email + 電話」其中一種方式查詢。")
+    renderEmpty(
+      "請輸入查詢資訊",
+      "請輸入訂單編號，或同時輸入下單時填寫的 Email 與電話才能查詢。"
+    )
+    return
+  }
+
+  // 2. 訂單編號不能和 Email / 電話一起填
+  if(hasOrderNumber && (hasEmail || hasPhone)){
+    alert("查詢方式只能擇一。\n請只輸入訂單編號，或只輸入 Email + 電話。")
+    renderEmpty(
+      "查詢格式錯誤",
+      "請勿同時輸入訂單編號與 Email / 電話。請改用其中一種方式查詢。"
+    )
+    return
+  }
+
+  // 3. 只填 Email 或只填電話，不行
+  if(!hasOrderNumber && (hasEmail !== hasPhone)){
+    alert("若使用 Email / 電話查詢，請兩個欄位都要填寫。")
+    renderEmpty(
+      "查詢資訊不足",
+      "若不用訂單編號查詢，請同時輸入 Email 與電話。"
+    )
+    return
+  }
 
   queryBtn.disabled = true
   queryBtn.textContent = "查詢中..."
 
   try{
-   const { data, error } = await supabase.rpc("query_orders_for_customer", {
-  p_order_number: orderNumber || null,
-  p_email: email || null,
-  p_phone: phone || null
-})
+    const { data, error } = await supabase.rpc("query_orders_for_customer", {
+      p_order_number: orderNumber || null,
+      p_email: email || null,
+      p_phone: phone || null
+    })
 
     if(error){
       console.error("rpc query error:", error)
@@ -47,11 +73,11 @@ if(!orderNumber && (!email || !phone)){
 
     const orders = data || []
 
-   if(orders.length === 0){
-  alert("查無訂單資料。\n如果確認已有下單但找不到資料，請聯繫客服人員。")
-  renderEmpty("查無訂單資料", "如果確認已有下單但找不到資料，請聯繫客服人員。")
-  return
-}
+    if(orders.length === 0){
+      alert("查無訂單資料。\n如果確認已有下單但找不到資料，請聯繫客服人員。")
+      renderEmpty("查無訂單資料", "如果確認已有下單但找不到資料，請聯繫客服人員。")
+      return
+    }
 
     renderOrders(orders)
 
