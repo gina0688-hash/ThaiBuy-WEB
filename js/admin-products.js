@@ -134,8 +134,17 @@ alert("系列建立完成")
 
 // ⭐ 新增規格
 window.addVariant = function(){
-  const id = Date.now()
-  variants.push({ id, name:"", price:0, stock:0 })
+  const id = crypto.randomUUID()
+
+  variants.push({
+    id,              // 前端暫時識別用
+    dbId: null,      // 資料庫真正 id，新規格還沒有
+    name: "",
+    price: 0,
+    stock: 0,
+    isDeleted: false
+  })
+
   renderVariants()
 }
 
@@ -144,36 +153,38 @@ function renderVariants(){
   const container = document.getElementById("variants")
   container.innerHTML = ""
 
-  if(variants.length === 0){
+  const visibleVariants = variants.filter(v => !v.isDeleted)
+
+  if(visibleVariants.length === 0){
     container.innerHTML = `<div class="helper-text">目前尚未新增規格</div>`
     return
   }
 
-  variants.forEach(v=>{
+  visibleVariants.forEach(v=>{
     const div = document.createElement("div")
     div.className = "variant"
 
     div.innerHTML = `
-      <input 
+      <input
         placeholder="規格名稱"
         value="${v.name || ""}"
-        oninput="updateVariant(${v.id}, 'name', this.value)">
+        oninput="updateVariant('${v.id}', 'name', this.value)">
 
-      <input 
+      <input
         placeholder="價格"
         type="number"
         min="0"
         value="${v.price || 0}"
-        oninput="updateVariant(${v.id}, 'price', this.value)">
+        oninput="updateVariant('${v.id}', 'price', this.value)">
 
-      <input 
+      <input
         placeholder="庫存數量"
         type="number"
         min="0"
         value="${v.stock || 0}"
-        oninput="updateVariant(${v.id}, 'stock', this.value)">
+        oninput="updateVariant('${v.id}', 'stock', this.value)">
 
-      <button type="button" onclick="removeVariant(${v.id})">刪除</button>
+      <button type="button" onclick="removeVariant('${v.id}')">刪除</button>
     `
 
     container.appendChild(div)
@@ -181,13 +192,26 @@ function renderVariants(){
 }
 
 window.updateVariant = function(id, field, value){
-  const v = variants.find(x=>x.id===id)
+  const v = variants.find(x => String(x.id) === String(id))
   if(!v) return
-  v[field] = ["price", "stock"].includes(field) ? Number(value) : value
+
+  v[field] = ["price", "stock"].includes(field)
+    ? Number(value)
+    : value
 }
 
 window.removeVariant = function(id){
-  variants = variants.filter(v => v.id !== id)
+  const target = variants.find(v => String(v.id) === String(id))
+  if(!target) return
+
+  // 舊規格：不要直接刪掉，先標記刪除
+  if(target.dbId){
+    target.isDeleted = true
+  }else{
+    // 新增但還沒存進 DB 的規格，才直接移除
+    variants = variants.filter(v => String(v.id) !== String(id))
+  }
+
   renderVariants()
 }
 
@@ -197,6 +221,8 @@ function validateProductForm(){
   const preorder_type = document.getElementById("preorder_type").value
   const deposit_required = document.getElementById("deposit_required").value === "true"
   const deposit_amount = Number(document.getElementById("deposit_amount").value || 0)
+
+  const activeVariants = variants.filter(v => !v.isDeleted)
 
   if(!name){
     alert("請輸入商品名稱")
@@ -208,17 +234,17 @@ function validateProductForm(){
     return false
   }
 
-  if(variants.length === 0){
+  if(activeVariants.length === 0){
     alert("請至少新增一個規格")
     return false
   }
 
-    if(preorder_type === "limited" && deposit_required && (isNaN(deposit_amount) || deposit_amount <= 0)){
+  if(preorder_type === "limited" && deposit_required && (isNaN(deposit_amount) || deposit_amount <= 0)){
     alert("限量預購若需訂金，請輸入正確的訂金金額")
     return false
   }
 
-  for(const v of variants){
+  for(const v of activeVariants){
     if(!v.name || !v.name.trim()){
       alert("規格名稱不可空白")
       return false
@@ -287,18 +313,7 @@ window.saveProduct = async function(){
 
     productId = editingId
 
-    // 刪舊規格
-        const { error: deleteVariantError } = await supabase
-      .from("product_variants")
-      .delete()
-      .eq("product_id", productId)
-
-    if(deleteVariantError){
-      console.error("delete old variants error:", deleteVariantError)
-      alert("刪除舊規格失敗")
-      return
-    }
-
+ 
    
 
   }else{
@@ -331,25 +346,67 @@ window.saveProduct = async function(){
     productId = product.id
   }
 
-  // ⭐ 新增規格
-  if(variants.length > 0){
-    const variantData = variants.map(v=>({
-      product_id: productId,
-      name: v.name,
-      price: v.price,
-      stock: v.stock || 0
-    }))
+  // ⭐ 規格同步：舊的 update、新的 insert、被刪的才 delete
+  const activeVariants = variants.filter(v => !v.isDeleted)
+  const deletedVariants = variants.filter(v => v.isDeleted && v.dbId)
 
-    const { error: variantError } = await supabase
-      .from("product_variants")
-      .insert(variantData)
+  // 1. 更新舊規格
+  for(const v of activeVariants.filter(v => v.dbId)){
+   const { error: updateVariantError } = await supabase
+  .from("product_variants")
+  .update({
+    name: v.name,
+    price: Number(v.price || 0),
+    stock: Number(v.stock || 0),
+    is_active: true
+  })
+  .eq("id", v.dbId)
 
-    if(variantError){
-      console.error("product_variants insert error:", variantError)
-      alert("規格儲存失敗")
+    if(updateVariantError){
+      console.error("update variant error:", updateVariantError)
+      alert(`規格更新失敗：${v.name || "未命名規格"}`)
       return
     }
   }
+
+  // 2. 新增新規格
+  const newVariants = activeVariants.filter(v => !v.dbId)
+
+  if(newVariants.length > 0){
+  const insertData = newVariants.map(v => ({
+  product_id: productId,
+  name: v.name,
+  price: Number(v.price || 0),
+  stock: Number(v.stock || 0),
+  is_active: true
+}))
+
+    const { error: insertVariantError } = await supabase
+      .from("product_variants")
+      .insert(insertData)
+
+    if(insertVariantError){
+      console.error("insert variant error:", insertVariantError)
+      alert("新增規格失敗")
+      return
+    }
+  }
+
+  // 3. 刪除被移除的舊規格
+ for(const v of deletedVariants){
+  const { error: deactivateVariantError } = await supabase
+    .from("product_variants")
+    .update({
+      is_active: false
+    })
+    .eq("id", v.dbId)
+
+  if(deactivateVariantError){
+    console.error("deactivate variant error:", deactivateVariantError)
+    alert(`停用規格失敗：${v.name}`)
+    return
+  }
+}
 
   // ⭐⭐⭐ 圖片上傳（修正後）
 
@@ -444,10 +501,11 @@ container.innerHTML = ""
 
 for(const p of data){
 
-    const { data: variantRows } = await supabase
-    .from("product_variants")
-    .select("*")
-    .eq("product_id", p.id)
+   const { data: variantRows } = await supabase
+  .from("product_variants")
+  .select("*")
+  .eq("product_id", p.id)
+  .eq("is_active", true)
 
   const { data: images } = await supabase
     .from("product_images")
@@ -480,7 +538,13 @@ for(const p of data){
     <br>
 
     系列：${p.product_series?.name || "未分類"}<br>
-    預購類型：${p.preorder_type === "limited" ? "限量預購" : "一般預購"}<br>
+    預購類型：${
+  p.preorder_type === "limited"
+    ? "限量預購"
+    : p.preorder_type === "instock"
+    ? "現貨"
+    : "一般預購"
+}<br>
     訂金：${
       p.deposit_required
         ? `需訂金 NT$${p.deposit_amount || 0}`
@@ -531,9 +595,10 @@ window.editProduct = async function(id){
   }
 
   const { data: vData, error: variantReadError } = await supabase
-    .from("product_variants")
-    .select("*")
-    .eq("product_id", id)
+  .from("product_variants")
+  .select("*")
+  .eq("product_id", id)
+  .eq("is_active", true)
 
   if(variantReadError){
     console.error("editProduct variants error:", variantReadError)
@@ -569,11 +634,13 @@ toggleDepositAmount()
 
 await loadSeriesOptions(product.series_id || "")
 
-  variants = vData.map(v=>({
-  id: Date.now() + Math.random(),
+variants = vData.map(v => ({
+  id: crypto.randomUUID(), // 前端畫面用
+  dbId: v.id,              // 資料庫真正 id，一定要保留
   name: v.name,
-  price: v.price,
-  stock: v.stock || 0
+  price: Number(v.price || 0),
+  stock: Number(v.stock || 0),
+  isDeleted: false
 }))
 
   renderVariants()
