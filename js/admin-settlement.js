@@ -163,27 +163,37 @@ function calcItemMetrics(batch, items, item, estimatedInternationalShipping = 0)
     allocatedBaseCost = batchBaseCost * (twdSubtotal / totalItemsTwdSubtotal)
   }
 
-  const allocatedCost = allocatedBaseCost + allocatedInternationalShipping
+const secondPaymentFee = Number(item.second_payment_fee || 0)
+const secondPaymentTotal = secondPaymentFee * qty
 
-  const unitCost = qty > 0 ? allocatedCost / qty : 0
-  const unitProfit = variantPrice - unitCost
-  const profitRate = variantPrice > 0 ? (unitProfit / variantPrice) * 100 : 0
+const allocatedCost = allocatedBaseCost + allocatedInternationalShipping
 
-  return {
-    qty,
-    unitPriceOriginal,
-    unitWeight,
-    variantPrice,
-    originalSubtotal,
-    twdSubtotal,
-    totalWeight,
-    allocatedInternationalShipping,
-    allocatedBaseCost,
-    allocatedCost,
-    unitCost,
-    unitProfit,
-    profitRate
-  }
+const unitCost = qty > 0 ? allocatedCost / qty : 0
+const netUnitCost = unitCost - secondPaymentFee
+const unitProfit = (variantPrice + secondPaymentFee) - unitCost
+const profitRate =
+  (variantPrice + secondPaymentFee) > 0
+    ? (unitProfit / (variantPrice + secondPaymentFee)) * 100
+    : 0
+
+return {
+  qty,
+  unitPriceOriginal,
+  unitWeight,
+  variantPrice,
+  secondPaymentFee,
+  secondPaymentTotal,
+  originalSubtotal,
+  twdSubtotal,
+  totalWeight,
+  allocatedInternationalShipping,
+  allocatedBaseCost,
+  allocatedCost,
+  unitCost,
+  netUnitCost,
+  unitProfit,
+  profitRate
+}
 }
 
 /* =========================
@@ -465,11 +475,12 @@ async function saveBatchItem(){
   const batch_id = document.getElementById("batch_select").value
   const product_id = document.getElementById("product_select").value
   const variant_id = document.getElementById("variant_select").value
- const qty = Number(document.getElementById("item_qty").value || 0)
+const qty = Number(document.getElementById("item_qty").value || 0)
 const unit_price_original = Number(document.getElementById("unit_price_original").value || 0)
 const salePriceRaw = document.getElementById("sale_price_override").value
 const sale_price_override = salePriceRaw === "" ? null : Number(salePriceRaw)
 const unit_weight = Number(document.getElementById("unit_weight").value || 0)
+const second_payment_fee = Number(document.getElementById("second_payment_fee").value || 0)
 const note = document.getElementById("item_note").value.trim()
 
   if(!batch_id || !product_id || !variant_id || qty <= 0){
@@ -485,6 +496,7 @@ const payload = {
   unit_price_original,
   sale_price_override,
   unit_weight,
+  second_payment_fee,
   note
 }
 
@@ -527,10 +539,11 @@ function clearItemForm(){
   document.getElementById("item_qty").value = 1
   document.getElementById("unit_price_original").value = 0
   document.getElementById("sale_price_override").value = ""
-  document.getElementById("unit_weight").value = 0
-  document.getElementById("batch_total_weight").value = 0
-  document.getElementById("estimated_international_shipping").value = 0
-  document.getElementById("item_note").value = ""
+document.getElementById("unit_weight").value = 0
+document.getElementById("second_payment_fee").value = 0
+document.getElementById("batch_total_weight").value = 0
+document.getElementById("estimated_international_shipping").value = 0
+document.getElementById("item_note").value = ""
 
   const btn = document.getElementById("saveItemBtn")
   if(btn) btn.textContent = "加入商品"
@@ -564,10 +577,11 @@ async function editBatchItem(itemId){
   await loadVariantsForSettlement()
 
   document.getElementById("variant_select").value = data.variant_id
-  document.getElementById("item_qty").value = data.qty ?? 1
+document.getElementById("item_qty").value = data.qty ?? 1
 document.getElementById("unit_price_original").value = data.unit_price_original ?? 0
 document.getElementById("sale_price_override").value = data.sale_price_override ?? ""
 document.getElementById("unit_weight").value = data.unit_weight ?? 0
+document.getElementById("second_payment_fee").value = data.second_payment_fee ?? 0
 document.getElementById("item_note").value = data.note || ""
 
   const btn = document.getElementById("saveItemBtn")
@@ -715,11 +729,13 @@ const batchActualCost = batchBaseCost + estimatedInternationalShipping
 
 let totalSaleAmount = 0
 let totalProfitAmount = 0
+let totalSecondPaymentAmount = 0
 
 for(const item of itemList){
   const m = calcItemMetrics(batch, itemList, item, estimatedInternationalShipping)
-  totalSaleAmount += m.variantPrice * m.qty
+  totalSaleAmount += (m.variantPrice * m.qty) + m.secondPaymentTotal
   totalProfitAmount += m.unitProfit * m.qty
+  totalSecondPaymentAmount += m.secondPaymentTotal
 }
 
 const hasNegativeProfit = totalProfitAmount < 0
@@ -744,8 +760,10 @@ let itemsHtml = ""
               <th>單件重量</th>
               <th>總重量</th>
               <th>國際運費</th>
+              <th>單件二補</th>
               <th>分攤後總成本</th>
               <th>單件成本</th>
+              <th>扣二補後成本</th>
               <th>售價</th>
               <th>單件利潤</th>
               <th>利潤率</th>
@@ -768,10 +786,12 @@ let itemsHtml = ""
   <td>${m.twdSubtotal.toFixed(2)}</td>
   <td>${m.unitWeight.toFixed(3)}</td>
   <td>${m.totalWeight.toFixed(3)}</td>
-  <td>${m.allocatedInternationalShipping.toFixed(2)}</td>
-  <td>${m.allocatedCost.toFixed(2)}</td>
-  <td>${m.unitCost.toFixed(2)}</td>
-  <td>
+<td>${m.allocatedInternationalShipping.toFixed(2)}</td>
+<td>${m.secondPaymentFee.toFixed(2)}</td>
+<td>${m.allocatedCost.toFixed(2)}</td>
+<td>${m.unitCost.toFixed(2)}</td>
+<td>${m.netUnitCost.toFixed(2)}</td>
+<td>
   ${m.variantPrice.toFixed(2)}
   ${item.sale_price_override !== null && item.sale_price_override !== undefined
     ? `<div class="small-muted">手動售價</div>`
@@ -824,9 +844,10 @@ batchCard.className = hasNegativeProfit ? "batch-card batch-card-danger" : "batc
         <div>匯率：${Number(batch.exchange_rate || 0).toFixed(4)}</div>
         <div>當地運費（已含刷卡）：${Number(batch.local_shipping || 0).toFixed(2)}</div>
         <div>回饋：${Number(batch.reward_amount || 0).toFixed(2)}（${rewardUsedText}）</div>
-    <div class="batch-summary">
+<div class="batch-summary">
   <span>購買商品件數：${totalQty}</span>
   <span>批次總重量：${totalWeight.toFixed(3)}</span>
+  <span>二補總額：${totalSecondPaymentAmount.toFixed(2)}</span>
   <span>總成本：${batchActualCost.toFixed(2)}</span>
   <span>售價總額：${totalSaleAmount.toFixed(2)}</span>
   <span class="${totalProfitAmount < 0 ? "text-danger" : "text-profit"}">
