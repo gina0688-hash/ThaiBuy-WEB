@@ -327,7 +327,17 @@ if(orderError){
   return
 }
 
-const orderNumber = orderId
+const { data: orderNumberData, error: orderNumberError } = await supabase
+  .rpc("get_order_number_by_id", { p_id: orderId })
+  .single()
+
+if(orderNumberError){
+  console.error("order number fetch error:", orderNumberError)
+  alert("訂單已建立成功，但讀取訂單編號失敗")
+  return
+}
+
+const orderNumber = orderNumberData.order_number
 
  const items = cart.flatMap(i => {
   const qty = Number(i.quantity || 1)
