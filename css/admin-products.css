@@ -296,3 +296,9 @@ textarea{
     width: 100%;
   }
 }
+
+.variant-add-wrap{
+  margin-top:12px;
+  display:flex;
+  justify-content:flex-end;
+}
