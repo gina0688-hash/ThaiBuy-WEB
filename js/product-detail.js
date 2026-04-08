@@ -202,14 +202,7 @@ const soldOutVariants = (variants || []).filter(v => Number(v.stock || 0) <= 0)
   </div>
 </div>
 
-        <div style="
-          line-height:1.9;
-          color:#333;
-          white-space:pre-line;
-          margin-bottom:18px;
-        ">
-          ${product.description || ""}
-        </div>
+      
 
         <!-- 規格區 -->
         <div style="
@@ -311,6 +304,15 @@ const soldOutVariants = (variants || []).filter(v => Number(v.stock || 0) <= 0)
       </button>
     `
 }
+
+  <div style="
+          line-height:1.9;
+          color:#333;
+          white-space:pre-line;
+          margin-bottom:18px;
+        ">
+          ${product.description || ""}
+        </div>
 
       </div>
 
