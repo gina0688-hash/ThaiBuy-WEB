@@ -104,7 +104,7 @@ async function loadStats(){
     return
   }
 
-  statsTableBody.innerHTML = `<tr><td colspan="9" class="empty-cell">讀取中...</td></tr>`
+  statsTableBody.innerHTML = `<tr><td colspan="10" class="empty-cell">讀取中...</td></tr>`
   purchaseLogList.innerHTML = `<div class="empty-log">讀取中...</div>`
 
   const startDateTime = `${startDate}T00:00:00`
@@ -119,7 +119,7 @@ async function loadStats(){
 
   if(ordersError){
     console.error("ordersError:", ordersError)
-    statsTableBody.innerHTML = `<tr><td colspan="9" class="empty-cell">訂單讀取失敗</td></tr>`
+    statsTableBody.innerHTML = `<tr><td colspan="10" class="empty-cell">訂單讀取失敗</td></tr>`
     return
   }
 
@@ -135,7 +135,7 @@ async function loadStats(){
 
     if(itemsError){
       console.error("itemsError:", itemsError)
-      statsTableBody.innerHTML = `<tr><td colspan="9" class="empty-cell">訂單商品讀取失敗</td></tr>`
+      statsTableBody.innerHTML = `<tr><td colspan="10" class="empty-cell">訂單商品讀取失敗</td></tr>`
       return
     }
 
@@ -152,7 +152,7 @@ async function loadStats(){
 
   if(purchaseError){
     console.error("purchaseError:", purchaseError)
-    statsTableBody.innerHTML = `<tr><td colspan="9" class="empty-cell">購入紀錄讀取失敗</td></tr>`
+    statsTableBody.innerHTML = `<tr><td colspan="10" class="empty-cell">購入紀錄讀取失敗</td></tr>`
     return
   }
 
@@ -195,16 +195,21 @@ async function loadStats(){
     row.purchased_qty = Number(purchaseMap.get(key) || 0)
   }
 
-  let rows = Array.from(demandMap.values()).map(row => {
-    const remaining_qty = Math.max(Number(row.demand_qty || 0) - Number(row.purchased_qty || 0), 0)
-    const success_rate = calcSuccessRate(row.demand_qty, row.purchased_qty)
+let rows = Array.from(demandMap.values()).map(row => {
+  const demandQty = Number(row.demand_qty || 0)
+  const purchasedQty = Number(row.purchased_qty || 0)
 
-    return {
-      ...row,
-      remaining_qty,
-      success_rate
-    }
-  })
+  const remaining_qty = Math.max(demandQty - purchasedQty, 0)
+  const extra_qty = Math.max(purchasedQty - demandQty, 0)
+  const success_rate = calcSuccessRate(demandQty, purchasedQty)
+
+  return {
+    ...row,
+    remaining_qty,
+    extra_qty,
+    success_rate
+  }
+})
 
   if(keyword){
     rows = rows.filter(row => {
@@ -262,7 +267,7 @@ function renderSummary(rows){
 
 function renderTable(rows){
   if(!rows.length){
-    statsTableBody.innerHTML = `<tr><td colspan="9" class="empty-cell">這段時間沒有可統計的商品</td></tr>`
+    statsTableBody.innerHTML = `<tr><td colspan="10" class="empty-cell">這段時間沒有可統計的商品</td></tr>`
     return
   }
 
@@ -276,38 +281,39 @@ function renderTable(rows){
       badgeClass = "rate-badge warning"
     }
 
-    return `
-      <tr>
-        <td>${escapeHtml(row.product_name)}</td>
-        <td>${escapeHtml(row.variant_name || "-")}</td>
-        <td>${row.demand_qty}</td>
-        <td>${row.purchased_qty}</td>
-        <td class="${row.remaining_qty > 0 ? "text-danger" : "text-success"}">${row.remaining_qty}</td>
-        <td><span class="${badgeClass}">${row.success_rate.toFixed(1)}%</span></td>
-        <td>
-          <input
-            type="number"
-            min="1"
-            class="inline-input"
-            id="purchaseQty-${index}"
-            placeholder="數量"
-          >
-        </td>
-        <td>
-          <input
-            type="text"
-            class="inline-input"
-            id="purchaseNote-${index}"
-            placeholder="備註（可不填）"
-          >
-        </td>
-        <td>
-          <button class="btn-small" onclick="savePurchaseRecord('${encodeURIComponent(key)}', ${index})">
-            記錄購入
-          </button>
-        </td>
-      </tr>
-    `
+   return `
+  <tr>
+    <td>${escapeHtml(row.product_name)}</td>
+    <td>${escapeHtml(row.variant_name || "-")}</td>
+    <td>${row.demand_qty}</td>
+    <td>${row.purchased_qty}</td>
+    <td class="${row.remaining_qty > 0 ? "text-danger" : "text-success"}">${row.remaining_qty}</td>
+    <td class="${row.extra_qty > 0 ? "text-warning" : ""}">${row.extra_qty}</td>
+    <td><span class="${badgeClass}">${row.success_rate.toFixed(1)}%</span></td>
+    <td>
+      <input
+        type="number"
+        min="1"
+        class="inline-input"
+        id="purchaseQty-${index}"
+        placeholder="數量"
+      >
+    </td>
+    <td>
+      <input
+        type="text"
+        class="inline-input"
+        id="purchaseNote-${index}"
+        placeholder="備註（可不填）"
+      >
+    </td>
+    <td>
+      <button class="btn-small" onclick="savePurchaseRecord('${encodeURIComponent(key)}', ${index})">
+        記錄購入
+      </button>
+    </td>
+  </tr>
+`
   }).join("")
 }
 

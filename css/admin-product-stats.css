@@ -350,3 +350,8 @@
   align-items:center;
   flex-shrink:0;
 }
+
+.text-warning{
+  color:#f59e0b;
+  font-weight:800;
+}
