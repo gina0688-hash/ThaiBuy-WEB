@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>商品統計</title>
+
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/admin-product-stats.css">
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <img src="../LOGO.png" class="brand-logo" alt="THAI BUY logo">
+    <div>
+      <div class="brand-title">THAI BUY</div>
+      <div class="brand-subtitle">可愛又安心的泰國代購</div>
+    </div>
+  </div>
+
+  <div class="topbar-nav">
+    <a href="./admin-orders.html" class="topbar-link">訂單管理</a>
+    <a href="./admin-product-stats.html" class="topbar-link active">商品統計</a>
+    <a href="./admin-products.html" class="topbar-link">商品管理</a>
+    <a href="./admin-tracking.html" class="topbar-link">貨態管理</a>
+     <a href="./admin-711.html" class="topbar-link">賣貨便管理</a>
+    <a href="./admin-settlement.html" class="topbar-link">帳務管理</a>
+    <a href="./admin-expenses.html" class="topbar-link">內帳支出</a>
+    <a href="./admin-wallet.html" class="topbar-link">儲值金管理</a>
+    <a href="./admin-711-income.html" class="topbar-link">7-11入帳</a>
+    <a href="./admin-self-usage.html" class="topbar-link">自用紀錄</a>
+  </div>
+</div>
+
+<div class="container">
+  <div class="page-header">
+    <div>
+      <h1>商品統計</h1>
+      <p>依訂單期間統計各品項需求量、已購數量、尚差數量與成功率</p>
+    </div>
+    <div id="currentUser" class="current-user"></div>
+  </div>
+
+  <div class="filter-card">
+    <div class="filter-grid">
+      <div class="field">
+        <label>開始日期</label>
+        <input type="date" id="startDate">
+      </div>
+
+      <div class="field">
+        <label>結束日期</label>
+        <input type="date" id="endDate">
+      </div>
+
+      <div class="field keyword-field">
+        <label>搜尋品項 / 規格</label>
+        <input type="text" id="keywordInput" placeholder="例如：帽T、黑色、L">
+      </div>
+
+      <div class="field">
+        <label>排序方式</label>
+        <select id="sortSelect">
+          <option value="demand_desc">需求量高 → 低</option>
+          <option value="remaining_desc">尚差高 → 低</option>
+          <option value="success_asc">成功率低 → 高</option>
+          <option value="success_desc">成功率高 → 低</option>
+          <option value="name_asc">品項名稱 A → Z</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="filter-actions">
+      <button class="btn-primary" id="searchBtn">查詢統計</button>
+      <button class="btn-secondary" id="resetBtn">重設</button>
+    </div>
+
+    <div class="hint-text">
+      統計邏輯：只計入所選期間內的訂單商品，且自動排除已取消品項。
+    </div>
+  </div>
+
+  <div class="summary-grid">
+    <div class="summary-card">
+      <div class="summary-label">總需求數量</div>
+      <div class="summary-value" id="totalDemand">0</div>
+    </div>
+
+    <div class="summary-card">
+      <div class="summary-label">總已購數量</div>
+      <div class="summary-value success" id="totalPurchased">0</div>
+    </div>
+
+    <div class="summary-card">
+      <div class="summary-label">總尚差數量</div>
+      <div class="summary-value danger" id="totalRemaining">0</div>
+    </div>
+
+    <div class="summary-card">
+      <div class="summary-label">整體成功率</div>
+      <div class="summary-value info" id="overallSuccessRate">0%</div>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-head">
+      <h2>品項統計</h2>
+      <div class="small-note">每列都可以直接記錄本次購入數量</div>
+    </div>
+
+    <div class="table-wrap">
+      <table class="stats-table">
+        <thead>
+          <tr>
+            <th>品項</th>
+            <th>規格</th>
+            <th>需求量</th>
+            <th>已購量</th>
+            <th>尚差</th>
+            <th>成功率</th>
+            <th>本次購入</th>
+            <th>備註</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="statsTableBody">
+          <tr>
+            <td colspan="9" class="empty-cell">尚無資料</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-head">
+      <h2>近期購入紀錄</h2>
+      <div class="small-note">只顯示目前查詢期間內的購入紀錄</div>
+    </div>
+
+    <div id="purchaseLogList" class="purchase-log-list">
+      <div class="empty-log">尚無購入紀錄</div>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="../js/admin-product-stats.js"></script>
+</body>
+</html>
