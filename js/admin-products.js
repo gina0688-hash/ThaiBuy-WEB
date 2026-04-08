@@ -2,6 +2,7 @@ import { supabase } from "./supabase.js"
 
 let variants = []
 let editingId = null
+let expandedProducts = new Set()
 
 function setFormMode(isEdit){
   const title = document.getElementById("formTitle")
@@ -454,6 +455,16 @@ window.saveProduct = async function(){
   await loadProducts()
 }
 
+window.toggleProductVariants = function(productId){
+  if(expandedProducts.has(productId)){
+    expandedProducts.delete(productId)
+  }else{
+    expandedProducts.add(productId)
+  }
+
+  loadProducts()
+}
+
 // ⭐ 載入商品（含圖片）
 window.loadProducts = async function(){
 
@@ -527,46 +538,66 @@ for(const p of data){
     }
   }
 
-  const div = document.createElement("div")
-  div.className = "product-item"
+const div = document.createElement("div")
+div.className = "product-item"
 
-   div.innerHTML = `
-    <b>${p.name}</b>
-    <span style="margin-left:8px; color:${p.is_active ? 'green' : 'red'};">
-      ${p.is_active ? '上架中' : '已下架'}
-    </span>
-    <br>
+const isExpanded = expandedProducts.has(p.id)
+const variantLines = (variantRows || []).map(v =>
+  `- ${v.name} / ${v.price} / 庫存：${v.stock || 0}`
+)
+const hasMoreThanThree = variantLines.length > 3
+const visibleVariantLines = isExpanded ? variantLines : variantLines.slice(0, 3)
 
-    系列：${p.product_series?.name || "未分類"}<br>
-    預購類型：${
-  p.preorder_type === "limited"
-    ? "限量預購"
-    : p.preorder_type === "instock"
-    ? "現貨"
-    : "一般預購"
-}<br>
-    訂金：${
-      p.deposit_required
-        ? `需訂金 NT$${p.deposit_amount || 0}`
-        : "不需訂金"
-    }<br>
-    ${p.description || ""}<br><br>
+div.innerHTML = `
+  <b>${p.name}</b>
+  <span style="margin-left:8px; color:${p.is_active ? 'green' : 'red'};">
+    ${p.is_active ? '上架中' : '已下架'}
+  </span>
+  <br>
 
-    上架日期：${p.release_date || "未設定"}<br>
-建立時間：${new Date(p.created_at).toLocaleString()}<br><br>
+  系列：${p.product_series?.name || "未分類"}<br>
+  預購類型：${
+    p.preorder_type === "limited"
+      ? "限量預購"
+      : p.preorder_type === "instock"
+      ? "現貨"
+      : "一般預購"
+  }<br>
+  訂金：${
+    p.deposit_required
+      ? `需訂金 NT$${p.deposit_amount || 0}`
+      : "不需訂金"
+  }<br>
+  ${p.description || ""}<br><br>
 
-    ${images.map(img => `
-      <img src="${img.image_url}" style="width:80px; margin-right:5px;">
-    `).join("")}
+  上架日期：${p.release_date || "未設定"}<br>
+  建立時間：${new Date(p.created_at).toLocaleString()}<br><br>
 
-    <br><br>
+  ${images.map(img => `
+    <img src="${img.image_url}" style="width:80px; margin-right:5px;">
+  `).join("")}
 
-       ${(variantRows || []).map(v=>`- ${v.name} / ${v.price} / 庫存：${v.stock || 0}`).join("<br>")}
+  <br><br>
 
-    <br><br>
-    <button onclick="editProduct('${p.id}')">編輯</button>
-    <button class="btn-danger" onclick="deleteProduct('${p.id}')">刪除</button>
-  `
+<div class="variant-preview">
+  ${visibleVariantLines.map(line => `<div>${line}</div>`).join("")}
+</div>
+${
+  hasMoreThanThree
+    ? `<button
+         type="button"
+         class="toggle-variants-btn"
+         onclick="toggleProductVariants('${p.id}')"
+       >
+         ${isExpanded ? "▲ 收合" : `▼ 展開其餘 ${variantLines.length - 3} 筆`}
+       </button>`
+    : ""
+}
+
+  <br><br>
+  <button onclick="editProduct('${p.id}')">編輯</button>
+  <button class="btn-danger" onclick="deleteProduct('${p.id}')">刪除</button>
+`
 
   container.appendChild(div)
 }
@@ -581,6 +612,15 @@ window.editProduct = async function(id){
 
   editingId = id
   setFormMode(true)
+  
+const formCard = document.querySelector(".product-form-card")
+if(formCard){
+  formCard.scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  })
+}
+
 
   const { data: product, error: productError } = await supabase
     .from("products")

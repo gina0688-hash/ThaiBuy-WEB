@@ -64,9 +64,17 @@ for(const p of filteredProducts){
       .select("price, stock")
       .eq("product_id", p.id)
   
-   const minPrice = variants.length
-  ? Math.min(...variants.map(v=>v.price))
+ const minPrice = variants.length
+  ? Math.min(...variants.map(v => Number(v.price || 0)))
   : 0
+
+const maxPrice = variants.length
+  ? Math.max(...variants.map(v => Number(v.price || 0)))
+  : 0
+
+const priceText = minPrice === maxPrice
+  ? `$${minPrice}`
+  : `$${minPrice} ~ $${maxPrice}`
 
 const isSoldOut = !variants || variants.length === 0 || variants.every(v => Number(v.stock || 0) <= 0)
 
@@ -110,7 +118,7 @@ if(p.preorder_type === "limited"){
     <div style="font-size:12px;color:#666;">
       ${p.description || ""}
     </div>
-    <div class="product-price">$${minPrice}</div>
+    <div class="product-price">${priceText}</div>
   </div>
 `
   

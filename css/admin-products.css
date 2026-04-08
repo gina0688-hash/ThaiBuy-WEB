@@ -302,3 +302,25 @@ textarea{
   display:flex;
   justify-content:flex-end;
 }
+
+.variant-preview{
+  margin-top: 8px;
+  line-height: 1.7;
+  color: #333;
+}
+
+
+.toggle-variants-btn{
+  margin-top: 8px;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 8px;
+  background: #f3f4f6;
+  color: #333;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.toggle-variants-btn:hover{
+  background: #e5e7eb;
+}
