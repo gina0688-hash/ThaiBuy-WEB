@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>賣貨便管理</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/admin-711.css">
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <img src="../LOGO.png" class="brand-logo" alt="THAI BUY logo">
+    <div>
+      <div class="brand-title">THAI BUY</div>
+      <div class="brand-subtitle">可愛又安心的泰國代購</div>
+    </div>
+  </div>
+
+  <div class="topbar-nav">
+  <a href="./admin-orders.html" class="topbar-link">訂單管理</a>
+    <a href="./admin-products.html" class="topbar-link">商品管理</a>
+    <a href="./admin-tracking.html" class="topbar-link">貨態管理</a>
+    <a href="./admin-711.html" class="topbar-link active">賣貨便管理</a>
+    <a href="./admin-settlement.html" class="topbar-link">帳務管理</a>
+    <a href="./admin-expenses.html" class="topbar-link">內帳支出</a>
+    <a href="./admin-wallet.html" class="topbar-link">儲值金管理</a>
+    <a href="./admin-711-income.html" class="topbar-link">7-11入帳</a>
+    <a href="./admin-self-usage.html" class="topbar-link">自用紀錄</a>
+    
+  </div>
+</div>
+
+<div class="container">
+  <div class="admin-page-header">
+    <div>
+      <h1>賣貨便管理</h1>
+      <p>在這裡新增、編輯與上下架前台要顯示的賣貨便賣場。</p>
+    </div>
+  </div>
+
+  <div class="admin-grid">
+    <div class="admin-card">
+      <h2 id="formTitle">新增賣場</h2>
+
+      <form id="marketForm" class="admin-form">
+        <input type="hidden" id="editId">
+
+        <label>賣場名稱</label>
+        <input type="text" id="marketName" placeholder="例如：4/10 補款賣場" required>
+
+        <label>賣場連結</label>
+        <input type="url" id="marketUrl" placeholder="請貼上完整網址" required>
+
+        <label>提醒文字</label>
+        <textarea id="marketNote" rows="3" placeholder="請勿下單到其他人的單子，僅限下單 THAI BUY 指定賣場。"></textarea>
+
+        <label>排序</label>
+        <input type="number" id="sortOrder" value="0">
+
+        <label class="checkbox-row">
+          <input type="checkbox" id="isActive" checked>
+          <span>前台顯示</span>
+        </label>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-primary">儲存</button>
+          <button type="button" class="btn-secondary" id="cancelEditBtn" style="display:none;">取消編輯</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="admin-card">
+      <h2>賣場列表</h2>
+      <div id="marketTableWrap" class="table-wrap">
+        <div class="loading-box">載入中...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="../js/admin-711.js"></script>
+</body>
+</html>

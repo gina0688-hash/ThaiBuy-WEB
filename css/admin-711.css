@@ -1,0 +1,195 @@
+.container{
+  max-width:1200px;
+  margin:30px auto;
+  padding:0 16px 40px;
+}
+
+.admin-page-header{
+  margin-bottom:20px;
+}
+
+.admin-page-header h1{
+  margin:0 0 8px;
+  font-size:28px;
+  color:#2d2d2d;
+}
+
+.admin-page-header p{
+  margin:0;
+  color:#666;
+}
+
+.admin-grid{
+  display:grid;
+  grid-template-columns:360px 1fr;
+  gap:20px;
+}
+
+.admin-card{
+  background:#fff;
+  border:1px solid #eee;
+  border-radius:18px;
+  padding:20px;
+  box-shadow:0 10px 24px rgba(0,0,0,0.04);
+}
+
+.admin-card h2{
+  margin:0 0 16px;
+  font-size:20px;
+}
+
+.admin-form{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.admin-form label{
+  font-size:14px;
+  font-weight:700;
+  color:#444;
+}
+
+.admin-form input[type="text"],
+.admin-form input[type="url"],
+.admin-form input[type="number"],
+.admin-form textarea{
+  width:100%;
+  padding:12px 14px;
+  border:1px solid #ddd;
+  border-radius:12px;
+  font-size:14px;
+  box-sizing:border-box;
+}
+
+.admin-form textarea{
+  resize:vertical;
+  min-height:90px;
+}
+
+.checkbox-row{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-top:6px;
+}
+
+.form-actions{
+  display:flex;
+  gap:10px;
+  margin-top:8px;
+}
+
+.btn-primary,
+.btn-secondary,
+.btn-edit,
+.btn-delete,
+.btn-toggle{
+  border:none;
+  border-radius:10px;
+  padding:10px 14px;
+  font-size:14px;
+  cursor:pointer;
+  transition:0.2s;
+}
+
+.btn-primary{
+  background:#ff8a3d;
+  color:#fff;
+  font-weight:700;
+}
+
+.btn-primary:hover{
+  opacity:0.92;
+}
+
+.btn-secondary{
+  background:#f3f4f6;
+  color:#333;
+}
+
+.btn-secondary:hover{
+  background:#e5e7eb;
+}
+
+.table-wrap{
+  overflow-x:auto;
+}
+
+.market-table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+.market-table th,
+.market-table td{
+  padding:12px 10px;
+  border-bottom:1px solid #eee;
+  text-align:left;
+  vertical-align:top;
+  font-size:14px;
+}
+
+.market-table th{
+  background:#fff8f3;
+  color:#a85619;
+  font-weight:800;
+}
+
+.url-text{
+  word-break:break-all;
+  color:#666;
+  line-height:1.7;
+}
+
+.status-badge{
+  display:inline-block;
+  padding:6px 10px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:700;
+}
+
+.status-on{
+  background:#e8fff1;
+  color:#1f8a4c;
+}
+
+.status-off{
+  background:#f5f5f5;
+  color:#777;
+}
+
+.action-group{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+.btn-edit{
+  background:#fff3e8;
+  color:#c86919;
+}
+
+.btn-delete{
+  background:#ffe8e8;
+  color:#c53a3a;
+}
+
+.btn-toggle{
+  background:#eef4ff;
+  color:#3b5ccc;
+}
+
+.loading-box,
+.empty-box{
+  padding:20px;
+  text-align:center;
+  color:#666;
+}
+
+@media (max-width: 900px){
+  .admin-grid{
+    grid-template-columns:1fr;
+  }
+}
