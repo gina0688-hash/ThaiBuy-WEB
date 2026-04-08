@@ -113,10 +113,13 @@ if(p.preorder_type === "limited"){
     </button>
   </div>
 
-<div class="product-info">
-  <div class="product-name">${p.name}</div>
-  <div class="product-price">${priceText}</div>
-</div>
+  <div class="product-info">
+    <div class="product-name">${p.name}</div>
+    <div style="font-size:12px;color:#666;">
+      ${p.description || ""}
+    </div>
+    <div class="product-price">${priceText}</div>
+  </div>
 `
   
     div.onclick = ()=>{
