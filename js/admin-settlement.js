@@ -217,7 +217,7 @@ const cargo_no = document.getElementById("cargo_no").value.trim()
   const card_fee = Number(document.getElementById("card_fee").value || 0)
   const exchange_rate = Number(document.getElementById("exchange_rate").value || 0)
   const local_shipping = Number(document.getElementById("local_shipping").value || 0)
-  const international_shipping = Number(document.getElementById("international_shipping").value || 0)
+ const shipping_per_kg = Number(document.getElementById("shipping_per_kg").value || 0)
   const reward_rate = Number(document.getElementById("reward_rate").value || 0)
   const reward_amount = Number(document.getElementById("reward_amount").value || 0)
   const is_reward_used = document.getElementById("is_reward_used").value === "true"
@@ -279,7 +279,7 @@ const payload = {
   amount_twd_final,
   exchange_rate,
   local_shipping,
-  international_shipping,
+  shipping_per_kg,
   reward_rate,
   reward_amount,
   is_reward_used,
@@ -333,7 +333,7 @@ document.getElementById("payer_name").value = ""
   document.getElementById("card_fee").value = 0
   document.getElementById("exchange_rate").value = 0
   document.getElementById("local_shipping").value = 0
-  document.getElementById("international_shipping").value = 0
+ document.getElementById("shipping_per_kg").value = 160
   document.getElementById("reward_rate").value = 0
   document.getElementById("reward_amount").value = 0
   document.getElementById("is_reward_used").value = "false"
@@ -381,7 +381,7 @@ document.getElementById("payer_name").value = data.payer_name || ""
   document.getElementById("card_fee").value = data.card_fee ?? 0
   document.getElementById("exchange_rate").value = data.exchange_rate ?? 0
   document.getElementById("local_shipping").value = data.local_shipping ?? 0
- document.getElementById("international_shipping").value = data.international_shipping ?? 0
+document.getElementById("shipping_per_kg").value = data.shipping_per_kg ?? 160
   document.getElementById("reward_rate").value = data.reward_rate ?? 0
   document.getElementById("reward_amount").value = data.reward_amount ?? 0
   document.getElementById("is_reward_used").value = String(data.is_reward_used)
@@ -724,7 +724,8 @@ const totalWeight = itemList.reduce((sum, item) => {
   return sum + (Number(item.qty || 0) * Number(item.unit_weight || 0))
 }, 0)
 
-const estimatedInternationalShipping = Number(batch.international_shipping || 0)
+const shippingPerKg = Number(batch.shipping_per_kg || 0)
+const estimatedInternationalShipping = totalWeight * shippingPerKg
 
 const batchBaseCost = calcBatchActualCost(batch)
 const batchActualCost = batchBaseCost + estimatedInternationalShipping
@@ -845,6 +846,7 @@ batchCard.className = hasNegativeProfit ? "batch-card batch-card-danger" : "batc
         <div>刷卡手續費：${Number(batch.card_fee || 0).toFixed(2)}</div>
         <div>匯率：${Number(batch.exchange_rate || 0).toFixed(4)}</div>
         <div>當地運費（已含刷卡）：${Number(batch.local_shipping || 0).toFixed(2)}</div>
+        <div>每公斤國際運費：${Number(batch.shipping_per_kg || 0).toFixed(2)}</div>
         <div>回饋：${Number(batch.reward_amount || 0).toFixed(2)}（${rewardUsedText}）</div>
 <div class="batch-summary">
   <span>購買商品件數：${totalQty}</span>
@@ -905,6 +907,19 @@ async function updateBatchWeightInfo(batchId){
     return
   }
 
+  const { data: batchData, error: batchError } = await supabase
+    .from("accounting_batches")
+    .select("shipping_per_kg")
+    .eq("id", batchId)
+    .single()
+
+  if(batchError){
+    console.error("read batch shipping_per_kg error:", batchError)
+    weightInput.value = 0
+    shippingInput.value = 0
+    return
+  }
+
   const { data, error } = await supabase
     .from("accounting_batch_items")
     .select("qty, unit_weight")
@@ -921,11 +936,11 @@ async function updateBatchWeightInfo(batchId){
     return sum + (Number(row.qty || 0) * Number(row.unit_weight || 0))
   }, 0)
 
-  const shippingPerKg = Number(document.getElementById("shipping_per_kg")?.value || 0)
-  const estimatedShipping = totalWeight * shippingPerKg
+  const shippingPerKg = Number(batchData?.shipping_per_kg || 0)
+  const estimatedInternationalShipping = totalWeight * shippingPerKg
 
   weightInput.value = totalWeight.toFixed(3)
-  shippingInput.value = estimatedShipping.toFixed(2)
+  shippingInput.value = estimatedInternationalShipping.toFixed(2)
 }
 
 function updateEstimatedShippingOnly(){
