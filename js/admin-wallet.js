@@ -15,6 +15,8 @@ window.cancelWalletEdit = cancelWalletEdit
 window.editWalletLog = editWalletLog
 window.deleteWalletLog = deleteWalletLog
 window.cancelWalletLogEdit = cancelWalletLogEdit
+window.toggleWalletForm = toggleWalletForm
+window.toggleWalletLogForm = toggleWalletLogForm
 
 init()
 
@@ -23,6 +25,8 @@ async function init(){
   if(!user) return
 
   ensureActionButtons()
+  toggleWalletForm(false)
+  toggleWalletLogForm(false)
 
   document.getElementById("wallet_search")?.addEventListener("input", () => {
     clearTimeout(searchTimer)
@@ -34,6 +38,40 @@ async function init(){
   document.getElementById("log_date").value = getTodayDate()
 
   await loadWallets()
+}
+
+function toggleWalletForm(forceOpen = null){
+  const wrap = document.getElementById("walletFormWrap")
+  const btn = document.getElementById("toggleWalletFormBtn")
+  if(!wrap) return
+
+  const shouldOpen = forceOpen === null
+    ? wrap.classList.contains("form-collapsed")
+    : forceOpen
+
+  wrap.classList.toggle("form-collapsed", !shouldOpen)
+  wrap.classList.toggle("form-expanded", shouldOpen)
+
+  if(btn){
+    btn.textContent = shouldOpen ? "－收起儲值帳戶表單" : "＋新增儲值帳戶"
+  }
+}
+
+function toggleWalletLogForm(forceOpen = null){
+  const wrap = document.getElementById("walletLogFormWrap")
+  const btn = document.getElementById("toggleWalletLogFormBtn")
+  if(!wrap) return
+
+  const shouldOpen = forceOpen === null
+    ? wrap.classList.contains("form-collapsed")
+    : forceOpen
+
+  wrap.classList.toggle("form-collapsed", !shouldOpen)
+  wrap.classList.toggle("form-expanded", shouldOpen)
+
+  if(btn){
+    btn.textContent = shouldOpen ? "－收起儲值異動表單" : "＋新增異動"
+  }
 }
 
 function ensureActionButtons(){
@@ -100,9 +138,10 @@ async function saveWallet(){
     return
   }
 
-  alert(editingWalletId ? "帳戶更新成功" : "帳戶建立成功")
-  clearWalletForm()
-  await loadWallets()
+alert(editingWalletId ? "帳戶更新成功" : "帳戶建立成功")
+clearWalletForm()
+toggleWalletForm(false)
+await loadWallets()
 }
 
 async function saveWalletLog(){
@@ -148,9 +187,10 @@ async function saveWalletLog(){
     return
   }
 
-  alert(editingWalletLogId ? "異動更新成功" : "異動新增成功")
-  clearWalletLogForm()
-  await loadWallets()
+alert(editingWalletLogId ? "異動更新成功" : "異動新增成功")
+clearWalletLogForm()
+toggleWalletLogForm(false)
+await loadWallets()
 }
 
 function clearWalletLogForm(){
@@ -171,6 +211,7 @@ function clearWalletLogForm(){
 
 function cancelWalletLogEdit(){
   clearWalletLogForm()
+  toggleWalletLogForm(false)
 }
 
 async function editWallet(walletId){
@@ -199,7 +240,8 @@ async function editWallet(walletId){
   const cancelBtn = document.getElementById("cancelWalletEditBtn")
   if(cancelBtn) cancelBtn.style.display = "inline-block"
 
-  window.scrollTo({ top: 0, behavior: "smooth" })
+ toggleWalletForm(true)
+window.scrollTo({ top: 0, behavior: "smooth" })
 }
 
 async function deleteWallet(walletId){
@@ -420,7 +462,8 @@ async function editWalletLog(logId){
   const cancelBtn = document.getElementById("cancelWalletLogEditBtn")
   if(cancelBtn) cancelBtn.style.display = "inline-block"
 
-  window.scrollTo({ top: 0, behavior: "smooth" })
+toggleWalletLogForm(true)
+window.scrollTo({ top: 0, behavior: "smooth" })
 }
 
 async function deleteWalletLog(logId){
@@ -462,4 +505,5 @@ function clearWalletForm(){
 
 function cancelWalletEdit(){
   clearWalletForm()
+  toggleWalletForm(false)
 }

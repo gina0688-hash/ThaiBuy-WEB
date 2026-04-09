@@ -36,9 +36,15 @@
 
 <div class="container">
 
-  <div class="card">
+<div class="card">
+  <div class="card-header-row">
     <h2>新增儲值帳戶</h2>
+    <button type="button" class="btn-primary" id="toggleWalletFormBtn" onclick="toggleWalletForm()">
+      ＋新增儲值帳戶
+    </button>
+  </div>
 
+  <div id="walletFormWrap" class="form-collapsed">
     <label>客戶姓名</label>
     <input type="text" id="customer_name" placeholder="例如：王小美">
 
@@ -55,10 +61,17 @@
       <button type="button" class="btn-primary" onclick="saveWallet()">建立帳戶</button>
     </div>
   </div>
+</div>
 
-  <div class="card">
+ <div class="card">
+  <div class="card-header-row">
     <h2>儲值金異動</h2>
+    <button type="button" class="btn-primary" id="toggleWalletLogFormBtn" onclick="toggleWalletLogForm()">
+      ＋新增異動
+    </button>
+  </div>
 
+  <div id="walletLogFormWrap" class="form-collapsed">
     <label>選擇客戶帳戶</label>
     <select id="wallet_select"></select>
 
@@ -84,10 +97,11 @@
     <textarea id="log_note" placeholder="例如：原訂單 O20260406 被砍單，轉為儲值"></textarea>
 
     <div class="form-actions">
-  <button type="button" class="btn-primary" id="saveWalletLogBtn" onclick="saveWalletLog()">新增異動</button>
-  <button type="button" class="btn-cancel" id="cancelWalletLogEditBtn" onclick="cancelWalletLogEdit()" style="display:none;">取消編輯</button>
-</div>
+      <button type="button" class="btn-primary" id="saveWalletLogBtn" onclick="saveWalletLog()">新增異動</button>
+      <button type="button" class="btn-cancel" id="cancelWalletLogEditBtn" onclick="cancelWalletLogEdit()" style="display:none;">取消編輯</button>
+    </div>
   </div>
+</div>
 
   <div class="card">
     <h2>儲值金查詢</h2>
