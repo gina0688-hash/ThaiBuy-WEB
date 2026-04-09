@@ -54,7 +54,7 @@ function keepProductFormOpen(){
 
 window.cancelEdit = function(){
   resetForm()
-  toggleProductForm(false)
+
 }
 window.toggleProductForm = toggleProductForm
 window.toggleDepositFields = function(){
@@ -490,7 +490,7 @@ if(wasEditing){
   keepProductFormOpen()
 }else{
   resetForm()
-  toggleProductForm(false)
+
 }
 }
 
@@ -803,7 +803,7 @@ async function init(){
   setFormMode(false)
   toggleDepositFields()
   toggleDepositAmount()
-  toggleProductForm(false)
+
 
   document.getElementById("searchKeyword")
     ?.addEventListener("keydown", (e)=>{
