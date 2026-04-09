@@ -217,6 +217,7 @@ const cargo_no = document.getElementById("cargo_no").value.trim()
   const card_fee = Number(document.getElementById("card_fee").value || 0)
   const exchange_rate = Number(document.getElementById("exchange_rate").value || 0)
   const local_shipping = Number(document.getElementById("local_shipping").value || 0)
+  const international_shipping = Number(document.getElementById("international_shipping").value || 0)
   const reward_rate = Number(document.getElementById("reward_rate").value || 0)
   const reward_amount = Number(document.getElementById("reward_amount").value || 0)
   const is_reward_used = document.getElementById("is_reward_used").value === "true"
@@ -278,6 +279,7 @@ const payload = {
   amount_twd_final,
   exchange_rate,
   local_shipping,
+  international_shipping,
   reward_rate,
   reward_amount,
   is_reward_used,
@@ -331,6 +333,7 @@ document.getElementById("payer_name").value = ""
   document.getElementById("card_fee").value = 0
   document.getElementById("exchange_rate").value = 0
   document.getElementById("local_shipping").value = 0
+  document.getElementById("international_shipping").value = 0
   document.getElementById("reward_rate").value = 0
   document.getElementById("reward_amount").value = 0
   document.getElementById("is_reward_used").value = "false"
@@ -378,7 +381,7 @@ document.getElementById("payer_name").value = data.payer_name || ""
   document.getElementById("card_fee").value = data.card_fee ?? 0
   document.getElementById("exchange_rate").value = data.exchange_rate ?? 0
   document.getElementById("local_shipping").value = data.local_shipping ?? 0
- 
+ document.getElementById("international_shipping").value = data.international_shipping ?? 0
   document.getElementById("reward_rate").value = data.reward_rate ?? 0
   document.getElementById("reward_amount").value = data.reward_amount ?? 0
   document.getElementById("is_reward_used").value = String(data.is_reward_used)
@@ -721,8 +724,7 @@ const totalWeight = itemList.reduce((sum, item) => {
   return sum + (Number(item.qty || 0) * Number(item.unit_weight || 0))
 }, 0)
 
-const shippingPerKg = Number(document.getElementById("shipping_per_kg")?.value || 0)
-const estimatedInternationalShipping = totalWeight * shippingPerKg
+const estimatedInternationalShipping = Number(batch.international_shipping || 0)
 
 const batchBaseCost = calcBatchActualCost(batch)
 const batchActualCost = batchBaseCost + estimatedInternationalShipping
