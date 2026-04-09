@@ -39,6 +39,18 @@ function toggleProductForm(forceOpen = null){
   }
 }
 
+function keepProductFormOpen(){
+  const wrap = document.getElementById("productFormWrap")
+  const btn = document.getElementById("toggleProductFormBtn")
+  if(!wrap) return
+
+  wrap.classList.remove("form-collapsed")
+  wrap.classList.add("form-expanded")
+
+  if(btn){
+    btn.textContent = "－收起商品表單"
+  }
+}
 
 window.cancelEdit = function(){
   resetForm()
@@ -467,12 +479,19 @@ window.saveProduct = async function(){
       }
     }
   }
+alert("完成 🎉")
 
-   alert("完成 🎉")
+const wasEditing = !!editingId
 
-resetForm()
-toggleProductForm(false)
 await loadProducts()
+
+if(wasEditing){
+  setFormMode(true)
+  keepProductFormOpen()
+}else{
+  resetForm()
+  toggleProductForm(false)
+}
 }
 
 window.toggleProductVariants = function(productId){
