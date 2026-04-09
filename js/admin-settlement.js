@@ -6,6 +6,7 @@ let allBatchRows = []
 let batchSearchTimer = null
 let expandedBatchDetails = new Set()
 let expandedBatchItems = new Set()
+let currentUser = null
 
 window.saveBatch = saveBatch
 window.saveBatchItem = saveBatchItem
@@ -25,6 +26,9 @@ window.toggleBatchItems = toggleBatchItems
 init()
 
 async function init(){
+  const { data: { user } } = await supabase.auth.getUser()
+  currentUser = user
+
   bindAutoCalc()
   ensureActionButtons()
   toggleBatchForm(false)
@@ -38,20 +42,20 @@ async function init(){
     updateEstimatedShippingOnly()
   })
 
-document.getElementById("batch_search")?.addEventListener("input", () => {
-  clearTimeout(batchSearchTimer)
-  batchSearchTimer = setTimeout(() => {
-    filterBatchList()
-  }, 300)
-})
+  document.getElementById("batch_search")?.addEventListener("input", () => {
+    clearTimeout(batchSearchTimer)
+    batchSearchTimer = setTimeout(() => {
+      filterBatchList()
+    }, 300)
+  })
 
-document.getElementById("stock_status_search")?.addEventListener("change", filterBatchList)
-document.getElementById("packed_status_search")?.addEventListener("change", filterBatchList)
-document.getElementById("batch_date_start")?.addEventListener("change", filterBatchList)
-document.getElementById("batch_date_end")?.addEventListener("change", filterBatchList)
-
-await loadBatches()
-await loadProducts()
+  document.getElementById("stock_status_search")?.addEventListener("change", filterBatchList)
+  document.getElementById("packed_status_search")?.addEventListener("change", filterBatchList)
+  document.getElementById("batch_date_start")?.addEventListener("change", filterBatchList)
+  document.getElementById("batch_date_end")?.addEventListener("change", filterBatchList)
+document.getElementById("creator_search")?.addEventListener("change", filterBatchList)
+  await loadBatches()
+  await loadProducts()
 }
 
 function toggleBatchForm(forceOpen = null){
@@ -261,6 +265,11 @@ return {
 ========================= */
 
 async function saveBatch(){
+if(!currentUser?.id){
+  alert("登入狀態失效，請重新登入後再試")
+  return
+}
+
   const batch_date = document.getElementById("batch_date").value
 const batch_name = document.getElementById("batch_name").value.trim()
 const purchase_source = document.getElementById("purchase_source").value.trim()
@@ -320,7 +329,7 @@ const cargo_no = document.getElementById("cargo_no").value.trim()
     packed_at = packed_status ? new Date().toISOString() : null
   }
 
-const payload = {
+const basePayload = {
   batch_date,
   batch_name,
   purchase_source,
@@ -348,20 +357,23 @@ const payload = {
 
   let error = null
 
-  if(editingBatchId){
-    const res = await supabase
-      .from("accounting_batches")
-      .update(payload)
-      .eq("id", editingBatchId)
+ if(editingBatchId){
+  const res = await supabase
+    .from("accounting_batches")
+    .update(basePayload)
+    .eq("id", editingBatchId)
 
-    error = res.error
-  }else{
-    const res = await supabase
-      .from("accounting_batches")
-      .insert([payload])
+  error = res.error
+}else{
+  const res = await supabase
+    .from("accounting_batches")
+    .insert([{
+      ...basePayload,
+      created_by: currentUser?.id
+    }])
 
-    error = res.error
-  }
+  error = res.error
+}
 
   if(error){
     console.error("saveBatch error:", error)
@@ -719,30 +731,56 @@ if(document.getElementById("batch_select").value === oldItem.batch_id){
 ========================= */
 
 async function loadBatches(){
-  const { data, error } = await supabase
+  // 1) 先抓全部批次，給下面列表用
+  const { data: allData, error: allError } = await supabase
     .from("accounting_batches")
     .select("*")
     .order("batch_date", { ascending: false })
     .order("created_at", { ascending: false })
 
-
-    allBatchRows = data || []
-  if(error){
-    console.error("loadBatches error:", error)
+  if(allError){
+    console.error("load all batches error:", allError)
     return
   }
 
-  const select = document.getElementById("batch_select")
-  const currentValue = select.value
+  allBatchRows = allData || []
 
-  select.innerHTML = `<option value="">請選擇批次</option>`
+  // 2) 再抓自己的批次，給上方商品加入用的下拉選單
+  let myData = []
 
-  for(const b of data || []){
-    select.innerHTML += `<option value="${b.id}">${b.batch_date}｜${b.batch_name}</option>`
+  if(currentUser?.id){
+    const { data: ownData, error: ownError } = await supabase
+      .from("accounting_batches")
+      .select("*")
+      .eq("created_by", currentUser.id)
+      .order("batch_date", { ascending: false })
+      .order("created_at", { ascending: false })
+
+    if(ownError){
+      console.error("load my batches error:", ownError)
+      return
+    }
+
+    myData = ownData || []
   }
 
-  if(currentValue){
-    select.value = currentValue
+  const select = document.getElementById("batch_select")
+  const currentValue = select?.value || ""
+
+  if(select){
+    select.innerHTML = `<option value="">請選擇批次</option>`
+
+    for(const b of myData){
+      select.innerHTML += `
+        <option value="${b.id}">
+          ${b.batch_date}｜${b.batch_name}
+        </option>
+      `
+    }
+
+    if(currentValue && myData.some(b => b.id === currentValue)){
+      select.value = currentValue
+    }
   }
 
   await renderBatchList(allBatchRows)
@@ -911,11 +949,18 @@ let itemsHtml = ""
           </div>
         </div>
 
-        <div class="batch-quick-info">
-          <div><b>購買來源：</b>${batch.purchase_source || "-"}</div>
-          <div><b>官方訂單編號：</b>${batch.official_order_no || "-"}</div>
-          <div><b>貨態編號：</b>${batch.cargo_no || "-"}</div>
-        </div>
+      <div class="batch-quick-info">
+  <div><b>建立者：</b>${
+    batch.created_by === "fa754f11-9a7e-4ced-8cbb-da30f01292e0"
+      ? "青"
+      : batch.created_by === "6dfc15fc-dacc-4515-ae56-49a8722fe534"
+      ? "媛媛"
+      : "-"
+  }</div>
+  <div><b>購買來源：</b>${batch.purchase_source || "-"}</div>
+  <div><b>官方訂單編號：</b>${batch.official_order_no || "-"}</div>
+  <div><b>貨態編號：</b>${batch.cargo_no || "-"}</div>
+</div>
 
         <div class="batch-tags">
           <span class="status-tag stock-${batch.stock_status || "pending"}">
@@ -1061,18 +1106,19 @@ async function filterBatchList(){
   const packedStatus = document.getElementById("packed_status_search")?.value || ""
   const startDate = document.getElementById("batch_date_start")?.value || ""
   const endDate = document.getElementById("batch_date_end")?.value || ""
+  const creatorId = document.getElementById("creator_search")?.value || ""
 
   const filtered = allBatchRows.filter(batch => {
     const batchName = String(batch.batch_name || "").toLowerCase()
-const officialOrderNo = String(batch.official_order_no || "").toLowerCase()
-const cargoNo = String(batch.cargo_no || "").toLowerCase()
-const batchDate = String(batch.batch_date || "")
+    const officialOrderNo = String(batch.official_order_no || "").toLowerCase()
+    const cargoNo = String(batch.cargo_no || "").toLowerCase()
+    const batchDate = String(batch.batch_date || "")
 
-const matchKeyword =
-  !keyword ||
-  batchName.includes(keyword) ||
-  officialOrderNo.includes(keyword) ||
-  cargoNo.includes(keyword)
+    const matchKeyword =
+      !keyword ||
+      batchName.includes(keyword) ||
+      officialOrderNo.includes(keyword) ||
+      cargoNo.includes(keyword)
 
     const matchStockStatus =
       !stockStatus ||
@@ -1090,17 +1136,23 @@ const matchKeyword =
       !endDate ||
       batchDate <= endDate
 
+    const matchCreator =
+      !creatorId ||
+      String(batch.created_by || "") === creatorId
+
     return (
       matchKeyword &&
       matchStockStatus &&
       matchPackedStatus &&
       matchStartDate &&
-      matchEndDate
+      matchEndDate &&
+      matchCreator
     )
   })
 
   await renderBatchList(filtered)
 }
+
 
 function formatStockStatus(status){
   switch(status){
@@ -1130,18 +1182,19 @@ async function exportSettlementCsv(){
   const packedStatus = document.getElementById("packed_status_search")?.value || ""
   const startDate = document.getElementById("batch_date_start")?.value || ""
   const endDate = document.getElementById("batch_date_end")?.value || ""
+  const creatorId = document.getElementById("creator_search")?.value || ""
 
   const filtered = allBatchRows.filter(batch => {
-  const batchName = String(batch.batch_name || "").toLowerCase()
-const officialOrderNo = String(batch.official_order_no || "").toLowerCase()
-const cargoNo = String(batch.cargo_no || "").toLowerCase()
-const batchDate = String(batch.batch_date || "")
+    const batchName = String(batch.batch_name || "").toLowerCase()
+    const officialOrderNo = String(batch.official_order_no || "").toLowerCase()
+    const cargoNo = String(batch.cargo_no || "").toLowerCase()
+    const batchDate = String(batch.batch_date || "")
 
-const matchKeyword =
-  !keyword ||
-  batchName.includes(keyword) ||
-  officialOrderNo.includes(keyword) ||
-  cargoNo.includes(keyword)
+    const matchKeyword =
+      !keyword ||
+      batchName.includes(keyword) ||
+      officialOrderNo.includes(keyword) ||
+      cargoNo.includes(keyword)
 
     const matchStockStatus =
       !stockStatus ||
@@ -1159,12 +1212,17 @@ const matchKeyword =
       !endDate ||
       batchDate <= endDate
 
+    const matchCreator =
+      !creatorId ||
+      String(batch.created_by || "") === creatorId
+
     return (
       matchKeyword &&
       matchStockStatus &&
       matchPackedStatus &&
       matchStartDate &&
-      matchEndDate
+      matchEndDate &&
+      matchCreator
     )
   })
 
