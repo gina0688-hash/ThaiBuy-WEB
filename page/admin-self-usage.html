@@ -142,12 +142,16 @@
 
         <div class="field">
           <label>品項</label>
-          <input type="text" id="itemName" placeholder="例如：T恤 / 小卡 / 外套" required>
+          <select id="itemName">
+  <option value="">請先選擇系列</option>
+</select>
         </div>
 
         <div class="field">
           <label>規格 / 尺寸 / 顏色</label>
-          <input type="text" id="variantName" placeholder="可不填">
+          <select id="variantName">
+  <option value="">請先選擇品項</option>
+</select>
         </div>
 
         <div class="field">
@@ -156,7 +160,7 @@
         </div>
 
         <div class="field">
-          <label>成本單價</label>
+          <label>成本單價 (含國際運費)</label>
           <input type="number" id="costPrice" min="0" step="0.01" placeholder="0" required>
         </div>
 

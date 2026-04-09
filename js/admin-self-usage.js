@@ -4,6 +4,8 @@ import { loadAuth } from "./auth.js"
 let currentUser = null
 let allRecords = []
 let allSeries = []
+let allProducts = []
+let allVariants = []
 let isSubmitting = false
 
 const $ = (id) => document.getElementById(id)
@@ -37,6 +39,9 @@ function bindEvents() {
   $("holderFilter").addEventListener("input", renderTable)
   $("startDate").addEventListener("change", renderTable)
   $("endDate").addEventListener("change", renderTable)
+
+  $("seriesName").addEventListener("change", handleSeriesChange)
+  $("itemName").addEventListener("change", handleItemChange)
 }
 
 function setTodayDefault() {
@@ -74,13 +79,12 @@ async function loadSeriesOptions() {
   }
 
   allSeries = data || []
-
-  $("seriesName").innerHTML = `
-    <option value="">請選擇系列</option>
-    ${allSeries.map(series => `
-      <option value="${escapeHtml(series.name)}">${escapeHtml(series.name)}</option>
-    `).join("")}
-  `
+$("seriesName").innerHTML = `
+  <option value="">請選擇系列</option>
+  ${allSeries.map(series => `
+    <option value="${series.id}">${escapeHtml(series.name)}</option>
+  `).join("")}
+`
 }
 
 function getFilteredRecords() {
@@ -285,12 +289,13 @@ function openCreateForm() {
   $("recordId").value = ""
   setTodayDefault()
   $("qty").value = 1
+  clearProductAndVariant()
   updatePreview()
   $("formCard").classList.remove("hidden")
   window.scrollTo({ top: 0, behavior: "smooth" })
 }
 
-function openEditForm(id) {
+async function openEditForm(id) {
   const row = allRecords.find(item => item.id === id)
   if (!row) return
 
@@ -298,13 +303,14 @@ function openEditForm(id) {
   $("recordId").value = row.id
   $("takenDate").value = row.taken_date || ""
   $("holderName").value = row.holder_name || ""
-  $("seriesName").value = row.series_name || ""
-  $("itemName").value = row.item_name || ""
-  $("variantName").value = row.variant_name || ""
   $("qty").value = row.qty || 1
   $("costPrice").value = row.cost_price || 0
   $("salePrice").value = row.sale_price || 0
   $("note").value = row.note || ""
+
+  $("seriesName").value = row.series_id || ""
+  await loadProductOptions(row.series_id || "", row.product_id || "")
+  await loadVariantOptions(row.product_id || "", row.variant_id || "")
 
   updatePreview()
   $("formCard").classList.remove("hidden")
@@ -328,22 +334,32 @@ async function handleSubmit(e) {
   if (isSubmitting) return
 
   const recordId = $("recordId").value
-  const payload = {
-    taken_date: $("takenDate").value,
-    holder_name: $("holderName").value.trim(),
-    series_name: $("seriesName").value.trim(),
-    item_name: $("itemName").value.trim(),
-    variant_name: $("variantName").value.trim() || null,
-    qty: Number($("qty").value || 1),
-    cost_price: Number($("costPrice").value || 0),
-    sale_price: Number($("salePrice").value || 0),
-    note: $("note").value.trim() || null
-  }
+const seriesId = $("seriesName").value || null
+const productId = $("itemName").value || null
+const variantId = $("variantName").value || null
 
-  if (!payload.taken_date || !payload.holder_name || !payload.series_name || !payload.item_name) {
-    alert("請把必填欄位填完整")
-    return
-  }
+const payload = {
+  taken_date: $("takenDate").value,
+  holder_name: $("holderName").value.trim(),
+
+  series_id: seriesId,
+  product_id: productId,
+  variant_id: variantId,
+
+  series_name: getSelectedText("seriesName"),
+  item_name: getSelectedText("itemName"),
+  variant_name: variantId ? getSelectedText("variantName") : null,
+
+  qty: Number($("qty").value || 1),
+  cost_price: Number($("costPrice").value || 0),
+  sale_price: Number($("salePrice").value || 0),
+  note: $("note").value.trim() || null
+}
+
+if (!payload.taken_date || !payload.holder_name || !payload.series_id || !payload.product_id) {
+  alert("請把必填欄位填完整")
+  return
+}
 
   if (payload.qty <= 0) {
     alert("數量必須大於 0")
@@ -429,4 +445,95 @@ function escapeHtml(str) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;")
+}
+
+async function loadProductOptions(seriesId, selectedProductId = "") {
+  if (!seriesId) {
+    allProducts = []
+    $("itemName").innerHTML = `<option value="">請先選擇系列</option>`
+    $("variantName").innerHTML = `<option value="">請先選擇品項</option>`
+    return
+  }
+
+  const { data, error } = await supabase
+    .from("products")
+    .select("id, name, series_id")
+    .eq("series_id", seriesId)
+    .order("name", { ascending: true })
+
+  if (error) {
+    console.error("載入品項失敗:", error)
+    $("itemName").innerHTML = `<option value="">載入失敗</option>`
+    $("variantName").innerHTML = `<option value="">請先選擇品項</option>`
+    return
+  }
+
+  allProducts = data || []
+
+  $("itemName").innerHTML = `
+    <option value="">請選擇品項</option>
+    ${allProducts.map(product => `
+      <option value="${product.id}" ${product.id === selectedProductId ? "selected" : ""}>
+        ${escapeHtml(product.name)}
+      </option>
+    `).join("")}
+  `
+
+  $("variantName").innerHTML = `<option value="">請先選擇品項</option>`
+}
+
+async function loadVariantOptions(productId, selectedVariantId = "") {
+  if (!productId) {
+    allVariants = []
+    $("variantName").innerHTML = `<option value="">請先選擇品項</option>`
+    return
+  }
+
+  const { data, error } = await supabase
+    .from("product_variants")
+    .select("id, name, product_id")
+    .eq("product_id", productId)
+    .order("name", { ascending: true })
+
+  if (error) {
+    console.error("載入規格失敗:", error)
+    $("variantName").innerHTML = `<option value="">載入失敗</option>`
+    return
+  }
+
+  allVariants = data || []
+
+  if (!allVariants.length) {
+    $("variantName").innerHTML = `<option value="">此商品無規格</option>`
+    return
+  }
+
+  $("variantName").innerHTML = `
+    <option value="">請選擇規格</option>
+    ${allVariants.map(variant => `
+      <option value="${variant.id}" ${variant.id === selectedVariantId ? "selected" : ""}>
+         ${escapeHtml(variant.name)}
+      </option>
+    `).join("")}
+  `
+}
+
+async function handleSeriesChange() {
+  const seriesId = $("seriesName").value
+  await loadProductOptions(seriesId)
+}
+
+async function handleItemChange() {
+  const productId = $("itemName").value
+  await loadVariantOptions(productId)
+}
+
+function getSelectedText(selectId) {
+  const el = $(selectId)
+  return el?.selectedOptions?.[0]?.textContent?.trim() || ""
+}
+
+function clearProductAndVariant() {
+  $("itemName").innerHTML = `<option value="">請先選擇系列</option>`
+  $("variantName").innerHTML = `<option value="">請先選擇品項</option>`
 }

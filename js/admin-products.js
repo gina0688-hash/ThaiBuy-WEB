@@ -22,10 +22,29 @@ function setFormMode(isEdit){
   }
 }
 
-window.cancelEdit = function(){
-  resetForm()
+function toggleProductForm(forceOpen = null){
+  const wrap = document.getElementById("productFormWrap")
+  const btn = document.getElementById("toggleProductFormBtn")
+  if(!wrap) return
+
+  const shouldOpen = forceOpen === null
+    ? wrap.classList.contains("form-collapsed")
+    : forceOpen
+
+  wrap.classList.toggle("form-collapsed", !shouldOpen)
+  wrap.classList.toggle("form-expanded", shouldOpen)
+
+  if(btn){
+    btn.textContent = shouldOpen ? "－收起商品表單" : "＋新增商品"
+  }
 }
 
+
+window.cancelEdit = function(){
+  resetForm()
+  toggleProductForm(false)
+}
+window.toggleProductForm = toggleProductForm
 window.toggleDepositFields = function(){
   const preorderType = document.getElementById("preorder_type")?.value
   const depositBlock = document.getElementById("depositBlock")
@@ -451,8 +470,9 @@ window.saveProduct = async function(){
 
    alert("完成 🎉")
 
-  resetForm()
-  await loadProducts()
+resetForm()
+toggleProductForm(false)
+await loadProducts()
 }
 
 window.toggleProductVariants = function(productId){
@@ -613,6 +633,7 @@ window.editProduct = async function(id){
   editingId = id
   setFormMode(true)
   
+  toggleProductForm(true)
 const formCard = document.querySelector(".product-form-card")
 if(formCard){
   formCard.scrollIntoView({
@@ -763,6 +784,7 @@ async function init(){
   setFormMode(false)
   toggleDepositFields()
   toggleDepositAmount()
+  toggleProductForm(false)
 
   document.getElementById("searchKeyword")
     ?.addEventListener("keydown", (e)=>{

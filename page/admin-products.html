@@ -37,7 +37,14 @@
 
   <!-- 商品新增 -->
   <div class="card product-form-card">
+  <div class="card-header-row">
     <h2 id="formTitle">🛍 新增商品</h2>
+    <button type="button" class="btn-primary" id="toggleProductFormBtn" onclick="toggleProductForm()">
+      ＋新增商品
+    </button>
+  </div>
+
+  <div id="productFormWrap" class="form-collapsed">
 
     <div class="form-section">
       <div class="form-section-title">基本資料</div>
@@ -168,7 +175,7 @@
       <button type="button" class="btn-primary" id="submitBtn" onclick="saveProduct()">送出商品</button>
     </div>
   </div>
-
+</div>
   <!-- 商品列表 -->
  <div class="card product-list-card">
     <h3>商品列表</h3>

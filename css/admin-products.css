@@ -324,3 +324,34 @@ textarea{
 .toggle-variants-btn:hover{
   background: #e5e7eb;
 }
+
+.card-header-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  margin-bottom:12px;
+}
+
+.form-collapsed{
+  display:none;
+}
+
+.form-expanded{
+  display:block;
+}
+
+.card-header-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+}
+
+#toggleProductFormBtn{
+  width:auto;
+  min-width:140px;
+  padding:10px 16px;
+  flex:0 0 auto;
+  white-space:nowrap;
+}
