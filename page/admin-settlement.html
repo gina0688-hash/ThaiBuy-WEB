@@ -35,9 +35,16 @@
 
 <div class="container">
 
-  <!-- 批次主資料 -->
+    <!-- 批次主資料 -->
   <div class="card">
-    <h2>新增帳務批次</h2>
+    <div class="card-header-row">
+      <h2 id="batchFormTitle">新增帳務批次</h2>
+      <button type="button" class="btn-primary" id="toggleBatchFormBtn" onclick="toggleBatchForm()">
+  ＋新增批次
+</button>
+    </div>
+
+    <div id="batchFormWrap" class="form-collapsed">
 
     <div class="form-section">
       <div class="form-section-title">基本資料</div>
@@ -204,10 +211,17 @@
       <button type="button" class="btn-primary" onclick="saveBatch()">建立批次</button>
     </div>
   </div>
-
-  <!-- 加入批次商品 -->
+  </div>
+    <!-- 加入批次商品 -->
   <div class="card" id="itemFormCard">
-    <h2>加入批次商品</h2>
+    <div class="card-header-row">
+      <h2 id="itemFormTitle">加入批次商品</h2>
+      <<button type="button" class="btn-primary" id="toggleItemFormBtn" onclick="toggleItemForm()">
+  ＋新增批次商品
+</button>
+    </div>
+
+    <div id="itemFormWrap" class="form-collapsed">
 
     <div class="form-section">
       <div class="form-section-title">商品選擇</div>
@@ -293,7 +307,7 @@
       <button type="button" class="btn-primary" onclick="saveBatchItem()">加入商品</button>
     </div>
   </div>
-
+ </div>
   <!-- 批次列表 -->
   <div class="card">
     <h2>批次列表</h2>

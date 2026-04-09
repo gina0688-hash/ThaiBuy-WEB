@@ -4,6 +4,8 @@ let editingBatchId = null
 let editingItemId = null
 let allBatchRows = []
 let batchSearchTimer = null
+let expandedBatchDetails = new Set()
+let expandedBatchItems = new Set()
 
 window.saveBatch = saveBatch
 window.saveBatchItem = saveBatchItem
@@ -15,12 +17,18 @@ window.deleteBatchItem = deleteBatchItem
 window.cancelBatchEdit = cancelBatchEdit
 window.cancelItemEdit = cancelItemEdit
 window.exportSettlementCsv = exportSettlementCsv
+window.toggleBatchForm = toggleBatchForm
+window.toggleItemForm = toggleItemForm
+window.toggleBatchDetail = toggleBatchDetail
+window.toggleBatchItems = toggleBatchItems
 
 init()
 
 async function init(){
   bindAutoCalc()
   ensureActionButtons()
+  toggleBatchForm(false)
+  toggleItemForm(false)
 
   document.getElementById("batch_select")?.addEventListener("change", async (e) => {
     await updateBatchWeightInfo(e.target.value)
@@ -44,6 +52,58 @@ document.getElementById("batch_date_end")?.addEventListener("change", filterBatc
 
 await loadBatches()
 await loadProducts()
+}
+
+function toggleBatchForm(forceOpen = null){
+  const wrap = document.getElementById("batchFormWrap")
+  const btn = document.getElementById("toggleBatchFormBtn")
+  if(!wrap) return
+
+  const shouldOpen = forceOpen === null
+    ? wrap.classList.contains("form-collapsed")
+    : forceOpen
+
+  wrap.classList.toggle("form-collapsed", !shouldOpen)
+  wrap.classList.toggle("form-expanded", shouldOpen)
+
+  if(btn){
+    btn.textContent = shouldOpen ? "－收起批次表單" : "＋新增批次"
+  }
+}
+
+function toggleItemForm(forceOpen = null){
+  const wrap = document.getElementById("itemFormWrap")
+  const btn = document.getElementById("toggleItemFormBtn")
+  if(!wrap) return
+
+  const shouldOpen = forceOpen === null
+    ? wrap.classList.contains("form-collapsed")
+    : forceOpen
+
+  wrap.classList.toggle("form-collapsed", !shouldOpen)
+  wrap.classList.toggle("form-expanded", shouldOpen)
+
+  if(btn){
+    btn.textContent = shouldOpen ? "－收起商品表單" : "＋新增批次商品"
+  }
+}
+
+function toggleBatchDetail(batchId){
+  if(expandedBatchDetails.has(batchId)){
+    expandedBatchDetails.delete(batchId)
+  }else{
+    expandedBatchDetails.add(batchId)
+  }
+  filterBatchList()
+}
+
+function toggleBatchItems(batchId){
+  if(expandedBatchItems.has(batchId)){
+    expandedBatchItems.delete(batchId)
+  }else{
+    expandedBatchItems.add(batchId)
+  }
+  filterBatchList()
 }
 
 function ensureActionButtons(){
@@ -311,12 +371,15 @@ const payload = {
 
   alert(editingBatchId ? "批次更新成功" : "批次建立成功")
   clearBatchForm()
+  toggleBatchForm(false)
   await loadBatches()
 }
 
 function clearBatchForm(){
   editingBatchId = null
 
+    const title = document.getElementById("batchFormTitle")
+  if(title) title.textContent = "新增帳務批次"
   document.getElementById("batch_date").value = ""
   document.getElementById("batch_name").value = ""
 document.getElementById("purchase_source").value = ""
@@ -348,6 +411,7 @@ document.getElementById("payer_name").value = ""
 
 function cancelBatchEdit(){
   clearBatchForm()
+  toggleBatchForm(false)
 }
 
 async function editBatch(batchId){
@@ -364,6 +428,7 @@ async function editBatch(batchId){
   }
 
   editingBatchId = data.id
+    document.getElementById("batchFormTitle").textContent = "編輯帳務批次"
 
  document.getElementById("batch_date").value = data.batch_date || ""
 document.getElementById("batch_name").value = data.batch_name || ""
@@ -393,6 +458,7 @@ document.getElementById("shipping_per_kg").value = data.shipping_per_kg ?? 160
   const cancelBtn = document.getElementById("cancelBatchEditBtn")
   if(cancelBtn) cancelBtn.style.display = "inline-block"
 
+  toggleBatchForm(true)
   window.scrollTo({ top: 0, behavior: "smooth" })
 }
 
@@ -411,8 +477,9 @@ async function deleteBatch(batchId){
     return
   }
 
-  if(editingBatchId === batchId){
+   if(editingBatchId === batchId){
     clearBatchForm()
+    toggleBatchForm(false)
   }
 
   alert("批次已刪除")
@@ -530,12 +597,14 @@ const payload = {
 
   await updateBatchWeightInfo(batch_id)
   clearItemForm()
+  toggleItemForm(false)
   await loadBatches()
 }
 
 function clearItemForm(){
   editingItemId = null
-
+  const title = document.getElementById("itemFormTitle")
+  if(title) title.textContent = "加入批次商品"
   document.getElementById("batch_select").value = ""
   document.getElementById("product_select").value = ""
   document.getElementById("variant_select").innerHTML = `<option value="">請先選規格</option>`
@@ -557,6 +626,7 @@ document.getElementById("item_note").value = ""
 
 function cancelItemEdit(){
   clearItemForm()
+  toggleItemForm(false)
 }
 
 async function editBatchItem(itemId){
@@ -573,6 +643,7 @@ async function editBatchItem(itemId){
   }
 
   editingItemId = data.id
+    document.getElementById("itemFormTitle").textContent = "編輯批次商品"
 
   document.getElementById("batch_select").value = data.batch_id
   document.getElementById("product_select").value = data.product_id
@@ -594,6 +665,8 @@ const cancelBtn = document.getElementById("cancelItemEditBtn")
 if(cancelBtn) cancelBtn.style.display = "inline-block"
 
 await updateBatchWeightInfo(data.batch_id)
+
+toggleItemForm(true)
 
 document.getElementById("itemFormCard")?.scrollIntoView({
   behavior: "smooth",
@@ -628,8 +701,9 @@ async function deleteBatchItem(itemId){
     return
   }
 
-  if(editingItemId === itemId){
+   if(editingItemId === itemId){
     clearItemForm()
+    toggleItemForm(false)
   }
 
 if(document.getElementById("batch_select").value === oldItem.batch_id){
@@ -817,51 +891,79 @@ let itemsHtml = ""
       itemsHtml = `<div style="color:#888;">此批次尚未加入商品</div>`
     }
 
-   const batchCard = document.createElement("div")
-batchCard.className = hasNegativeProfit ? "batch-card batch-card-danger" : "batch-card"
+    const batchCard = document.createElement("div")
+    batchCard.className = hasNegativeProfit ? "batch-card batch-card-danger" : "batch-card"
+
+    const isDetailExpanded = expandedBatchDetails.has(batch.id)
+    const isItemsExpanded = expandedBatchItems.has(batch.id)
 
     batchCard.innerHTML = `
       <div class="batch-header">
         <div class="batch-header-top">
           <h3>
-  ${batch.batch_date}｜${batch.batch_name}
-  ${hasNegativeProfit ? `<span class="danger-badge">負利潤</span>` : ``}
-</h3>
+            ${batch.batch_date}｜${batch.batch_name}
+            ${hasNegativeProfit ? `<span class="danger-badge">負利潤</span>` : ``}
+          </h3>
+
           <div class="batch-actions">
             <button type="button" class="btn-secondary btn-sm" onclick="editBatch('${batch.id}')">編輯批次</button>
             <button type="button" class="btn-cancel btn-sm" onclick="deleteBatch('${batch.id}')">刪除批次</button>
           </div>
         </div>
-        <div>購買來源：${batch.purchase_source || "-"}</div>
-<div>官方訂單編號：${batch.official_order_no || "-"}</div>
-<div>貨態編號：${batch.cargo_no || "-"}</div>
-<div>入庫狀態：${formatStockStatus(batch.stock_status)}</div>
-<div>入庫時間：${formatDateTime(batch.stocked_at)}</div>
-<div>是否已打包回台：${batch.packed_status ? "是" : "否"}</div>
-<div>打包回台時間：${formatDateTime(batch.packed_at)}</div>
-<div>刷卡人：${batch.payer_name || "-"}</div>
-        <div>銀行：${batch.bank_name || "-"} / ${batch.card_name || "-"}</div>
-        <div>原幣：${batch.currency} ${Number(batch.amount_original || 0).toFixed(2)}</div>
-        <div>台幣：${Number(batch.amount_twd_final || 0).toFixed(2)}</div>
-        <div>刷卡手續費：${Number(batch.card_fee || 0).toFixed(2)}</div>
-        <div>匯率：${Number(batch.exchange_rate || 0).toFixed(4)}</div>
-        <div>當地運費（已含刷卡）：${Number(batch.local_shipping || 0).toFixed(2)}</div>
-        <div>每公斤國際運費：${Number(batch.shipping_per_kg || 0).toFixed(2)}</div>
-        <div>回饋：${Number(batch.reward_amount || 0).toFixed(2)}（${rewardUsedText}）</div>
-<div class="batch-summary">
-  <span>購買商品件數：${totalQty}</span>
-  <span>批次總重量：${totalWeight.toFixed(3)}</span>
-  <span>二補總額：${totalSecondPaymentAmount.toFixed(2)}</span>
-  <span>總成本：${batchActualCost.toFixed(2)}</span>
-  <span>售價總額：${totalSaleAmount.toFixed(2)}</span>
-  <span class="${totalProfitAmount < 0 ? "text-danger" : "text-profit"}">
-    總利潤：${totalProfitAmount.toFixed(2)}
-  </span>
-</div>
-        <div>備註：${batch.note || "-"}</div>
+
+        <div class="batch-quick-info">
+          <div><b>購買來源：</b>${batch.purchase_source || "-"}</div>
+          <div><b>官方訂單編號：</b>${batch.official_order_no || "-"}</div>
+          <div><b>貨態編號：</b>${batch.cargo_no || "-"}</div>
+        </div>
+
+        <div class="batch-tags">
+          <span class="status-tag stock-${batch.stock_status || "pending"}">
+            ${formatStockStatus(batch.stock_status)}
+          </span>
+          <span class="status-tag ${batch.packed_status ? "packed-yes" : "packed-no"}">
+            ${batch.packed_status ? "已打包回台" : "未打包回台"}
+          </span>
+        </div>
+
+        <div class="batch-summary">
+          <span>購買商品件數：${totalQty}</span>
+          <span>批次總重量：${totalWeight.toFixed(3)}</span>
+          <span>二補總額：${totalSecondPaymentAmount.toFixed(2)}</span>
+          <span>總成本：${batchActualCost.toFixed(2)}</span>
+          <span>售價總額：${totalSaleAmount.toFixed(2)}</span>
+          <span class="${totalProfitAmount < 0 ? "text-danger" : "text-profit"}">
+            總利潤：${totalProfitAmount.toFixed(2)}
+          </span>
+        </div>
+
+        <div class="batch-fold-actions">
+          <button type="button" class="btn-secondary btn-sm" onclick="toggleBatchDetail('${batch.id}')">
+            ${isDetailExpanded ? "收起批次其他資料" : "展開批次其他資料"}
+          </button>
+
+          <button type="button" class="btn-secondary btn-sm" onclick="toggleBatchItems('${batch.id}')">
+            ${isItemsExpanded ? "收起商品明細" : "展開商品明細"}
+          </button>
+        </div>
+
+        <div class="batch-detail-block ${isDetailExpanded ? "expanded" : ""}">
+          <div>入庫時間：${formatDateTime(batch.stocked_at)}</div>
+          <div>打包回台時間：${formatDateTime(batch.packed_at)}</div>
+          <div>刷卡人：${batch.payer_name || "-"}</div>
+          <div>銀行：${batch.bank_name || "-"} / ${batch.card_name || "-"}</div>
+          <div>原幣：${batch.currency} ${Number(batch.amount_original || 0).toFixed(2)}</div>
+          <div>台幣：${Number(batch.amount_twd_final || 0).toFixed(2)}</div>
+          <div>刷卡手續費：${Number(batch.card_fee || 0).toFixed(2)}</div>
+          <div>匯率：${Number(batch.exchange_rate || 0).toFixed(4)}</div>
+          <div>當地運費（已含刷卡）：${Number(batch.local_shipping || 0).toFixed(2)}</div>
+          <div>每公斤國際運費：${Number(batch.shipping_per_kg || 0).toFixed(2)}</div>
+          <div>回饋：${Number(batch.reward_amount || 0).toFixed(2)}（${rewardUsedText}）</div>
+          <div>備註：${batch.note || "-"}</div>
+        </div>
       </div>
 
-      <div class="batch-items">
+      <div class="batch-items-block ${isItemsExpanded ? "expanded" : ""}">
         ${itemsHtml}
       </div>
     `
