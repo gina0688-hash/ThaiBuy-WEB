@@ -483,3 +483,15 @@ textarea{
     grid-template-columns:1fr;
   }
 }
+.btn-primary{
+  background: linear-gradient(180deg, #f4b06a 0%, #ff9142 100%);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  font-weight: 700;
+  box-shadow: 0 6px 14px rgba(255, 145, 66, 0.20);
+}
+
+.btn-primary:hover{
+  background: linear-gradient(180deg, #f6b97a 0%, #ff9b52 100%);
+}
