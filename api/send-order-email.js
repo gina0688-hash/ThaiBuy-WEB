@@ -34,11 +34,24 @@ module.exports = async function handler(req, res) {
       process.env.SUPABASE_SERVICE_ROLE_KEY
     );
 
-    const { data: order, error: orderError } = await supabaseAdmin
-      .from('orders')
-      .select('id, order_number, customer_name, total_amount, email_notified, email_notify_token')
-      .eq('order_number', orderNumber)
-      .single();
+  const { data: order, error: orderError } = await supabaseAdmin
+  .from('orders')
+  .select(`
+    id,
+    order_number,
+    customer_name,
+    total_amount,
+    email_notified,
+    email_notify_token,
+    order_items (
+      product_name,
+      variant_name,
+      quantity,
+      price
+    )
+  `)
+  .eq('order_number', orderNumber)
+  .single();
 
     if (orderError || !order) {
       return res.status(404).json({
@@ -54,26 +67,39 @@ module.exports = async function handler(req, res) {
       });
     }
 
-    if (order.email_notified) {
-      return res.status(200).json({
-        ok: true,
-        message: '這筆訂單已通知過，略過寄送'
-      });
-    }
+ if (order.email_notified) {
+  return res.status(200).json({
+    ok: true,
+    message: '這筆訂單已通知過，略過寄送'
+  });
+}
 
-    const sendResult = await resend.emails.send({
-      from: 'ThaiBuy <onboarding@resend.dev>',
-      to: 'gina0688@gmail.com',
-      subject: `新訂單通知｜${order.order_number}`,
-      html: `
-        <div style="font-family: Arial, sans-serif; line-height: 1.8;">
-          <h2>你有新訂單</h2>
-          <p><b>訂單編號：</b>${order.order_number}</p>
-          <p><b>客人：</b>${order.customer_name || '未提供'}</p>
-          <p><b>金額：</b>${order.total_amount ?? '未提供'}</p>
-        </div>
-      `
-    });
+const itemsHtml = (order.order_items || []).map(item => `
+  <li style="margin-bottom:8px;">
+    <b>${item.product_name || '未命名商品'}</b>
+    ${item.variant_name ? `｜${item.variant_name}` : ''}
+    × ${item.quantity || 0}
+    ${item.price != null ? `（單價 TWD $${item.price}）` : ''}
+  </li>
+`).join('');
+
+const sendResult = await resend.emails.send({
+  from: 'ThaiBuy <onboarding@resend.dev>',
+  to: 'gina0688@gmail.com',
+  subject: `新訂單通知｜${order.order_number}`,
+  html: `
+    <div style="font-family: Arial, sans-serif; line-height: 1.8;">
+      <h2>你有新訂單</h2>
+      <p><b>訂單編號：</b>${order.order_number}</p>
+      <p><b>客人：</b>${order.customer_name || '未提供'}</p>
+      <p><b>金額：</b>${order.total_amount ?? '未提供'}</p>
+      <p><b>商品內容：</b></p>
+      <ul style="padding-left:20px; margin:8px 0 0 0;">
+        ${itemsHtml || '<li>無商品資料</li>'}
+      </ul>
+    </div>
+  `
+});
 
     if (sendResult?.error) {
       return res.status(500).json({
