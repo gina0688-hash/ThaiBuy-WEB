@@ -2,7 +2,7 @@ import { supabase } from "./supabase.js"
 import { getCart, saveCart } from "./cart.js"
 
 let cart = getCart()
-
+let isSubmitting = false
 function getOriginalItemsTotal(){
   return cart.reduce((sum, item) => {
     return sum + Number(item.original_price || 0) * Number(item.quantity || 1)
@@ -186,7 +186,20 @@ function render(){
 }
 
 window.submitOrder = async function(){
-  const name = document.getElementById("name").value.trim()
+  if(isSubmitting){
+    return
+  }
+
+  const submitBtn = document.getElementById("submitOrderBtn")
+  isSubmitting = true
+
+  if(submitBtn){
+    submitBtn.disabled = true
+    submitBtn.textContent = "送出中..."
+  }
+
+  try{
+    const name = document.getElementById("name").value.trim()
   const phone = document.getElementById("phone").value.trim()
   const communityName = document.getElementById("communityName").value.trim()
   const email = document.getElementById("email").value.trim()
@@ -356,6 +369,14 @@ try{
 
 saveCart([])
 window.location.href = `./order-success.html?orderNumber=${encodeURIComponent(orderNumber)}&amount=${encodeURIComponent(total)}`
+  }finally{
+    isSubmitting = false
+
+    if(submitBtn){
+      submitBtn.disabled = false
+      submitBtn.textContent = "送出訂單"
+    }
+  }
 }
 
 window.refreshCheckout = function(){
