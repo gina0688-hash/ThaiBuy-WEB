@@ -335,7 +335,6 @@ window.submitOrder = async function(){
     alert(`訂單建立失敗：${data?.message || "未知錯誤"}`)
     return
   }
-console.log("rpc data:", data)
 const orderNumber = data.order_number || data.order_id
 const notifyToken = data.email_notify_token
 
