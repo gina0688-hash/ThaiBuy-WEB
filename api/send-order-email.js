@@ -1,14 +1,30 @@
-import { Resend } from 'resend';
+const { Resend } = require('resend');
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+    return res.status(405).json({ ok: false, error: 'Method not allowed' });
   }
 
   try {
-    const { orderNumber, customerName, amount } = req.body;
+    const apiKey = process.env.RESEND_API_KEY;
+
+    if (!apiKey) {
+      return res.status(500).json({
+        ok: false,
+        error: 'RESEND_API_KEY 沒抓到'
+      });
+    }
+
+    const resend = new Resend(apiKey);
+
+    const { orderNumber, customerName, amount } = req.body || {};
+
+    if (!orderNumber) {
+      return res.status(400).json({
+        ok: false,
+        error: '缺少 orderNumber'
+      });
+    }
 
     const data = await resend.emails.send({
       from: 'ThaiBuy <onboarding@resend.dev>',
@@ -17,13 +33,19 @@ export default async function handler(req, res) {
       html: `
         <h2>你有新訂單</h2>
         <p>訂單編號：${orderNumber}</p>
-        <p>客人：${customerName}</p>
-        <p>金額：${amount}</p>
+        <p>客人：${customerName || '未提供'}</p>
+        <p>金額：${amount ?? '未提供'}</p>
       `
     });
 
-    return res.status(200).json({ ok: true, data });
+    return res.status(200).json({
+      ok: true,
+      data
+    });
   } catch (error) {
-    return res.status(500).json({ ok: false, error: error.message });
+    return res.status(500).json({
+      ok: false,
+      error: error.message
+    });
   }
-}
+};
