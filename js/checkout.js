@@ -336,10 +336,24 @@ window.submitOrder = async function(){
     return
   }
 
-  const orderNumber = data.order_number || data.order_id
+const orderNumber = data.order_number || data.order_id
 
-  saveCart([])
-  window.location.href = `./order-success.html?orderNumber=${encodeURIComponent(orderNumber)}&amount=${encodeURIComponent(total)}`
+try{
+  await fetch('/api/send-order-email', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      orderNumber,
+      customerName: name,
+      amount: total
+    })
+  })
+}catch(err){
+  console.error("send-order-email error:", err)
+}
+
+saveCart([])
+window.location.href = `./order-success.html?orderNumber=${encodeURIComponent(orderNumber)}&amount=${encodeURIComponent(total)}`
 }
 
 window.refreshCheckout = function(){
