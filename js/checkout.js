@@ -335,19 +335,22 @@ window.submitOrder = async function(){
     alert(`訂單建立失敗：${data?.message || "未知錯誤"}`)
     return
   }
-
+console.log("rpc data:", data)
 const orderNumber = data.order_number || data.order_id
+const notifyToken = data.email_notify_token
 
 try{
-  await fetch('/api/send-order-email', {
+  const emailRes = await fetch('/api/send-order-email', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       orderNumber,
-      customerName: name,
-      amount: total
+      notifyToken
     })
   })
+
+  const emailJson = await emailRes.json()
+  console.log("send-order-email result:", emailJson)
 }catch(err){
   console.error("send-order-email error:", err)
 }
