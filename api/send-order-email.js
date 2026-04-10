@@ -2,7 +2,10 @@ const { Resend } = require('resend');
 
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
-    return res.status(405).json({ ok: false, error: 'Method not allowed' });
+    return res.status(405).json({
+      ok: false,
+      error: 'Method not allowed'
+    });
   }
 
   try {
@@ -31,10 +34,12 @@ module.exports = async function handler(req, res) {
       to: 'gina0688@gmail.com',
       subject: `新訂單通知｜${orderNumber}`,
       html: `
-        <h2>你有新訂單</h2>
-        <p>訂單編號：${orderNumber}</p>
-        <p>客人：${customerName || '未提供'}</p>
-        <p>金額：${amount ?? '未提供'}</p>
+        <div style="font-family: Arial, sans-serif; line-height: 1.8;">
+          <h2>你有新訂單</h2>
+          <p><b>訂單編號：</b>${orderNumber}</p>
+          <p><b>客人：</b>${customerName || '未提供'}</p>
+          <p><b>金額：</b>${amount ?? '未提供'}</p>
+        </div>
       `
     });
 
