@@ -208,14 +208,13 @@ function updateRewardAmount(){
    共用計算
 ========================= */
 
-function calcBatchActualCost(batch){
+function calcBatchActualCost(batch, estimatedInternationalShipping = 0){
   const amountTwd = Number(batch.amount_twd_final || 0)
   const cardFee = Number(batch.card_fee || 0)
-  const localShipping = Number(batch.local_shipping || 0)
   const rewardAmount = Number(batch.reward_amount || 0)
   const isRewardUsed = !!batch.is_reward_used
 
-  let total = amountTwd + cardFee + localShipping
+  let total = amountTwd + cardFee + estimatedInternationalShipping
 
   if(isRewardUsed){
     total -= rewardAmount
@@ -253,8 +252,9 @@ function calcItemMetrics(batch, items, item, estimatedInternationalShipping = 0)
   }, 0)
 
   // 各項批次共用費用
-  const cardFee = Number(batch.card_fee || 0)
-  const localShipping = Number(batch.local_shipping || 0)
+   const cardFee = Number(batch.card_fee || 0)
+  const localShippingOriginal = Number(batch.local_shipping || 0)
+  const localShipping = localShippingOriginal * exchangeRate
   const rewardAmount = Number(batch.reward_amount || 0)
   const isRewardUsed = !!batch.is_reward_used
 
@@ -934,7 +934,7 @@ const totalWeight = itemList.reduce((sum, item) => {
 const shippingPerKg = Number(batch.shipping_per_kg || 0)
 const estimatedInternationalShipping = totalWeight * shippingPerKg
 
-const batchReferenceCost = calcBatchActualCost(batch)
+const batchReferenceCost = calcBatchActualCost(batch, estimatedInternationalShipping)
 let batchActualCost = 0
 
 let totalSaleAmount = 0
@@ -1098,7 +1098,10 @@ let itemsHtml = ""
           <div>台幣：${Number(batch.amount_twd_final || 0).toFixed(2)}</div>
           <div>刷卡手續費：${Number(batch.card_fee || 0).toFixed(2)}</div>
           <div>匯率：${Number(batch.exchange_rate || 0).toFixed(4)}</div>
-          <div>當地運費：${Number(batch.local_shipping || 0).toFixed(2)}</div>
+         <div>
+  當地運費：${Number(batch.local_shipping || 0).toFixed(2)}
+  ／折台幣：${(Number(batch.local_shipping || 0) * Number(batch.exchange_rate || 0)).toFixed(2)}
+</div>
           <div>每公斤國際運費：${Number(batch.shipping_per_kg || 0).toFixed(2)}</div>
           <div>回饋：${Number(batch.reward_amount || 0).toFixed(2)}（${rewardUsedText}）</div>
           <div>備註：${batch.note || "-"}</div>
