@@ -4,8 +4,7 @@ let editingBatchId = null
 let editingItemId = null
 let allBatchRows = []
 let batchSearchTimer = null
-let expandedBatchDetails = new Set()
-let expandedBatchItems = new Set()
+
 let currentUser = null
 let batchOptions = []
 
@@ -21,8 +20,7 @@ window.cancelItemEdit = cancelItemEdit
 window.exportSettlementCsv = exportSettlementCsv
 window.toggleBatchForm = toggleBatchForm
 window.toggleItemForm = toggleItemForm
-window.toggleBatchDetail = toggleBatchDetail
-window.toggleBatchItems = toggleBatchItems
+
 
 init()
 
@@ -128,23 +126,6 @@ function toggleItemForm(forceOpen = null){
   }
 }
 
-function toggleBatchDetail(batchId){
-  if(expandedBatchDetails.has(batchId)){
-    expandedBatchDetails.delete(batchId)
-  }else{
-    expandedBatchDetails.add(batchId)
-  }
-  filterBatchList()
-}
-
-function toggleBatchItems(batchId){
-  if(expandedBatchItems.has(batchId)){
-    expandedBatchItems.delete(batchId)
-  }else{
-    expandedBatchItems.add(batchId)
-  }
-  filterBatchList()
-}
 
 function ensureActionButtons(){
   if(!document.getElementById("cancelBatchEditBtn")){
@@ -189,6 +170,9 @@ function bindAutoCalc(){
 
   amountOriginal.addEventListener("input", updateExchangeRate)
   amountTwdFinal.addEventListener("input", updateExchangeRate)
+
+  amountTwdFinal.addEventListener("input", updateCardFee)
+
   rewardRate.addEventListener("input", updateRewardAmount)
   amountTwdFinal.addEventListener("input", updateRewardAmount)
 }
@@ -202,6 +186,14 @@ function updateExchangeRate(){
     rateInput.value = (twd / original).toFixed(4)
   }else{
     rateInput.value = 0
+  }
+}
+
+function updateCardFee(){
+  const twd = Number(document.getElementById("amount_twd_final").value || 0)
+  const cardFeeInput = document.getElementById("card_fee")
+  if(cardFeeInput){
+    cardFeeInput.value = (twd * 0.015).toFixed(2)
   }
 }
 
@@ -519,8 +511,14 @@ document.getElementById("payer_name").value = data.payer_name || ""
   document.getElementById("card_name").value = data.card_name || ""
   document.getElementById("currency").value = data.currency || "TWD"
   document.getElementById("amount_original").value = data.amount_original ?? 0
-  document.getElementById("amount_twd_final").value = data.amount_twd_final ?? 0
+document.getElementById("amount_twd_final").value = data.amount_twd_final ?? 0
+
+if(Number(data.card_fee || 0) > 0){
   document.getElementById("card_fee").value = data.card_fee ?? 0
+}else{
+  updateCardFee()
+}
+  
   document.getElementById("exchange_rate").value = data.exchange_rate ?? 0
   document.getElementById("local_shipping").value = data.local_shipping ?? 0
 document.getElementById("shipping_per_kg").value = data.shipping_per_kg ?? 160
@@ -1014,8 +1012,7 @@ let itemsHtml = ""
     const batchCard = document.createElement("div")
     batchCard.className = hasNegativeProfit ? "batch-card batch-card-danger" : "batch-card"
 
-    const isDetailExpanded = expandedBatchDetails.has(batch.id)
-    const isItemsExpanded = expandedBatchItems.has(batch.id)
+
 
     batchCard.innerHTML = `
       <div class="batch-header">
@@ -1067,17 +1064,9 @@ let itemsHtml = ""
   </span>
 </div>
 
-        <div class="batch-fold-actions">
-          <button type="button" class="btn-secondary btn-sm" onclick="toggleBatchDetail('${batch.id}')">
-            ${isDetailExpanded ? "收起批次其他資料" : "展開批次其他資料"}
-          </button>
+    
 
-          <button type="button" class="btn-secondary btn-sm" onclick="toggleBatchItems('${batch.id}')">
-            ${isItemsExpanded ? "收起商品明細" : "展開商品明細"}
-          </button>
-        </div>
-
-        <div class="batch-detail-block ${isDetailExpanded ? "expanded" : ""}">
+        <div class="batch-detail-block expanded">
           <div>入庫時間：${formatDateTime(batch.stocked_at)}</div>
           <div>打包回台時間：${formatDateTime(batch.packed_at)}</div>
           <div>刷卡人：${batch.payer_name || "-"}</div>
@@ -1093,7 +1082,7 @@ let itemsHtml = ""
         </div>
       </div>
 
-      <div class="batch-items-block ${isItemsExpanded ? "expanded" : ""}">
+     <div class="batch-items-block expanded">
         ${itemsHtml}
       </div>
     `
