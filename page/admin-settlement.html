@@ -228,7 +228,13 @@
       <div class="form-grid-3">
         <div class="field">
           <label>選擇批次</label>
-          <select id="batch_select"></select>
+          <div class="batch-select-wrap">
+  <input type="text" id="batch_search_input" placeholder="搜尋批次..." autocomplete="off">
+  <div id="batch_dropdown" class="batch-dropdown"></div>
+</div>
+
+<!-- 原本的 select 保留（但隱藏） -->
+<select id="batch_select" style="display:none;"></select>
         </div>
 
         <div class="field">
@@ -314,7 +320,10 @@
 
     <div class="settlement-toolbar">
       <div class="settlement-toolbar-row">
-        <input type="text" id="batch_search" placeholder="搜尋批次名稱 / 官方訂單編號 / 貨態編號">
+       <div class="batch-list-search-wrap">
+  <input type="text" id="batch_search" placeholder="搜尋批次名稱 / 官方訂單編號 / 貨態編號" autocomplete="off">
+  <div id="batch_search_dropdown" class="batch-search-dropdown"></div>
+</div>
 
         <select id="stock_status_search">
           <option value="">全部入庫狀態</option>

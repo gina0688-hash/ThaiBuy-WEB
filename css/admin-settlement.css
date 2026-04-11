@@ -226,6 +226,10 @@ textarea{
   flex-wrap:wrap;
 }
 
+
+.settlement-toolbar-row{
+  justify-content: flex-start;
+}
 .settlement-toolbar-row input[type="text"]{
   flex:1;
   min-width:260px;
@@ -276,6 +280,10 @@ textarea{
   .date-range-inputs input[type="date"]{
     width:100%;
     min-width:unset;
+  }
+    .batch-list-search-wrap{
+    width: 100%;
+    flex: 1 1 auto;
   }
 }
 
@@ -507,4 +515,79 @@ textarea{
   align-items: center;
   justify-content: center;
   box-shadow: 0 4px 10px rgba(255, 145, 66, 0.16);
+}
+
+.batch-select-wrap{
+  position: relative;
+}
+
+#batch_search_input{
+  width:100%;
+  padding:10px;
+  border:1px solid #ddd;
+  border-radius:10px;
+}
+
+.batch-dropdown{
+  position:absolute;
+  top:100%;
+  left:0;
+  right:0;
+  background:white;
+  border:1px solid #ddd;
+  border-radius:10px;
+  max-height:250px;
+  overflow:auto;
+  z-index:999;
+  display:none;
+}
+
+.batch-option{
+  padding:10px;
+  cursor:pointer;
+}
+
+.batch-option:hover{
+  background:#f3f4f6;
+}
+.batch-list-search-wrap{
+  position: relative;
+  flex: 0 0 360px;
+  width: 360px;
+  max-width: 100%;
+}
+
+#batch_search{
+  width: 100%;
+}
+
+.batch-search-dropdown{
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  max-height: 280px;
+  overflow-y: auto;
+  z-index: 999;
+  display: none;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+}
+
+.batch-search-option{
+  padding: 10px 12px;
+  cursor: pointer;
+  border-bottom: 1px solid #f3f3f3;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.batch-search-option:last-child{
+  border-bottom: none;
+}
+
+.batch-search-option:hover{
+  background: #f8f8f8;
 }

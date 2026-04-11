@@ -7,6 +7,7 @@ let batchSearchTimer = null
 let expandedBatchDetails = new Set()
 let expandedBatchItems = new Set()
 let currentUser = null
+let batchOptions = []
 
 window.saveBatch = saveBatch
 window.saveBatchItem = saveBatchItem
@@ -42,20 +43,55 @@ async function init(){
     updateEstimatedShippingOnly()
   })
 
-  document.getElementById("batch_search")?.addEventListener("input", () => {
-    clearTimeout(batchSearchTimer)
-    batchSearchTimer = setTimeout(() => {
-      filterBatchList()
-    }, 300)
-  })
+const batchSearchInputMain = document.getElementById("batch_search")
+const batchSearchDropdownMain = document.getElementById("batch_search_dropdown")
+
+batchSearchInputMain?.addEventListener("focus", () => {
+  renderBatchListSearchDropdown(allBatchRows || [])
+  if(batchSearchDropdownMain) batchSearchDropdownMain.style.display = "block"
+})
+
+batchSearchInputMain?.addEventListener("input", () => {
+  clearTimeout(batchSearchTimer)
+  batchSearchTimer = setTimeout(() => {
+    filterBatchList()
+    filterBatchListSearchDropdown(batchSearchInputMain.value)
+    if(batchSearchDropdownMain) batchSearchDropdownMain.style.display = "block"
+  }, 300)
+})
 
   document.getElementById("stock_status_search")?.addEventListener("change", filterBatchList)
   document.getElementById("packed_status_search")?.addEventListener("change", filterBatchList)
   document.getElementById("batch_date_start")?.addEventListener("change", filterBatchList)
   document.getElementById("batch_date_end")?.addEventListener("change", filterBatchList)
 document.getElementById("creator_search")?.addEventListener("change", filterBatchList)
-  await loadBatches()
-  await loadProducts()
+
+const batchSearchInput = document.getElementById("batch_search_input")
+const batchDropdown = document.getElementById("batch_dropdown")
+
+batchSearchInput?.addEventListener("focus", () => {
+  renderBatchDropdown(batchOptions)
+  if(batchDropdown) batchDropdown.style.display = "block"
+})
+
+batchSearchInput?.addEventListener("input", (e) => {
+  filterBatchDropdown(e.target.value)
+  if(batchDropdown) batchDropdown.style.display = "block"
+})
+
+document.addEventListener("click", (e) => {
+  if(!e.target.closest(".batch-select-wrap")){
+    if(batchDropdown) batchDropdown.style.display = "none"
+  }
+
+  if(!e.target.closest(".batch-list-search-wrap")){
+    const mainDropdown = document.getElementById("batch_search_dropdown")
+    if(mainDropdown) mainDropdown.style.display = "none"
+  }
+})
+
+await loadBatches()
+await loadProducts()
 }
 
 function toggleBatchForm(forceOpen = null){
@@ -648,6 +684,7 @@ function clearItemForm(){
   if(title) title.textContent = "加入批次商品"
   document.getElementById("batch_select").value = ""
   document.getElementById("product_select").value = ""
+  document.getElementById("batch_search_input").value = ""
   document.getElementById("variant_select").innerHTML = `<option value="">請先選規格</option>`
   document.getElementById("item_qty").value = 1
   document.getElementById("unit_price_original").value = 0
@@ -688,6 +725,11 @@ async function editBatchItem(itemId){
 
   document.getElementById("batch_select").value = data.batch_id
   document.getElementById("product_select").value = data.product_id
+const selectedBatch = batchOptions.find(b => b.id === data.batch_id)
+document.getElementById("batch_search_input").value = selectedBatch
+  ? `${selectedBatch.batch_date}｜${selectedBatch.batch_name}`
+  : ""
+
 
   await loadVariantsForSettlement()
 
@@ -811,6 +853,9 @@ async function loadBatches(){
       select.value = currentValue
     }
   }
+
+batchOptions = myData || []
+renderBatchDropdown(batchOptions)
 
   await renderBatchList(allBatchRows)
 }
@@ -1360,4 +1405,93 @@ async function exportSettlementCsv(){
   link.download = "settlement_export.csv"
   link.click()
   URL.revokeObjectURL(url)
+}
+
+function renderBatchDropdown(list){
+  const dropdown = document.getElementById("batch_dropdown")
+  dropdown.innerHTML = ""
+
+  list.forEach(b => {
+    const div = document.createElement("div")
+    div.className = "batch-option"
+    div.textContent = `${b.batch_date}｜${b.batch_name}`
+
+    div.onclick = () => {
+      document.getElementById("batch_select").value = b.id
+      document.getElementById("batch_search_input").value = `${b.batch_date}｜${b.batch_name}`
+      dropdown.style.display = "none"
+
+      updateBatchWeightInfo(b.id)
+    }
+
+    dropdown.appendChild(div)
+  })
+}
+
+function filterBatchDropdown(keyword){
+  const text = String(keyword || "").trim().toLowerCase()
+
+  const filtered = batchOptions.filter(b => {
+    const batchDate = String(b.batch_date || "").toLowerCase()
+    const batchName = String(b.batch_name || "").toLowerCase()
+    const purchaseSource = String(b.purchase_source || "").toLowerCase()
+    const officialOrderNo = String(b.official_order_no || "").toLowerCase()
+    const cargoNo = String(b.cargo_no || "").toLowerCase()
+
+    return (
+      batchDate.includes(text) ||
+      batchName.includes(text) ||
+      purchaseSource.includes(text) ||
+      officialOrderNo.includes(text) ||
+      cargoNo.includes(text)
+    )
+  })
+
+  renderBatchDropdown(filtered)
+}
+
+function renderBatchListSearchDropdown(list){
+  const dropdown = document.getElementById("batch_search_dropdown")
+  if(!dropdown) return
+
+  dropdown.innerHTML = ""
+
+  list.forEach(batch => {
+    const div = document.createElement("div")
+    div.className = "batch-search-option"
+    div.textContent = `${batch.batch_date || "-"}｜${batch.batch_name || "-"}｜${batch.official_order_no || "-"}｜${batch.cargo_no || "-"}`
+
+  div.onclick = () => {
+  const input = document.getElementById("batch_search")
+  if(input){
+    input.value = `${batch.batch_name || ""}`.trim()
+  }
+  dropdown.style.display = "none"
+  filterBatchList()
+}
+
+    dropdown.appendChild(div)
+  })
+}
+
+function filterBatchListSearchDropdown(keyword){
+  const text = String(keyword || "").trim().toLowerCase()
+
+  const filtered = allBatchRows.filter(batch => {
+    const batchName = String(batch.batch_name || "").toLowerCase()
+    const officialOrderNo = String(batch.official_order_no || "").toLowerCase()
+    const cargoNo = String(batch.cargo_no || "").toLowerCase()
+    const purchaseSource = String(batch.purchase_source || "").toLowerCase()
+    const batchDate = String(batch.batch_date || "").toLowerCase()
+
+    return (
+      batchName.includes(text) ||
+      officialOrderNo.includes(text) ||
+      cargoNo.includes(text) ||
+      purchaseSource.includes(text) ||
+      batchDate.includes(text)
+    )
+  })
+
+  renderBatchListSearchDropdown(filtered)
 }
