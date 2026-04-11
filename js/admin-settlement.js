@@ -201,64 +201,73 @@ function calcItemMetrics(batch, items, item, estimatedInternationalShipping = 0)
   const unitPriceOriginal = Number(item.unit_price_original || 0)
   const unitWeight = Number(item.unit_weight || 0)
   const variantPrice =
-  item.sale_price_override !== null && item.sale_price_override !== undefined
-    ? Number(item.sale_price_override || 0)
-    : Number(item.product_variants?.price || 0)
+    item.sale_price_override !== null && item.sale_price_override !== undefined
+      ? Number(item.sale_price_override || 0)
+      : Number(item.product_variants?.price || 0)
 
   const originalSubtotal = qty * unitPriceOriginal
   const twdSubtotal = originalSubtotal * exchangeRate
   const totalWeight = qty * unitWeight
 
-// 👉 用重量分攤（正確）
-const totalWeightAll = items.reduce((sum, row) => {
-  return sum + (Number(row.qty || 0) * Number(row.unit_weight || 0))
-}, 0)
+  // 1. 國際運費：用重量分攤
+  const totalWeightAll = items.reduce((sum, row) => {
+    return sum + (Number(row.qty || 0) * Number(row.unit_weight || 0))
+  }, 0)
 
-let allocatedInternationalShipping = 0
+  let allocatedInternationalShipping = 0
+  if(totalWeightAll > 0){
+    allocatedInternationalShipping =
+      estimatedInternationalShipping * (totalWeight / totalWeightAll)
+  }
 
-if(totalWeightAll > 0){
-  allocatedInternationalShipping =
-    estimatedInternationalShipping * (totalWeight / totalWeightAll)
-}
+  // 2. 批次主成本：用金額分攤
+  const totalItemsTwdSubtotal = items.reduce((sum, row) => {
+    return sum + (
+      Number(row.qty || 0) *
+      Number(row.unit_price_original || 0) *
+      exchangeRate
+    )
+  }, 0)
 
   const batchBaseCost = calcBatchActualCost(batch)
   let allocatedBaseCost = 0
 
   if(totalItemsTwdSubtotal > 0){
-    allocatedBaseCost = batchBaseCost * (twdSubtotal / totalItemsTwdSubtotal)
+    allocatedBaseCost =
+      batchBaseCost * (twdSubtotal / totalItemsTwdSubtotal)
   }
 
-const secondPaymentFee = Number(item.second_payment_fee || 0)
-const secondPaymentTotal = secondPaymentFee * qty
+  const secondPaymentFee = Number(item.second_payment_fee || 0)
+  const secondPaymentTotal = secondPaymentFee * qty
 
-const allocatedCost = allocatedBaseCost + allocatedInternationalShipping
+  const allocatedCost = allocatedBaseCost + allocatedInternationalShipping
 
-const unitCost = qty > 0 ? allocatedCost / qty : 0
-const netUnitCost = unitCost - secondPaymentFee
-const unitProfit = (variantPrice + secondPaymentFee) - unitCost
-const profitRate =
-  (variantPrice + secondPaymentFee) > 0
-    ? (unitProfit / (variantPrice + secondPaymentFee)) * 100
-    : 0
+  const unitCost = qty > 0 ? allocatedCost / qty : 0
+  const netUnitCost = unitCost - secondPaymentFee
+  const unitProfit = (variantPrice + secondPaymentFee) - unitCost
+  const profitRate =
+    (variantPrice + secondPaymentFee) > 0
+      ? (unitProfit / (variantPrice + secondPaymentFee)) * 100
+      : 0
 
-return {
-  qty,
-  unitPriceOriginal,
-  unitWeight,
-  variantPrice,
-  secondPaymentFee,
-  secondPaymentTotal,
-  originalSubtotal,
-  twdSubtotal,
-  totalWeight,
-  allocatedInternationalShipping,
-  allocatedBaseCost,
-  allocatedCost,
-  unitCost,
-  netUnitCost,
-  unitProfit,
-  profitRate
-}
+  return {
+    qty,
+    unitPriceOriginal,
+    unitWeight,
+    variantPrice,
+    secondPaymentFee,
+    secondPaymentTotal,
+    originalSubtotal,
+    twdSubtotal,
+    totalWeight,
+    allocatedInternationalShipping,
+    allocatedBaseCost,
+    allocatedCost,
+    unitCost,
+    netUnitCost,
+    unitProfit,
+    profitRate
+  }
 }
 
 /* =========================
