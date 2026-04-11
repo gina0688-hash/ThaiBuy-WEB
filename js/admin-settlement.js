@@ -182,10 +182,11 @@ function updateRewardAmount(){
 function calcBatchActualCost(batch){
   const amountTwd = Number(batch.amount_twd_final || 0)
   const cardFee = Number(batch.card_fee || 0)
+  const localShipping = Number(batch.local_shipping || 0)
   const rewardAmount = Number(batch.reward_amount || 0)
   const isRewardUsed = !!batch.is_reward_used
 
-  let total = amountTwd + cardFee
+  let total = amountTwd + cardFee + localShipping
 
   if(isRewardUsed){
     total -= rewardAmount
@@ -200,6 +201,7 @@ function calcItemMetrics(batch, items, item, estimatedInternationalShipping = 0)
   const qty = Number(item.qty || 0)
   const unitPriceOriginal = Number(item.unit_price_original || 0)
   const unitWeight = Number(item.unit_weight || 0)
+
   const variantPrice =
     item.sale_price_override !== null && item.sale_price_override !== undefined
       ? Number(item.sale_price_override || 0)
@@ -209,38 +211,53 @@ function calcItemMetrics(batch, items, item, estimatedInternationalShipping = 0)
   const twdSubtotal = originalSubtotal * exchangeRate
   const totalWeight = qty * unitWeight
 
-  // 1. 國際運費：用重量分攤
+  // 全批次商品台幣小計總和（用來分攤刷卡費 / 當地運費 / 回饋）
+  const totalItemsTwdSubtotal = items.reduce((sum, row) => {
+    const rowQty = Number(row.qty || 0)
+    const rowUnitPriceOriginal = Number(row.unit_price_original || 0)
+    return sum + (rowQty * rowUnitPriceOriginal * exchangeRate)
+  }, 0)
+
+  // 全批次總重量（用來分攤國際運費）
   const totalWeightAll = items.reduce((sum, row) => {
     return sum + (Number(row.qty || 0) * Number(row.unit_weight || 0))
   }, 0)
 
+  // 各項批次共用費用
+  const cardFee = Number(batch.card_fee || 0)
+  const localShipping = Number(batch.local_shipping || 0)
+  const rewardAmount = Number(batch.reward_amount || 0)
+  const isRewardUsed = !!batch.is_reward_used
+
+  // 金額比例分攤
+  let allocatedCardFee = 0
+  let allocatedLocalShipping = 0
+  let allocatedReward = 0
+
+  if(totalItemsTwdSubtotal > 0){
+    const amountRatio = twdSubtotal / totalItemsTwdSubtotal
+    allocatedCardFee = cardFee * amountRatio
+    allocatedLocalShipping = localShipping * amountRatio
+    allocatedReward = isRewardUsed ? rewardAmount * amountRatio : 0
+  }
+
+  // 重量比例分攤
   let allocatedInternationalShipping = 0
   if(totalWeightAll > 0){
     allocatedInternationalShipping =
       estimatedInternationalShipping * (totalWeight / totalWeightAll)
   }
 
-  // 2. 批次主成本：用金額分攤
-  const totalItemsTwdSubtotal = items.reduce((sum, row) => {
-    return sum + (
-      Number(row.qty || 0) *
-      Number(row.unit_price_original || 0) *
-      exchangeRate
-    )
-  }, 0)
-
-  const batchBaseCost = calcBatchActualCost(batch)
-  let allocatedBaseCost = 0
-
-  if(totalItemsTwdSubtotal > 0){
-    allocatedBaseCost =
-      batchBaseCost * (twdSubtotal / totalItemsTwdSubtotal)
-  }
-
   const secondPaymentFee = Number(item.second_payment_fee || 0)
   const secondPaymentTotal = secondPaymentFee * qty
 
-  const allocatedCost = allocatedBaseCost + allocatedInternationalShipping
+  // 最終商品總成本
+  const allocatedCost =
+    twdSubtotal +
+    allocatedCardFee +
+    allocatedLocalShipping +
+    allocatedInternationalShipping -
+    allocatedReward
 
   const unitCost = qty > 0 ? allocatedCost / qty : 0
   const netUnitCost = unitCost - secondPaymentFee
@@ -260,8 +277,10 @@ function calcItemMetrics(batch, items, item, estimatedInternationalShipping = 0)
     originalSubtotal,
     twdSubtotal,
     totalWeight,
+    allocatedCardFee,
+    allocatedLocalShipping,
+    allocatedReward,
     allocatedInternationalShipping,
-    allocatedBaseCost,
     allocatedCost,
     unitCost,
     netUnitCost,
@@ -849,8 +868,8 @@ const totalWeight = itemList.reduce((sum, item) => {
 const shippingPerKg = Number(batch.shipping_per_kg || 0)
 const estimatedInternationalShipping = totalWeight * shippingPerKg
 
-const batchBaseCost = calcBatchActualCost(batch)
-const batchActualCost = batchBaseCost + estimatedInternationalShipping
+const batchReferenceCost = calcBatchActualCost(batch)
+let batchActualCost = 0
 
 let totalSaleAmount = 0
 let totalProfitAmount = 0
@@ -861,9 +880,11 @@ for(const item of itemList){
   totalSaleAmount += (m.variantPrice * m.qty) + m.secondPaymentTotal
   totalProfitAmount += m.unitProfit * m.qty
   totalSecondPaymentAmount += m.secondPaymentTotal
+  batchActualCost += m.allocatedCost
 }
 
 const hasNegativeProfit = totalProfitAmount < 0
+const batchCostDiff = batchReferenceCost - batchActualCost
 
 grandTotalCost += batchActualCost
 grandTotalSale += totalSaleAmount
@@ -885,6 +906,9 @@ let itemsHtml = ""
               <th>單件重量</th>
               <th>總重量</th>
               <th>國際運費</th>
+              <th>刷卡費分攤</th>
+<th>當地運費分攤</th>
+<th>回饋分攤</th>
               <th>單件二補</th>
               <th>分攤後總成本</th>
               <th>單件成本</th>
@@ -912,6 +936,9 @@ let itemsHtml = ""
   <td>${m.unitWeight.toFixed(3)}</td>
   <td>${m.totalWeight.toFixed(3)}</td>
 <td>${m.allocatedInternationalShipping.toFixed(2)}</td>
+<td>${m.allocatedCardFee.toFixed(2)}</td>
+<td>${m.allocatedLocalShipping.toFixed(2)}</td>
+<td>${m.allocatedReward.toFixed(2)}</td>
 <td>${m.secondPaymentFee.toFixed(2)}</td>
 <td>${m.allocatedCost.toFixed(2)}</td>
 <td>${m.unitCost.toFixed(2)}</td>
@@ -980,17 +1007,20 @@ let itemsHtml = ""
             ${batch.packed_status ? "已打包回台" : "未打包回台"}
           </span>
         </div>
-
-        <div class="batch-summary">
-          <span>購買商品件數：${totalQty}</span>
-          <span>批次總重量：${totalWeight.toFixed(3)}</span>
-          <span>二補總額：${totalSecondPaymentAmount.toFixed(2)}</span>
-          <span>總成本：${batchActualCost.toFixed(2)}</span>
-          <span>售價總額：${totalSaleAmount.toFixed(2)}</span>
-          <span class="${totalProfitAmount < 0 ? "text-danger" : "text-profit"}">
-            總利潤：${totalProfitAmount.toFixed(2)}
-          </span>
-        </div>
+       <div class="batch-summary">
+  <span>購買商品件數：${totalQty}</span>
+  <span>批次總重量：${totalWeight.toFixed(3)}</span>
+  <span>二補總額：${totalSecondPaymentAmount.toFixed(2)}</span>
+  <span>批次參考總額：${batchReferenceCost.toFixed(2)}</span>
+  <span>商品試算總成本：${batchActualCost.toFixed(2)}</span>
+  <span class="${Math.abs(batchCostDiff) > 1 ? "text-danger" : ""}">
+    差額：${batchCostDiff.toFixed(2)}
+  </span>
+  <span>售價總額：${totalSaleAmount.toFixed(2)}</span>
+  <span class="${totalProfitAmount < 0 ? "text-danger" : "text-profit"}">
+    總利潤：${totalProfitAmount.toFixed(2)}
+  </span>
+</div>
 
         <div class="batch-fold-actions">
           <button type="button" class="btn-secondary btn-sm" onclick="toggleBatchDetail('${batch.id}')">
@@ -1011,7 +1041,7 @@ let itemsHtml = ""
           <div>台幣：${Number(batch.amount_twd_final || 0).toFixed(2)}</div>
           <div>刷卡手續費：${Number(batch.card_fee || 0).toFixed(2)}</div>
           <div>匯率：${Number(batch.exchange_rate || 0).toFixed(4)}</div>
-          <div>當地運費（已含刷卡）：${Number(batch.local_shipping || 0).toFixed(2)}</div>
+          <div>當地運費：${Number(batch.local_shipping || 0).toFixed(2)}</div>
           <div>每公斤國際運費：${Number(batch.shipping_per_kg || 0).toFixed(2)}</div>
           <div>回饋：${Number(batch.reward_amount || 0).toFixed(2)}（${rewardUsedText}）</div>
           <div>備註：${batch.note || "-"}</div>
