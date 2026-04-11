@@ -7,6 +7,7 @@ let batchSearchTimer = null
 
 let currentUser = null
 let batchOptions = []
+let isBatchLoading = false
 
 window.saveBatch = saveBatch
 window.saveBatchItem = saveBatchItem
@@ -800,6 +801,11 @@ if(document.getElementById("batch_select").value === oldItem.batch_id){
 ========================= */
 
 async function loadBatches(){
+   const searchInput = document.getElementById("batch_search")
+  if(searchInput){
+    searchInput.disabled = true
+    searchInput.placeholder = "資料載入中..."
+  }
   // 1) 先抓全部批次，給下面列表用
   const { data: allData, error: allError } = await supabase
     .from("accounting_batches")
@@ -807,10 +813,16 @@ async function loadBatches(){
     .order("batch_date", { ascending: false })
     .order("created_at", { ascending: false })
 
-  if(allError){
-    console.error("load all batches error:", allError)
-    return
+if(allError){
+  console.error("load all batches error:", allError)
+
+  if(searchInput){
+    searchInput.disabled = false
+    searchInput.placeholder = "搜尋批次名稱 / 訂單編號 / 貨態編號 / 建立者"
   }
+
+  return
+}
 
   allBatchRows = allData || []
 
@@ -825,10 +837,16 @@ async function loadBatches(){
       .order("batch_date", { ascending: false })
       .order("created_at", { ascending: false })
 
-    if(ownError){
-      console.error("load my batches error:", ownError)
-      return
-    }
+   if(ownError){
+  console.error("load my batches error:", ownError)
+
+  if(searchInput){
+    searchInput.disabled = false
+    searchInput.placeholder = "搜尋批次名稱 / 訂單編號 / 貨態編號 / 建立者"
+  }
+
+  return
+}
 
     myData = ownData || []
   }
@@ -855,7 +873,12 @@ async function loadBatches(){
 batchOptions = myData || []
 renderBatchDropdown(batchOptions)
 
-  await renderBatchList(allBatchRows)
+await renderBatchList(allBatchRows)
+
+if(searchInput){
+  searchInput.disabled = false
+  searchInput.placeholder = "搜尋批次名稱 / 訂單編號 / 貨態編號 / 建立者"
+}
 }
 
 async function renderBatchList(batchRows){
@@ -1175,6 +1198,9 @@ function updateEstimatedShippingOnly(){
 }
 
 async function filterBatchList(){
+  if(isBatchLoading){
+  return
+}
   const keyword = document.getElementById("batch_search")?.value.trim().toLowerCase() || ""
   const stockStatus = document.getElementById("stock_status_search")?.value || ""
   const packedStatus = document.getElementById("packed_status_search")?.value || ""
