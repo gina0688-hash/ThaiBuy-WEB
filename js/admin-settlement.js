@@ -209,16 +209,17 @@ function calcItemMetrics(batch, items, item, estimatedInternationalShipping = 0)
   const twdSubtotal = originalSubtotal * exchangeRate
   const totalWeight = qty * unitWeight
 
-  const totalItemsTwdSubtotal = items.reduce((sum, row) => {
-    return sum + (Number(row.qty || 0) * Number(row.unit_price_original || 0) * exchangeRate)
-  }, 0)
+// 👉 用重量分攤（正確）
+const totalWeightAll = items.reduce((sum, row) => {
+  return sum + (Number(row.qty || 0) * Number(row.unit_weight || 0))
+}, 0)
 
-  let allocatedInternationalShipping = 0
+let allocatedInternationalShipping = 0
 
-  if(totalItemsTwdSubtotal > 0){
-    allocatedInternationalShipping =
-      estimatedInternationalShipping * (twdSubtotal / totalItemsTwdSubtotal)
-  }
+if(totalWeightAll > 0){
+  allocatedInternationalShipping =
+    estimatedInternationalShipping * (totalWeight / totalWeightAll)
+}
 
   const batchBaseCost = calcBatchActualCost(batch)
   let allocatedBaseCost = 0
