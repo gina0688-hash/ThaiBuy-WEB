@@ -50,12 +50,12 @@ batchSearchInputMain?.addEventListener("focus", () => {
 })
 
 batchSearchInputMain?.addEventListener("input", () => {
-  clearTimeout(batchSearchTimer)
-  batchSearchTimer = setTimeout(() => {
-    filterBatchList()
-    filterBatchListSearchDropdown(batchSearchInputMain.value)
-    if(batchSearchDropdownMain) batchSearchDropdownMain.style.display = "block"
-  }, 300)
+  filterBatchList()
+  filterBatchListSearchDropdown(batchSearchInputMain.value)
+
+  if(batchSearchDropdownMain){
+    batchSearchDropdownMain.style.display = "block"
+  }
 })
 
   document.getElementById("stock_status_search")?.addEventListener("change", filterBatchList)
