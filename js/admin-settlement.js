@@ -1186,13 +1186,20 @@ async function filterBatchList(){
     const batchName = String(batch.batch_name || "").toLowerCase()
     const officialOrderNo = String(batch.official_order_no || "").toLowerCase()
     const cargoNo = String(batch.cargo_no || "").toLowerCase()
+    const creatorName =
+  batch.created_by === "fa754f11-9a7e-4ced-8cbb-da30f01292e0"
+    ? "青"
+    : batch.created_by === "6dfc15fc-dacc-4515-ae56-49a8722fe534"
+    ? "媛媛"
+    : ""
     const batchDate = String(batch.batch_date || "")
 
-    const matchKeyword =
-      !keyword ||
-      batchName.includes(keyword) ||
-      officialOrderNo.includes(keyword) ||
-      cargoNo.includes(keyword)
+  const matchKeyword =
+  !keyword ||
+  batchName.includes(keyword) ||
+  officialOrderNo.includes(keyword) ||
+  cargoNo.includes(keyword) ||
+  creatorName.includes(keyword)   // ⭐ 加這行
 
     const matchStockStatus =
       !stockStatus ||
