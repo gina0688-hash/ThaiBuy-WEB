@@ -459,7 +459,7 @@ ${
       <div style="margin-bottom:4px;">
         運費模式：
         <span style="font-weight:bold;color:${money.shippingFeeMode === "cap100" ? "#16a34a" : "#ea580c"};">
-          ${money.shippingFeeMode === "cap100" ? "最高只收100（不累加）" : "超過5000分段累加"}
+          ${money.shippingFeeMode === "cap100" ? "最高只收100（不累加）" : "超過5000分段累加，分兩單寄送"}
         </span>
       </div>
     `
