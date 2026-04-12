@@ -140,7 +140,45 @@
 
         <div id="shippingNotice" class="info-box"></div>
 
-        <div id="c2cFields" class="sub-card" style="display:none;">
+<div id="c2cFeeModeWrap" class="sub-card" style="display:none;">
+  <h3>交貨便運費設定</h3>
+  <div class="c2c-fee-mode-list">
+
+    <label class="c2c-fee-option">
+      <input
+        type="radio"
+        name="c2cFeeMode"
+        value="split"
+        checked
+        onchange="refreshCheckout()"
+      >
+      <div class="c2c-fee-option-text">
+        <div class="c2c-fee-option-title">超過 5000 元時，分段累加運費</div>
+        <div class="c2c-fee-option-desc">
+          例如訂單金額較高時，會依拆成多筆交貨便的方式累加運費。
+        </div>
+      </div>
+    </label>
+
+    <label class="c2c-fee-option">
+      <input
+        type="radio"
+        name="c2cFeeMode"
+        value="cap100"
+        onchange="refreshCheckout()"
+      >
+      <div class="c2c-fee-option-text">
+        <div class="c2c-fee-option-title">不論金額多少，最多只收 100 元</div>
+        <div class="c2c-fee-option-desc">
+          適合想直接固定運費計算的情況，不再依超過 5000 元拆單累加。
+        </div>
+      </div>
+    </label>
+
+  </div>
+</div>
+
+<div id="c2cFields" class="sub-card" style="display:none;">
           <h3>交貨便收件資訊</h3>
 
           <div class="form-grid two-col">

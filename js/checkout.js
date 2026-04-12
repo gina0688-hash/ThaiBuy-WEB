@@ -18,29 +18,49 @@ function getOriginalItemsTotal(){
   }, 0)
 }
 
-function calcC2CShippingFee(totalAmount){
-  let remaining = Number(totalAmount || 0)
+function getC2CBaseFee(amount){
+  const total = Number(amount || 0)
+
+  if(total <= 0){
+    return 0
+  }else if(total <= 1000){
+    return 60
+  }else if(total < 2000){
+    return 70
+  }else if(total <= 3000){
+    return 80
+  }else if(total <= 4000){
+    return 90
+  }else{
+    return 100
+  }
+}
+
+function calcC2CShippingFee(totalAmount, feeMode = "split"){
+  const total = Number(totalAmount || 0)
+
+  if(total <= 0) return 0
+
+  // 模式1：最多只收一筆，上限100
+  if(feeMode === "cap100"){
+    return getC2CBaseFee(Math.min(total, 5000))
+  }
+
+  // 模式2：超過5000就分段累加
+  let remaining = total
   let fee = 0
 
   while(remaining > 0){
     const chunk = Math.min(remaining, 5000)
-
-    if(chunk <= 1000){
-      fee += 60
-    }else if(chunk < 2000){
-      fee += 70
-    }else if(chunk <= 3000){
-      fee += 80
-    }else if(chunk <= 4000){
-      fee += 90
-    }else{
-      fee += 100
-    }
-
+    fee += getC2CBaseFee(chunk)
     remaining -= chunk
   }
 
   return fee
+}
+
+function getC2CFeeMode(){
+  return document.querySelector('input[name="c2cFeeMode"]:checked')?.value || "split"
 }
 
 window.updateShippingNotice = function(){
@@ -49,16 +69,17 @@ window.updateShippingNotice = function(){
 
   if(!notice) return
 
-  if(shippingMethod === "交貨便"){
-    const fee = calcC2CShippingFee(getOriginalItemsTotal())
+if(shippingMethod === "交貨便"){
+  const feeMode = getC2CFeeMode()
+  const fee = calcC2CShippingFee(getOriginalItemsTotal(), feeMode)
 
     notice.innerHTML = `
-      <b>📦 交貨便</b><br>
-      • 有保險之配送項目，須先匯款運費，直接加總在訂單總金額上。<br>
-      • 本筆訂單依商品原價計算之運費為：<b>TWD $${fee}</b><br>
-      • 若超過 5000 元，需分兩單寄送並加總兩筆運費。<br>
-      • 選擇此方式者，須在下單時填寫完整運送資訊。
-    `
+  <b>📦 交貨便</b><br>
+  • 有保險之配送項目，須先匯款運費，直接加總在訂單總金額上。<br>
+  • 本筆訂單依商品原價計算之運費為：<b>TWD $${fee}</b><br>
+  • 目前運費模式：<b>${feeMode === "cap100" ? "最高只收 100 元" : "超過 5000 元分段累加"}</b><br>
+  • 選擇此方式者，須在下單時填寫完整運送資訊。
+`
   }else if(shippingMethod === "賣貨便"){
     notice.innerHTML = `
       <b>📦 賣貨便</b><br>
@@ -75,24 +96,30 @@ window.updateShippingNotice = function(){
 window.toggleC2CFields = function(){
   const shippingMethod = document.getElementById("shippingMethod")?.value
   const block = document.getElementById("c2cFields")
+const feeModeWrap = document.getElementById("c2cFeeModeWrap")
 
   if(!block) return
 
-  if(shippingMethod === "交貨便"){
-    block.style.display = "block"
-  }else{
-    block.style.display = "none"
+if(shippingMethod === "交貨便"){
+  if(block) block.style.display = "block"
+  if(feeModeWrap) feeModeWrap.style.display = "block"
+}else{
+  if(block) block.style.display = "none"
+  if(feeModeWrap) feeModeWrap.style.display = "none"
 
-    const receiverName = document.getElementById("receiverName")
-    const receiverPhone = document.getElementById("receiverPhone")
-    const storeName = document.getElementById("storeName")
-    const storeCode = document.getElementById("storeCode")
+  const receiverName = document.getElementById("receiverName")
+  const receiverPhone = document.getElementById("receiverPhone")
+  const storeName = document.getElementById("storeName")
+  const storeCode = document.getElementById("storeCode")
 
-    if(receiverName) receiverName.value = ""
-    if(receiverPhone) receiverPhone.value = ""
-    if(storeName) storeName.value = ""
-    if(storeCode) storeCode.value = ""
-  }
+  if(receiverName) receiverName.value = ""
+  if(receiverPhone) receiverPhone.value = ""
+  if(storeName) storeName.value = ""
+  if(storeCode) storeCode.value = ""
+
+  const defaultMode = document.querySelector('input[name="c2cFeeMode"][value="split"]')
+  if(defaultMode) defaultMode.checked = true
+}
 }
 
 function render(){
@@ -151,9 +178,11 @@ const safePreorderLabel = item.preorder_type === "limited" ? "限量預購" : "�
     productChargeTotal = orderDepositAmount
   }
 
-  const shippingFee = shippingMethod === "交貨便"
-    ? calcC2CShippingFee(originalItemsTotal)
-    : 0
+  const c2cFeeMode = getC2CFeeMode()
+
+const shippingFee = shippingMethod === "交貨便"
+  ? calcC2CShippingFee(originalItemsTotal, c2cFeeMode)
+  : 0
 
   const orderTotal = originalItemsTotal + shippingFee
   const finalTotal = hasLimitedDeposit
@@ -312,9 +341,11 @@ window.submitOrder = async function(){
     return sum + Number(i.original_price || 0) * Number(i.quantity || 1)
   }, 0)
 
-  const shippingFee = shippingMethod === "交貨便"
-    ? calcC2CShippingFee(originalItemsTotal)
-    : 0
+ const c2cFeeMode = getC2CFeeMode()
+
+const shippingFee = shippingMethod === "交貨便"
+  ? calcC2CShippingFee(originalItemsTotal, c2cFeeMode)
+  : 0
 
   const total = hasLimitedDeposit
     ? productChargeTotal
@@ -329,26 +360,27 @@ const rpcItems = cart.map(i => ({
   quantity: Number(i.quantity || 1)
 }))
 
-  const { data, error } = await supabase.rpc("create_order_with_items_and_stock", {
-    p_customer_name: name,
-    p_phone: phone,
-    p_community_name: communityName || null,
-    p_email: email,
-    p_bank_last5: bankLast5,
-    p_expected_remit_time: expectedRemitTime,
-    p_contact_method: contactMethod,
-    p_contact_account: contactAccount,
-    p_total_amount: total,
-    p_need_second_payment: hasLimitedDeposit,
-    p_is_deposit_order: hasLimitedDeposit,
-    p_second_payment_status: hasLimitedDeposit ? "unpaid" : null,
-    p_shipping_method: shippingMethod,
-    p_receiver_name: shippingMethod === "交貨便" ? receiverName : null,
-    p_receiver_phone: shippingMethod === "交貨便" ? receiverPhone : null,
-    p_store_name: shippingMethod === "交貨便" ? storeName : null,
-    p_store_code: shippingMethod === "交貨便" ? storeCode : null,
-    p_items: rpcItems
-  })
+ const { data, error } = await supabase.rpc("create_order_with_items_and_stock", {
+  p_customer_name: name,
+  p_phone: phone,
+  p_community_name: communityName || null,
+  p_email: email,
+  p_bank_last5: bankLast5,
+  p_expected_remit_time: expectedRemitTime,
+  p_contact_method: contactMethod,
+  p_contact_account: contactAccount,
+  p_total_amount: total,
+  p_need_second_payment: hasLimitedDeposit,
+  p_is_deposit_order: hasLimitedDeposit,
+  p_second_payment_status: hasLimitedDeposit ? "unpaid" : null,
+  p_shipping_method: shippingMethod,
+  p_shipping_fee_mode: shippingMethod === "交貨便" ? c2cFeeMode : null,
+  p_receiver_name: shippingMethod === "交貨便" ? receiverName : null,
+  p_receiver_phone: shippingMethod === "交貨便" ? receiverPhone : null,
+  p_store_name: shippingMethod === "交貨便" ? storeName : null,
+  p_store_code: shippingMethod === "交貨便" ? storeCode : null,
+  p_items: rpcItems
+})
 
   if(error){
     console.error("create_order_with_items_and_stock error:", error)
