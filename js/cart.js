@@ -1,3 +1,12 @@
+function escapeHtml(str = ""){
+  return String(str || "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;")
+}
+
 // ⭐ 取得購物車
 export function getCart(){
   const cart = JSON.parse(localStorage.getItem("cart") || "[]")
@@ -83,6 +92,8 @@ export function changeQty(index, delta){
   renderCart()
 }
 
+
+
 // ⭐ render 購物車
 export function renderCart(){
 
@@ -122,20 +133,20 @@ export function renderCart(){
 
     items.innerHTML += `
       <div class="cart-item">
-        <div><b>${item.product_name || ""}</b></div>
-        <div>${item.variant}</div>
+       <div><b>${escapeHtml(item.product_name || "")}</b></div>
+<div>${escapeHtml(item.variant || "")}</div>
 
         <div style="font-size:12px;color:#666;">
           ${item.preorder_type === "limited" ? "限量預購" : "一般預購"}
         </div>
 
         <div style="margin:6px 0;font-size:13px;">
-          商品原價：$${item.original_price}
-          ${
-            isLimitedDeposit
-              ? `<br>本次收款：整單訂金 $${item.deposit_amount}`
-              : `<br>本次收款：$${item.checkout_price}`
-          }
+        商品原價：$${Number(item.original_price || 0)}
+${
+  isLimitedDeposit
+    ? `<br>本次收款：整單訂金 $${Number(item.deposit_amount || 0)}`
+    : `<br>本次收款：$${Number(item.checkout_price || 0)}`
+}
         </div>
 
         <button onclick="window.changeQty(${index}, -1)">➖</button>
@@ -146,7 +157,7 @@ export function renderCart(){
         ${
           isLimitedDeposit
             ? `小計：整單只收一次訂金`
-            : `小計：$${item.checkout_price * item.quantity}`
+            : `小計：$${Number(item.checkout_price || 0) * Number(item.quantity || 0)}`
         }
 
         <button onclick="window.removeFromCart(${index})">❌</button>
@@ -154,7 +165,7 @@ export function renderCart(){
     `
   })
 
-  count.innerText = cart.reduce((sum, i) => sum + i.quantity, 0)
+ count.innerText = cart.reduce((sum, i) => sum + Number(i.quantity || 0), 0)
   totalDiv.innerHTML = `<b>本次結帳金額：$${total}</b>`
 }
 

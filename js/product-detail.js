@@ -1,6 +1,39 @@
 import { supabase } from "./supabase.js"
 import { addToCart, renderCart } from "./cart.js"
 
+function escapeHtml(str){
+  return String(str || "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;")
+}
+
+function safeImageUrl(url){
+  const str = String(url || "").trim()
+
+  if(!str) return "https://via.placeholder.com/300"
+
+  if(
+    str.startsWith("http://") ||
+    str.startsWith("https://") ||
+    str.startsWith("/")
+  ){
+    return str
+  }
+
+  return "https://via.placeholder.com/300"
+}
+
+function safeAttr(str){
+  return String(str || "")
+    .replaceAll("&", "&amp;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+}
+
 // ⭐ 取得 URL id
 const params = new URLSearchParams(window.location.search)
 const id = params.get("id")
@@ -41,11 +74,20 @@ async function loadProduct(){
     .eq("product_id", id)
     .order("sort_order")
 
-  const safeVariants = (variants || []).filter(v => Number(v.stock || 0) > 0)
-const soldOutVariants = (variants || []).filter(v => Number(v.stock || 0) <= 0)
-  const safeImages = images || []
+const safeVariants = (variants || []).filter(v => Number(v.stock || 0) > 0)
+const safeImages = (images || []).map((img, index) => ({
+  ...img,
+  safe_url: safeImageUrl(img.image_url),
+  safe_border: index === 0 ? "2px solid #d87a2f" : "1px solid #ddd"
+}))
 
-  const container = document.getElementById("productDetail")
+const safeProductName = escapeHtml(product.name)
+const safePreorderNote = escapeHtml(product.preorder_note)
+const safeShippingMethod = escapeHtml(product.shipping_method)
+const safePaymentMethod = escapeHtml(product.payment_method)
+const safeDescription = escapeHtml(product.description)
+
+const container = document.getElementById("productDetail")
 
   container.innerHTML = `
     <div style="
@@ -63,43 +105,48 @@ const soldOutVariants = (variants || []).filter(v => Number(v.stock || 0) <= 0)
           border-radius:14px;
           padding:12px;
         ">
-          <img
-            id="mainImg"
-            src="${safeImages?.[0]?.image_url || ""}"
-            style="
-              width:100%;
-              border-radius:10px;
-              display:block;
-            "
-          >
+       <img
+  id="mainImg"
+  src="${safeImages?.[0]?.safe_url || "https://via.placeholder.com/300"}"
+  alt="${safeProductName}"
+  style="
+    width:100%;
+    border-radius:10px;
+    display:block;
+  "
+>
         </div>
 
-        ${
-          safeImages.length > 0 ? `
-            <div style="
-              margin-top:10px;
-              display:flex;
-              gap:8px;
-              flex-wrap:wrap;
-            ">
-              ${safeImages.map((img, index)=>`
-                <img
-                  src="${img.image_url}"
-                  style="
-                    width:58px;
-                    height:58px;
-                    object-fit:cover;
-                    border-radius:8px;
-                    cursor:pointer;
-                    border:${index === 0 ? "2px solid #d87a2f" : "1px solid #ddd"};
-                    background:#fff;
-                  "
-                  onclick="changeImage('${img.image_url}', this)"
-                >
-              `).join("")}
-            </div>
-          ` : ""
-        }
+      ${
+  safeImages.length > 0 ? `
+    <div
+      id="thumbList"
+      style="
+        margin-top:10px;
+        display:flex;
+        gap:8px;
+        flex-wrap:wrap;
+      "
+    >
+      ${safeImages.map((img)=>`
+     <img
+  src="${img.safe_url}"
+  data-image-url="${safeAttr(img.safe_url)}"
+  alt="${safeProductName}"
+  style="
+    width:58px;
+    height:58px;
+    object-fit:cover;
+    border-radius:8px;
+    cursor:pointer;
+    border:${img.safe_border};
+    background:#fff;
+  "
+>
+      `).join("")}
+    </div>
+  ` : ""
+}
 
         <!-- 左邊說明區 -->
         <div style="
@@ -125,7 +172,7 @@ const soldOutVariants = (variants || []).filter(v => Number(v.stock || 0) <= 0)
               line-height:1.9;
               color:#333;
               white-space:pre-line;
-            ">${product.preorder_note || ""}</div>
+            ">${safePreorderNote}</div>
           </div>
 
         <div style="
@@ -144,7 +191,7 @@ const soldOutVariants = (variants || []).filter(v => Number(v.stock || 0) <= 0)
               line-height:1.9;
               color:#333;
               white-space:pre-line;
-            ">${product.shipping_method || ""}</div>
+            ">${safeShippingMethod}</div>
           </div>
 
          <div style="
@@ -163,7 +210,7 @@ const soldOutVariants = (variants || []).filter(v => Number(v.stock || 0) <= 0)
               line-height:1.9;
               color:#333;
               white-space:pre-line;
-            ">${product.payment_method || ""}</div>
+            ">${safePaymentMethod}</div>
           </div>
 
         </div>
@@ -179,7 +226,7 @@ const soldOutVariants = (variants || []).filter(v => Number(v.stock || 0) <= 0)
     line-height:1.4;
     color:#3a1d14;
   ">
-    ${product.name || ""}
+    ${safeProductName}
   </h2>
 
   <div style="
@@ -193,7 +240,7 @@ const soldOutVariants = (variants || []).filter(v => Number(v.stock || 0) <= 0)
     font-weight:600;
   ">
     ${
-      product.preorder_type === "limit"
+      product.preorder_type === "limited"
         ? "限量預購"
         : product.preorder_type === "instock"
         ? "現貨"
@@ -236,15 +283,15 @@ const soldOutVariants = (variants || []).filter(v => Number(v.stock || 0) <= 0)
         "
       >
         ${safeVariants.map(v=>`
-          <option
-            value="${v.price}"
-            data-stock="${v.stock ?? 0}"
-            data-variant-name="${v.name}"
-            data-variant-id="${v.id}"
-          >
-            ${v.name} - TWD $${v.price}（庫存：${v.stock ?? 0}）
-          </option>
-        `).join("")}
+  <option
+    value="${Number(v.price || 0)}"
+    data-stock="${Number(v.stock || 0)}"
+    data-variant-name="${safeAttr(v.name)}"
+    data-variant-id="${safeAttr(v.id)}"
+  >
+    ${escapeHtml(v.name)} - TWD $${Number(v.price || 0)}（庫存：${Number(v.stock || 0)}）
+  </option>
+`).join("")}
       </select>
     `
     : `
@@ -278,16 +325,17 @@ const soldOutVariants = (variants || []).filter(v => Number(v.stock || 0) <= 0)
         ${
   safeVariants.length > 0
     ? `
-      <button
-        class="btn-primary"
-        onclick="addDetailToCart()"
-        style="
-          width:100%;
-          margin-bottom:18px;
-        "
-      >
-        加入購物車
-      </button>
+     <button
+  id="addDetailBtn"
+  class="btn-primary"
+  type="button"
+  style="
+    width:100%;
+    margin-bottom:18px;
+  "
+>
+  加入購物車
+</button>
     `
     : `
       <button
@@ -311,13 +359,27 @@ const soldOutVariants = (variants || []).filter(v => Number(v.stock || 0) <= 0)
           white-space:pre-line;
           margin-bottom:18px;
         ">
-          ${product.description || ""}
+          ${safeDescription}
         </div>
 
       </div>
 
     </div>
   `
+
+  const thumbList = document.getElementById("thumbList")
+if(thumbList){
+  thumbList.querySelectorAll("img").forEach(img=>{
+    img.addEventListener("click", ()=>{
+      changeImage(img.dataset.imageUrl || "", img)
+    })
+  })
+}
+
+const addDetailBtn = document.getElementById("addDetailBtn")
+if(addDetailBtn){
+  addDetailBtn.addEventListener("click", addDetailToCart)
+}
 
   updatePrice()
 
@@ -334,9 +396,9 @@ window.changeImage = function(url, el){
     mainImg.src = url
   }
 
-  document.querySelectorAll('#productDetail img[onclick*="changeImage"]').forEach(img=>{
-    img.style.border = "1px solid #ddd"
-  })
+  document.querySelectorAll("#thumbList img").forEach(img=>{
+  img.style.border = "1px solid #ddd"
+})
 
   if(el){
     el.style.border = "2px solid #d87a2f"
@@ -393,8 +455,8 @@ window.addDetailToCart = function(){
   const ok = addToCart({
     product_id: id,
     product_name: currentProduct?.name || "",
-    variant_id: variantId,
-    variant: variantName,
+variant_id: String(variantId || ""),
+variant: String(variantName || ""),
     original_price: originalPrice,
     checkout_price: originalPrice,
     preorder_type: currentProduct?.preorder_type || "normal",

@@ -1,6 +1,15 @@
 import { supabase } from "./supabase.js"
 import { getCart, saveCart } from "./cart.js"
 
+function escapeHtml(str){
+  return String(str || "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;")
+}
+
 let cart = getCart()
 let isSubmitting = false
 function getOriginalItemsTotal(){
@@ -108,31 +117,34 @@ function render(){
   let productChargeTotal = 0
 
   cart.forEach(item => {
+    const safeProductName = escapeHtml(item.product_name || item.name)
+const safeVariant = escapeHtml(item.variant)
+const safePreorderLabel = item.preorder_type === "limited" ? "限量預購" : "一般預購"
     if(!hasLimitedDeposit){
       productChargeTotal += Number(item.checkout_price || 0) * Number(item.quantity || 1)
     }
 
     summary.innerHTML += `
-      <div style="margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid #eee;">
-        <div><b>${item.product_name || item.name}</b></div>
-        <div>${item.variant}</div>
-        <div style="font-size:13px;color:#666;">
-          ${item.preorder_type === "limited" ? "限量預購" : "一般預購"}
-        </div>
-        <div>商品原價：TWD $${Number(item.original_price || 0)}</div>
-        <div>x ${Number(item.quantity || 1)}</div>
-        ${
-          hasLimitedDeposit
-            ? `
-              <div>商品原價小計：TWD $${Number(item.original_price || 0) * Number(item.quantity || 1)}</div>
-            `
-            : `
-              <div>本次收款：TWD $${Number(item.checkout_price || 0)}</div>
-              <div><b>小計：TWD $${Number(item.checkout_price || 0) * Number(item.quantity || 1)}</b></div>
-            `
-        }
-      </div>
-    `
+  <div style="margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid #eee;">
+    <div><b>${safeProductName}</b></div>
+    <div>${safeVariant}</div>
+    <div style="font-size:13px;color:#666;">
+      ${safePreorderLabel}
+    </div>
+    <div>商品原價：TWD $${Number(item.original_price || 0)}</div>
+    <div>x ${Number(item.quantity || 1)}</div>
+    ${
+      hasLimitedDeposit
+        ? `
+          <div>商品原價小計：TWD $${Number(item.original_price || 0) * Number(item.quantity || 1)}</div>
+        `
+        : `
+          <div>本次收款：TWD $${Number(item.checkout_price || 0)}</div>
+          <div><b>小計：TWD $${Number(item.checkout_price || 0) * Number(item.quantity || 1)}</b></div>
+        `
+    }
+  </div>
+`
   })
 
   if(hasLimitedDeposit){
@@ -308,14 +320,14 @@ window.submitOrder = async function(){
     ? productChargeTotal
     : productChargeTotal + shippingFee
 
-  const rpcItems = cart.map(i => ({
-    product_id: i.product_id || null,
-    variant_id: i.variant_id || null,
-    product_name: i.product_name || i.name,
-    variant_name: i.variant,
-    price: Number(i.original_price || 0),
-    quantity: Number(i.quantity || 1)
-  }))
+const rpcItems = cart.map(i => ({
+  product_id: i.product_id ? String(i.product_id) : null,
+  variant_id: i.variant_id ? String(i.variant_id) : null,
+  product_name: String(i.product_name || i.name || ""),
+  variant_name: String(i.variant || ""),
+  price: Number(i.original_price || 0),
+  quantity: Number(i.quantity || 1)
+}))
 
   const { data, error } = await supabase.rpc("create_order_with_items_and_stock", {
     p_customer_name: name,

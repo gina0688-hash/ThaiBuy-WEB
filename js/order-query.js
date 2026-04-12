@@ -122,7 +122,7 @@ function renderOrders(orders){
               聯絡人：${escapeHtml(order.customer_name || "-")}<br>
               Email：${maskEmail(order.email || "-")}<br>
               電話：${maskPhone(order.phone || "-")}<br>
-            匯款末五碼：${order.bank_last5 || "-"}
+            匯款末五碼：${escapeHtml(order.bank_last5 || "-")}
             </div>
           </div>
 
@@ -260,13 +260,14 @@ function renderOrders(orders){
                 style="width:100%;box-sizing:border-box;border:1px solid #f0d9c7;background:#fffaf6;border-radius:14px;padding:12px 14px;font-size:14px;min-height:90px;"
               ></textarea>
 
-              <button
-                type="button"
-                onclick="submitSecondPayment('${order.id}')"
-                style="border:none;border-radius:999px;padding:12px 18px;background:linear-gradient(135deg,#ffb36b,#ff8b3d);color:#fff;font-size:14px;font-weight:800;cursor:pointer;"
-              >
-                我已完成補款
-              </button>
+            <button
+  type="button"
+  class="second-payment-btn"
+  data-order-id="${escapeHtml(order.id)}"
+  style="border:none;border-radius:999px;padding:12px 18px;background:linear-gradient(135deg,#ffb36b,#ff8b3d);color:#fff;font-size:14px;font-weight:800;cursor:pointer;"
+>
+  我已完成補款
+</button>
             </div>
           </div>
         `
@@ -328,6 +329,8 @@ function renderOrders(orders){
                   </div>
                 `
               }).join("")
+              
+              
           }
         </div>
 
@@ -339,17 +342,23 @@ function renderOrders(orders){
             : ""
           }
         </div>
-      </div>
+          </div>
     `
   }).join("")
+
+  queryResult.querySelectorAll(".second-payment-btn").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      submitSecondPayment(btn.dataset.orderId || "")
+    })
+  })
 }
 
 function renderEmpty(title, text){
   queryResult.innerHTML = `
     <div class="result-empty">
       <div class="result-icon">📦</div>
-      <h3>${title}</h3>
-      <p>${text}</p>
+      <h3>${escapeHtml(title)}</h3>
+      <p>${escapeHtml(text)}</p>
     </div>
   `
 }
@@ -359,7 +368,7 @@ function renderError(text){
     <div class="result-empty">
       <div class="result-icon">⚠️</div>
       <h3>發生錯誤</h3>
-      <p>${text}</p>
+      <p>${escapeHtml(text)}</p>
     </div>
   `
 }

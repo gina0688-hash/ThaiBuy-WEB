@@ -38,7 +38,7 @@ async function loadMarkets(){
 
       <a
         class="market-link"
-        href="${item.market_url}"
+       href="${safeUrl(item.market_url)}"
         target="_blank"
         rel="noopener noreferrer"
       >
@@ -49,10 +49,19 @@ async function loadMarkets(){
 }
 
 function escapeHtml(str = ""){
-  return str
+  return String(str || "")
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;")
+}
+function safeUrl(url = ""){
+  const str = String(url || "").trim()
+
+  if(/^https?:\/\//i.test(str)){
+    return str
+  }
+
+  return "#"
 }

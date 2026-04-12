@@ -1,5 +1,14 @@
 import { supabase } from "./supabase.js"
 
+function escapeHtml(str){
+  return String(str || "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;")
+}
+
 let editingBatchId = null
 let editingItemId = null
 let allBatchRows = []
@@ -578,11 +587,14 @@ async function loadProducts(){
   }
 
   const select = document.getElementById("product_select")
-  select.innerHTML = `<option value="">請選擇商品</option>`
+ select.innerHTML = `<option value="">請選擇商品</option>`
 
-  for(const p of data || []){
-    select.innerHTML += `<option value="${p.id}">${p.name}</option>`
-  }
+for(const p of data || []){
+  const option = document.createElement("option")
+  option.value = String(p.id || "")
+  option.textContent = p.name || ""
+  select.appendChild(option)
+}
 }
 
 async function loadVariantsForSettlement(){
@@ -604,13 +616,12 @@ async function loadVariantsForSettlement(){
     return
   }
 
-  for(const v of data || []){
-    variantSelect.innerHTML += `
-      <option value="${v.id}">
-        ${v.name}｜售價:${v.price ?? 0}｜目前cost:${v.cost ?? 0}
-      </option>
-    `
-  }
+for(const v of data || []){
+  const option = document.createElement("option")
+  option.value = String(v.id || "")
+  option.textContent = `${v.name || ""}｜售價:${Number(v.price ?? 0)}｜目前cost:${Number(v.cost ?? 0)}`
+  variantSelect.appendChild(option)
+}
 }
 
 /* =========================
@@ -855,15 +866,14 @@ if(allError){
   const currentValue = select?.value || ""
 
   if(select){
-    select.innerHTML = `<option value="">請選擇批次</option>`
+  select.innerHTML = `<option value="">請選擇批次</option>`
 
-    for(const b of myData){
-      select.innerHTML += `
-        <option value="${b.id}">
-          ${b.batch_date}｜${b.batch_name}
-        </option>
-      `
-    }
+for(const b of myData){
+  const option = document.createElement("option")
+  option.value = String(b.id || "")
+  option.textContent = `${b.batch_date || ""}｜${b.batch_name || ""}`
+  select.appendChild(option)
+}
 
     if(currentValue && myData.some(b => b.id === currentValue)){
       select.value = currentValue
@@ -905,7 +915,10 @@ for(const batch of batchRows){
 
     const dateTitle = document.createElement("div")
     dateTitle.className = "batch-date-group"
-    dateTitle.innerHTML = `<h3>${currentDate}</h3>`
+    const h3 = document.createElement("h3")
+h3.textContent = currentDate
+dateTitle.innerHTML = ""
+dateTitle.appendChild(h3)
     container.appendChild(dateTitle)
   }
     const { data: items, error } = await supabase
@@ -993,8 +1006,8 @@ let itemsHtml = ""
 
               return `
               <tr>
-  <td>${item.products?.name || "-"}</td>
-  <td>${item.product_variants?.name || "-"}</td>
+  <td>${escapeHtml(item.products?.name || "-")}</td>
+  <td>${escapeHtml(item.product_variants?.name || "-")}</td>
   <td>${m.qty}</td>
   <td>${m.unitPriceOriginal.toFixed(2)}</td>
   <td>${m.originalSubtotal.toFixed(2)}</td>
@@ -1017,10 +1030,10 @@ let itemsHtml = ""
 </td>
   <td class="${profitClass}">${m.unitProfit.toFixed(2)}</td>
   <td class="${profitClass}">${m.profitRate.toFixed(1)}%</td>
-  <td>${item.note || "-"}</td>
+  <td>${escapeHtml(item.note || "-")}</td>
   <td>
-    <button type="button" class="btn-secondary btn-sm" onclick="editBatchItem('${item.id}')">編輯</button>
-    <button type="button" class="btn-cancel btn-sm" onclick="deleteBatchItem('${item.id}')">刪除</button>
+  <button type="button" class="btn-secondary btn-sm edit-item-btn" data-id="${escapeHtml(item.id)}">編輯</button>
+<button type="button" class="btn-cancel btn-sm delete-item-btn" data-id="${escapeHtml(item.id)}">刪除</button>
   </td>
 </tr>
               `
@@ -1041,13 +1054,13 @@ let itemsHtml = ""
       <div class="batch-header">
         <div class="batch-header-top">
           <h3>
-            ${batch.batch_date}｜${batch.batch_name}
+            ${escapeHtml(batch.batch_date || "-")}｜${escapeHtml(batch.batch_name || "-")}
             ${hasNegativeProfit ? `<span class="danger-badge">負利潤</span>` : ``}
           </h3>
 
           <div class="batch-actions">
-            <button type="button" class="btn-secondary btn-sm" onclick="editBatch('${batch.id}')">編輯批次</button>
-            <button type="button" class="btn-cancel btn-sm" onclick="deleteBatch('${batch.id}')">刪除批次</button>
+<button type="button" class="btn-secondary btn-sm edit-batch-btn" data-id="${escapeHtml(batch.id)}">編輯批次</button>
+<button type="button" class="btn-cancel btn-sm delete-batch-btn" data-id="${escapeHtml(batch.id)}">刪除批次</button>
           </div>
         </div>
 
@@ -1059,9 +1072,9 @@ let itemsHtml = ""
       ? "媛媛"
       : "-"
   }</div>
-  <div><b>購買來源：</b>${batch.purchase_source || "-"}</div>
-  <div><b>官方訂單編號：</b>${batch.official_order_no || "-"}</div>
-  <div><b>貨態編號：</b>${batch.cargo_no || "-"}</div>
+  <div><b>購買來源：</b>${escapeHtml(batch.purchase_source || "-")}</div>
+  <div><b>官方訂單編號：</b>${escapeHtml(batch.official_order_no || "-")}</div>
+  <div><b>貨態編號：</b>${escapeHtml(batch.cargo_no || "-")}</div>
 </div>
 
         <div class="batch-tags">
@@ -1092,8 +1105,8 @@ let itemsHtml = ""
         <div class="batch-detail-block expanded">
           <div>入庫時間：${formatDateTime(batch.stocked_at)}</div>
           <div>打包回台時間：${formatDateTime(batch.packed_at)}</div>
-          <div>刷卡人：${batch.payer_name || "-"}</div>
-          <div>銀行：${batch.bank_name || "-"} / ${batch.card_name || "-"}</div>
+          <div>刷卡人：${escapeHtml(batch.payer_name || "-")}</div>
+          <div>銀行：${escapeHtml(batch.bank_name || "-")} / ${escapeHtml(batch.card_name || "-")}</div>
           <div>原幣：${batch.currency} ${Number(batch.amount_original || 0).toFixed(2)}</div>
           <div>台幣：${Number(batch.amount_twd_final || 0).toFixed(2)}</div>
           <div>刷卡手續費：${Number(batch.card_fee || 0).toFixed(2)}</div>
@@ -1104,7 +1117,7 @@ let itemsHtml = ""
 </div>
           <div>每公斤國際運費：${Number(batch.shipping_per_kg || 0).toFixed(2)}</div>
           <div>回饋：${Number(batch.reward_amount || 0).toFixed(2)}（${rewardUsedText}）</div>
-          <div>備註：${batch.note || "-"}</div>
+          <div>備註：${escapeHtml(batch.note || "-")}</div>
         </div>
       </div>
 
@@ -1112,6 +1125,30 @@ let itemsHtml = ""
         ${itemsHtml}
       </div>
     `
+
+batchCard.querySelectorAll(".edit-item-btn").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    editBatchItem(btn.dataset.id || "")
+  })
+})
+
+batchCard.querySelectorAll(".delete-item-btn").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    deleteBatchItem(btn.dataset.id || "")
+  })
+})
+
+batchCard.querySelectorAll(".edit-batch-btn").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    editBatch(btn.dataset.id || "")
+  })
+})
+
+batchCard.querySelectorAll(".delete-batch-btn").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    deleteBatch(btn.dataset.id || "")
+  })
+})
 
       container.appendChild(batchCard)
   }

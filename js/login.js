@@ -1,19 +1,51 @@
 import { supabase } from "./supabase.js"
 
+let isLoggingIn = false
+
 window.login = async function(){
 
-  const email = document.getElementById("email").value
-  const password = document.getElementById("password").value
+  if(isLoggingIn) return
 
-  const { error } = await supabase.auth.signInWithPassword({
-    email,
-    password
-  })
+  const loginBtn = document.getElementById("loginBtn")
+  const email = document.getElementById("email").value.trim()
+  const password = document.getElementById("password").value.trim()
 
-  if(error){
-    alert("登入失敗：" + error.message)
+  if(!email){
+    alert("請輸入 Email")
     return
   }
 
-  location.href = "admin-orders.html"
+  if(!password){
+    alert("請輸入密碼")
+    return
+  }
+
+  isLoggingIn = true
+
+  if(loginBtn){
+    loginBtn.disabled = true
+    loginBtn.textContent = "登入中..."
+  }
+
+  try{
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    })
+
+    if(error){
+      alert("登入失敗，請確認帳號密碼是否正確")
+      return
+    }
+
+    window.location.replace("admin-orders.html")
+
+  }finally{
+    isLoggingIn = false
+
+    if(loginBtn){
+      loginBtn.disabled = false
+      loginBtn.textContent = "登入"
+    }
+  }
 }

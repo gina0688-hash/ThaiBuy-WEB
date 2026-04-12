@@ -2,6 +2,15 @@
 import { supabase } from "./supabase.js"
 import { loadAuth, bindLogout } from "./auth.js"
 
+function escapeHtml(str){
+  return String(str || "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;")
+}
+
 const user = await loadAuth()
 if(!user) throw new Error("未登入")
 
@@ -97,7 +106,7 @@ if(statusFilter !== "all"){
     div.className = "order-card"
 
     div.innerHTML = `
-     <div class="order-summary" onclick="toggleDetail('${o.id}')">
+    <div class="order-summary toggle-btn" data-id="${escapeHtml(o.id)}">
 
   <div style="
     display:flex;
@@ -109,26 +118,26 @@ if(statusFilter !== "all"){
     <!-- 左 -->
     <div>
      <div style="font-weight:bold;">
-  🧾 ${o.customer_name}
+  🧾 🧾 ${escapeHtml(o.customer_name)}
   <span style="color:#6b7280;margin-left:6px;">
     $${money.totalAmount}
   </span>
 </div>
 
 <div style="font-size:13px;color:#f97316;margin-top:4px;font-weight:700;">
-  訂單編號：${o.order_number || o.id}
+  訂單編號：${escapeHtml(o.order_number || o.id)}
 </div>
 
      <div style="font-size:14px;color:#6b7280;margin-top:4px;font-weight:500;">
 ${
   o.bank_last5
-  ? `<span style="margin-left:8px;">末五碼:${o.bank_last5}</span>`
+  ? `<span style="margin-left:8px;">末五碼:${escapeHtml(o.bank_last5)}</span>`
   : ""
 }
 
 ${
   o.shipping_method
-  ? `<span style="margin-left:8px;">🚚 ${o.shipping_method}</span>`
+  ? `<span style="margin-left:8px;">🚚 ${escapeHtml(o.shipping_method)}</span>`
   : ""
 }
 
@@ -198,31 +207,31 @@ ${
   style="background:#ef4444;color:white;border:none;padding:6px 10px;border-radius:6px;margin-bottom:10px;">
   🔄 回復整筆訂單
 </button><br>
-<b>訂單編號：</b>${o.order_number || "-"}<br>
-<b>系統ID：</b>${o.id}<br>
-<b>本名：</b>${o.customer_name || "-"}<br>
-<b>電話：</b>${o.phone || "-"}<br>
-<b>Email：</b>${o.email || "-"}<br>
-<b>社群名字：</b>${o.community_name || "-"}<br>
-<b>聯繫方式：</b>${o.contact_method || "-"}<br>
-<b>聯繫帳號：</b>${o.contact_account || "-"}<br>
-<b>預計匯款時間：</b>${o.expected_remit_time || "-"}<br>
+<b>訂單編號：</b>${escapeHtml(o.order_number || "-")}<br>
+<b>系統ID：</b>${escapeHtml(o.id || "-")}<br>
+<b>本名：</b>${escapeHtml(o.customer_name || "-")}<br>
+<b>電話：</b>${escapeHtml(o.phone || "-")}<br>
+<b>Email：</b>${escapeHtml(o.email || "-")}<br>
+<b>社群名字：</b>${escapeHtml(o.community_name || "-")}<br>
+<b>聯繫方式：</b>${escapeHtml(o.contact_method || "-")}<br>
+<b>聯繫帳號：</b>${escapeHtml(o.contact_account || "-")}<br>
+<b>預計匯款時間：</b>${escapeHtml(o.expected_remit_time || "-")}<br>
 <b>時間：</b>${new Date(o.created_at).toLocaleString()}<br><br>
 
-<b>運送方式：</b>${o.shipping_method || "-"}<br>
+<b>運送方式：</b>${escapeHtml(o.shipping_method || "-")}<br>
 ${
   o.shipping_method === "交貨便"
     ? `
-      <b>收件本名：</b>${o.receiver_name || "-"}<br>
-      <b>收件電話：</b>${o.receiver_phone || "-"}<br>
-      <b>7-11 門市：</b>${o.store_name || "-"}<br>
-      <b>7-11 店號：</b>${o.store_code || "-"}<br><br>
+    <b>收件本名：</b>${escapeHtml(o.receiver_name || "-")}<br>
+<b>收件電話：</b>${escapeHtml(o.receiver_phone || "-")}<br>
+<b>7-11 門市：</b>${escapeHtml(o.store_name || "-")}<br>
+<b>7-11 店號：</b>${escapeHtml(o.store_code || "-")}<br><br>
     `
     : "<br>"
 }
 
         <b>管理狀態：</b>
-<select onchange="updateAdminStatus('${o.id}', this.value)">
+<select class="admin-status-select" data-id="${escapeHtml(o.id)}">
   <option value="" ${!o.admin_status ? "selected" : ""}>未設定</option>
   <option value="checking" ${o.admin_status==="checking"?"selected":""}>等待對帳</option>
   <option value="paid" ${o.admin_status==="paid"?"selected":""}>對帳完成</option>
@@ -265,9 +274,9 @@ ${
 
 <div style="margin-top:8px;font-size:14px;line-height:1.8;">
   <div>補款狀態：<b>${formatSecondPaymentStatus(o.second_payment_status)}</b></div>
-  <div>補款末五碼：${o.second_payment_last5 || "-"}</div>
-  <div>補款時間：${o.second_payment_time || "-"}</div>
-  <div>補款備註：${o.second_payment_note || "-"}</div>
+  <div>補款末五碼：${escapeHtml(o.second_payment_last5 || "-")}</div>
+<div>補款時間：${escapeHtml(o.second_payment_time || "-")}</div>
+<div>補款備註：${escapeHtml(o.second_payment_note || "-")}</div>
 </div>
 
 ${
@@ -287,7 +296,7 @@ ${
 <div style="margin-top:4px;">
   補款金額：
   <input type="number"
-    value="${o.second_payment_amount || 0}"
+    value="${Number(o.second_payment_amount || 0)}"
     style="width:120px;margin:0;"
     onchange="updateSecondAmount('${o.id}', this.value)">
 </div>
@@ -319,12 +328,14 @@ ${
             ">
         
               <div>
-                - ${i.product_name} / ${i.variant_name}
+                - ${escapeHtml(i.product_name)} / ${escapeHtml(i.variant_name)}
                 x ${i.quantity} ($${i.price})
               </div>
         
-              <button
-  onclick="updateItemStatus('${i.id}','pending')"
+<button
+  data-item-id="${escapeHtml(i.id)}"
+  data-status="pending"
+  class="status-btn"
   style="
     background:${status==="pending"?"#ef4444":"#e5e7eb"};
     color:${status==="pending"?"white":"black"};
@@ -339,7 +350,9 @@ ${
               <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap">
         
                 <button
-                  onclick="updateItemStatus('${i.id}','ordered')"
+                  data-item-id="${escapeHtml(i.id)}"
+data-status="ordered"
+class="status-btn"
                   style="
                     background:${status==="ordered"?"#2563eb":"#e5e7eb"};
                     color:${status==="ordered"?"white":"black"};
@@ -351,31 +364,35 @@ ${
                   🛒 已購
                 </button>
         
-                <button
-                  onclick="updateItemStatus('${i.id}','arrived')"
-                  style="
-                    background:${status==="arrived"?"#16a34a":"#e5e7eb"};
-                    color:${status==="arrived"?"white":"black"};
-                    border:none;
-                    padding:4px 8px;
-                    border-radius:6px;
-                  "
-                >
-                  📦 到台
-                </button>
+               <button
+  data-item-id="${escapeHtml(i.id)}"
+  data-status="arrived"
+  class="status-btn"
+  style="
+    background:${status==="arrived"?"#16a34a":"#e5e7eb"};
+    color:${status==="arrived"?"white":"black"};
+    border:none;
+    padding:4px 8px;
+    border-radius:6px;
+  "
+>
+  📦 到台
+</button>
         
-                <button
-                  onclick="updateItemStatus('${i.id}','shipped')"
-                  style="
-                    background:${status==="shipped"?"#f59e0b":"#e5e7eb"};
-                    color:${status==="shipped"?"white":"black"};
-                    border:none;
-                    padding:4px 8px;
-                    border-radius:6px;
-                  "
-                >
-                  🚚 出貨
-                </button>
+               <button
+  data-item-id="${escapeHtml(i.id)}"
+  data-status="shipped"
+  class="status-btn"
+  style="
+    background:${status==="shipped"?"#f59e0b":"#e5e7eb"};
+    color:${status==="shipped"?"white":"black"};
+    border:none;
+    padding:4px 8px;
+    border-radius:6px;
+  "
+>
+  🚚 出貨
+</button>
         
                 ${
                   i.status === "cancelled"
@@ -465,7 +482,7 @@ ${
     末五碼：
     ${
       o.bank_last5
-      ? `<span style="font-weight:bold;color:#2563eb;">${o.bank_last5}</span>`
+      ? `<span style="font-weight:bold;color:#2563eb;">${escapeHtml(o.bank_last5)}</span>`
       : `<span style="color:#999;">尚未填寫</span>`
     }
   </div>
@@ -474,7 +491,7 @@ ${
     預計匯款時間：
     ${
       o.expected_remit_time
-      ? `<span style="font-weight:bold;color:#2563eb;">${o.expected_remit_time}</span>`
+      ? `<span style="font-weight:bold;color:#2563eb;">${escapeHtml(o.expected_remit_time)}</span>`
       : `<span style="color:#999;">尚未填寫</span>`
     }
   </div>
@@ -482,7 +499,7 @@ ${
   <div>
     備註：
     <input type="text"
-      value="${o.note || ""}"
+      value="${escapeHtml(o.note || "")}"
       style="width:100%"
       onchange="updateNote('${o.id}', this.value)">
   </div>
@@ -492,7 +509,27 @@ ${
 
       <hr>
     `
+const toggleEl = div.querySelector(".toggle-btn")
+if(toggleEl){
+  toggleEl.addEventListener("click", ()=>{
+    toggleDetail(o.id)
+  })
+}
 
+div.querySelectorAll(".status-btn").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    updateItemStatus(
+      btn.dataset.itemId,
+      btn.dataset.status
+    )
+  })
+})
+
+div.querySelectorAll(".admin-status-select").forEach(sel=>{
+  sel.addEventListener("change", ()=>{
+    updateAdminStatus(sel.dataset.id, sel.value)
+  })
+})
     // ⭐ 分類
    const s = statusText
 
@@ -896,7 +933,7 @@ window.loadLogs = async function(orderId){
         ${new Date(log.changed_at).toLocaleString()}：
         ${formatStatus(log.old_status)} → ${formatStatus(log.new_status)}
         <span style="color:${color};font-weight:bold;">
-          （${name}）
+          （${escapeHtml(name)}）
         </span>
       </div>
     `

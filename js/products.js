@@ -1,6 +1,31 @@
 import { supabase } from "./supabase.js"
 import { renderCart } from "./cart.js"
 
+function escapeHtml(str){
+  return String(str || "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;")
+}
+
+function safeImageUrl(url){
+  const str = String(url || "").trim()
+
+  if(!str) return "https://via.placeholder.com/300"
+
+  if(
+    str.startsWith("http://") ||
+    str.startsWith("https://") ||
+    str.startsWith("/")
+  ){
+    return str
+  }
+
+  return "https://via.placeholder.com/300"
+}
+
 let productsData = []
 let currentSeriesId = "all"
 let currentPreorderType = "all"
@@ -56,7 +81,7 @@ for(const p of filteredProducts){
       .order("sort_order")
       .limit(1)
   
-    const imgUrl = images?.[0]?.image_url || "https://via.placeholder.com/300"
+    const imgUrl = safeImageUrl(images?.[0]?.image_url)
   
     // ⭐ 取價格（最低）
     const { data: variants } = await supabase
@@ -64,11 +89,11 @@ for(const p of filteredProducts){
       .select("price, stock")
       .eq("product_id", p.id)
   
- const minPrice = variants.length
+const minPrice = variants?.length
   ? Math.min(...variants.map(v => Number(v.price || 0)))
   : 0
 
-const maxPrice = variants.length
+const maxPrice = variants?.length
   ? Math.max(...variants.map(v => Number(v.price || 0)))
   : 0
 
@@ -87,8 +112,8 @@ if(currentStockStatus === "soldout" && !isSoldOut){
 }
 
 const div = document.createElement("div")
-    div.className = `product-card ${isSoldOut ? "soldout" : ""}`
-  
+div.className = `product-card ${isSoldOut ? "soldout" : ""}`
+
 let preorderLabel = "一般預購"
 
 if(p.preorder_type === "limited"){
@@ -97,33 +122,46 @@ if(p.preorder_type === "limited"){
   preorderLabel = "現貨"
 }
 
- div.innerHTML = `
+const safeProductId = String(p.id || "")
+const safeProductName = escapeHtml(p.name)
+const safeBadgeClass = ["limited", "instock", "normal"].includes(p.preorder_type)
+  ? p.preorder_type
+  : "normal"
+
+div.innerHTML = `
   <div class="product-img-wrap">
-    <span class="product-badge ${p.preorder_type}">
-  ${preorderLabel}
-</span>
+   <span class="product-badge ${safeBadgeClass}">
+      ${preorderLabel}
+    </span>
 
     ${isSoldOut ? `<span class="soldout-badge">SOLD OUT</span>` : ""}
 
-    <img src="${imgUrl}" class="product-img">
+   <img src="${imgUrl}" class="product-img" alt="${safeProductName}">
 
-    <button class="add-btn"
-      onclick="event.stopPropagation(); goToDetail('${p.id}')">
+    <button class="add-btn" type="button">
       查看詳情
     </button>
   </div>
 
-<div class="product-info">
-  <div class="product-name">${p.name}</div>
-  <div class="product-price">${priceText}</div>
-</div>
+  <div class="product-info">
+   <div class="product-name">${safeProductName}</div>
+    <div class="product-price">${priceText}</div>
+  </div>
 `
-  
-    div.onclick = ()=>{
-  goToDetail(p.id)
+
+const detailBtn = div.querySelector(".add-btn")
+if(detailBtn){
+  detailBtn.addEventListener("click", (event)=>{
+    event.stopPropagation()
+   goToDetail(safeProductId)
+  })
 }
-  
-    container.appendChild(div)
+
+div.addEventListener("click", ()=>{
+goToDetail(safeProductId)
+})
+
+container.appendChild(div)
   }
 
  
@@ -145,18 +183,27 @@ async function loadSeries(){
   const container = document.getElementById("seriesSidebar")
   if(!container) return
 
-container.innerHTML = `
-  <button class="sidebar-link series-filter ${currentSeriesId === "all" ? "active" : ""}" onclick="filterBySeries('all')">
-    全部系列
-  </button>
-`
+container.innerHTML = ""
+
+const allBtn = document.createElement("button")
+allBtn.className = `sidebar-link series-filter ${currentSeriesId === "all" ? "active" : ""}`
+allBtn.textContent = "全部系列"
+allBtn.type = "button"
+allBtn.addEventListener("click", ()=>{
+  filterBySeries("all")
+})
+container.appendChild(allBtn)
 
 for(const s of series || []){
-  container.innerHTML += `
-    <button class="sidebar-link series-filter ${currentSeriesId === s.id ? "active" : ""}" onclick="filterBySeries('${s.id}')">
-      ${s.name}
-    </button>
-  `
+  const btn = document.createElement("button")
+  const safeSeriesId = String(s.id || "")
+btn.className = `sidebar-link series-filter ${currentSeriesId === safeSeriesId ? "active" : ""}`
+  btn.textContent = s.name || ""
+  btn.type = "button"
+  btn.addEventListener("click", ()=>{
+    filterBySeries(safeSeriesId)
+  })
+  container.appendChild(btn)
 }
 }
 
