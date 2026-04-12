@@ -3,6 +3,10 @@ import { supabase } from "./supabase.js"
 let variants = []
 let editingId = null
 let expandedProducts = new Set()
+function numberToChinese(num){
+  const map = ["一","二","三","四","五","六","七","八","九","十"]
+  return map[num - 1] || String(num)
+}
 
 function setFormMode(isEdit){
   const title = document.getElementById("formTitle")
@@ -442,43 +446,80 @@ window.saveProduct = async function(){
 
   // ⭐⭐⭐ 圖片上傳（修正後）
 
-  const files = document.getElementById("images")?.files || []
+ const files = document.getElementById("images")?.files || []
+const imageLabelInputs = [...document.querySelectorAll(".image-label-input")]
 
-  // 只有「真的有重新選圖片」時，才刪舊圖再重建
-  if(files.length > 0){
+// 先抓目前 DB 裡原本的圖片
+const { data: existingImages, error: existingImagesError } = await supabase
+  .from("product_images")
+  .select("*")
+  .eq("product_id", productId)
+  .order("sort_order")
 
-    const { error: deleteImageError } = await supabase
+if(existingImagesError){
+  console.error("read existing images error:", existingImagesError)
+  alert("讀取原圖片資料失敗")
+  return
+}
+
+// 情況 A：有重新選新圖片 → 刪掉舊圖，重建圖片資料
+if(files.length > 0){
+
+  const { error: deleteImageError } = await supabase
+    .from("product_images")
+    .delete()
+    .eq("product_id", productId)
+
+  if(deleteImageError){
+    console.error("delete old images error:", deleteImageError)
+    alert("刪除舊圖片失敗：" + (deleteImageError.message || "未知錯誤"))
+    return
+  }
+
+  const imageUrls = await uploadImages(files)
+
+  if(imageUrls.length > 0){
+    const imageData = imageUrls.map((url, index) => ({
+      product_id: productId,
+      image_url: url,
+      sort_order: index,
+      image_label: imageLabelInputs[index]?.value?.trim() || `圖${numberToChinese(index + 1)}`
+    }))
+
+    const { error: imageDbError } = await supabase
       .from("product_images")
-      .delete()
-      .eq("product_id", productId)
+      .insert(imageData)
 
-    if(deleteImageError){
-      console.error("delete old images error:", deleteImageError)
-      alert("刪除舊圖片失敗：" + (deleteImageError.message || "未知錯誤"))
+    if(imageDbError){
+      console.error("product_images insert error:", imageDbError)
+      alert("圖片資料寫入失敗：" + (imageDbError.message || "未知錯誤"))
       return
     }
+  }
+}
 
-    const imageUrls = await uploadImages(files)
+// 情況 B：沒重選圖片，但有在編輯舊圖片名稱 → 只更新 label
+else if(editingId && existingImages?.length > 0){
 
-    if(imageUrls.length > 0){
+  for(let index = 0; index < existingImages.length; index++){
+    const img = existingImages[index]
+    const newLabel = imageLabelInputs[index]?.value?.trim() || `圖${numberToChinese(index + 1)}`
 
-      const imageData = imageUrls.map((url, index)=>({
-        product_id: productId,
-        image_url: url,
+    const { error: updateImageLabelError } = await supabase
+      .from("product_images")
+      .update({
+        image_label: newLabel,
         sort_order: index
-      }))
+      })
+      .eq("id", img.id)
 
-      const { error: imageDbError } = await supabase
-        .from("product_images")
-        .insert(imageData)
-
-      if(imageDbError){
-        console.error("product_images insert error:", imageDbError)
-        alert("圖片資料寫入失敗：" + (imageDbError.message || "未知錯誤"))
-        return
-      }
+    if(updateImageLabelError){
+      console.error("update image label error:", updateImageLabelError)
+      alert("圖片名稱更新失敗：" + (updateImageLabelError.message || "未知錯誤"))
+      return
     }
   }
+}
 alert("完成 🎉")
 
 const wasEditing = !!editingId
@@ -612,9 +653,34 @@ div.innerHTML = `
   上架日期：${p.release_date || "未設定"}<br>
   建立時間：${new Date(p.created_at).toLocaleString()}<br><br>
 
-  ${images.map(img => `
-    <img src="${img.image_url}" style="width:80px; margin-right:5px;">
-  `).join("")}
+ ${images.map(img => `
+  <div style="
+    display:inline-block;
+    margin-right:8px;
+    text-align:center;
+    vertical-align:top;
+    width:80px;
+  ">
+    <img src="${img.image_url}" style="
+      width:80px;
+      height:80px;
+      object-fit:cover;
+      display:block;
+      margin-bottom:4px;
+      border-radius:8px;
+    ">
+    <div style="
+      width:80px;
+      font-size:12px;
+      color:#666;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    " title="${img.image_label || ""}">
+      ${img.image_label || ""}
+    </div>
+  </div>
+`).join("")}
 
   <br><br>
 
@@ -731,14 +797,18 @@ const preview = document.getElementById("preview")
 if(preview){
   preview.innerHTML = ""
 
-  images.forEach((img, index)=>{
+  images.forEach((img, index) => {
     const div = document.createElement("div")
-    div.style.display = "inline-block"
-    div.style.margin = "5px"
 
     div.innerHTML = `
       <img src="${img.image_url}" style="width:80px;"><br>
-      ${index + 1}
+      <input
+        type="text"
+        class="image-label-input"
+        data-index="${index}"
+        value="${img.image_label || `圖${numberToChinese(index + 1)}`}"
+        placeholder="例如：圖一"
+      >
     `
 
     preview.appendChild(div)
@@ -853,32 +923,33 @@ async function uploadImages(files){
 }
 
 window.previewImages = function(){
+  const files = document.getElementById("images")?.files || []
+  const preview = document.getElementById("preview")
 
-    const files = document.getElementById("images").files
-    const preview = document.getElementById("preview")
-  
-    if(!preview) return
-  
-    preview.innerHTML = ""
-  
-    Array.from(files).forEach((file, index)=>{
-  
-      const reader = new FileReader()
-  
-      reader.onload = function(e){
-  
-        const div = document.createElement("div")
-        div.style.display = "inline-block"
-        div.style.margin = "5px"
-  
-        div.innerHTML = `
-          <img src="${e.target.result}" style="width:80px;"><br>
-          ${index + 1}
-        `
-  
-        preview.appendChild(div)
-      }
-  
-      reader.readAsDataURL(file)
-    })
-  }
+  if(!preview) return
+
+  preview.innerHTML = ""
+
+  Array.from(files).forEach((file, index) => {
+    const reader = new FileReader()
+
+    reader.onload = function(e){
+      const div = document.createElement("div")
+
+      div.innerHTML = `
+        <img src="${e.target.result}" style="width:80px;"><br>
+        <input
+          type="text"
+          class="image-label-input"
+          data-index="${index}"
+          value="圖${numberToChinese(index + 1)}"
+          placeholder="例如：圖一"
+        >
+      `
+
+      preview.appendChild(div)
+    }
+
+    reader.readAsDataURL(file)
+  })
+}

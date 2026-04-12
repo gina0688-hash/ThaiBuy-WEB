@@ -78,7 +78,12 @@ const safeVariants = (variants || []).filter(v => Number(v.stock || 0) > 0)
 const safeImages = (images || []).map((img, index) => ({
   ...img,
   safe_url: safeImageUrl(img.image_url),
-  safe_border: index === 0 ? "2px solid #d87a2f" : "1px solid #ddd"
+  safe_border: index === 0 ? "2px solid #d87a2f" : "1px solid #ddd",
+ safe_label: escapeHtml(
+  (img.image_label && img.image_label.trim())
+    ? img.image_label
+    : `圖${index + 1}`
+)
 }))
 
 const safeProductName = escapeHtml(product.name)
@@ -115,6 +120,26 @@ const container = document.getElementById("productDetail")
     display:block;
   "
 >
+
+<div
+  id="mainImgLabel"
+  style="
+    margin-top:10px;
+    text-align:center;
+    font-size:14px;
+    color:#6b5b52;
+    font-weight:600;
+    line-height:1.4;
+    display:-webkit-box;
+    -webkit-line-clamp:2;
+    -webkit-box-orient:vertical;
+    overflow:hidden;
+    min-height:39px;
+  "
+  title="${safeImages?.[0]?.safe_label || "圖一"}"
+>
+  ${safeImages?.[0]?.safe_label || "圖一"}
+</div>
         </div>
 
       ${
@@ -128,22 +153,44 @@ const container = document.getElementById("productDetail")
         flex-wrap:wrap;
       "
     >
-      ${safeImages.map((img)=>`
-     <img
-  src="${img.safe_url}"
-  data-image-url="${safeAttr(img.safe_url)}"
-  alt="${safeProductName}"
-  style="
-    width:58px;
-    height:58px;
-    object-fit:cover;
-    border-radius:8px;
-    cursor:pointer;
-    border:${img.safe_border};
-    background:#fff;
-  "
->
-      `).join("")}
+   ${safeImages.map((img)=>`
+  <div style="
+    width:66px;
+    text-align:center;
+  ">
+    <img
+      src="${img.safe_url}"
+      data-image-url="${safeAttr(img.safe_url)}"
+      data-image-label="${safeAttr(img.safe_label)}"
+      alt="${safeProductName}"
+      style="
+        width:58px;
+        height:58px;
+        object-fit:cover;
+        border-radius:8px;
+        cursor:pointer;
+        border:${img.safe_border};
+        background:#fff;
+        display:block;
+        margin:0 auto;
+      "
+    >
+    <div style="
+      margin-top:4px;
+      font-size:12px;
+      color:#6b5b52;
+      line-height:1.3;
+      display:-webkit-box;
+      -webkit-line-clamp:2;
+      -webkit-box-orient:vertical;
+      overflow:hidden;
+      min-height:31px;
+      word-break:break-word;
+    " title="${img.safe_label}">
+      ${img.safe_label}
+    </div>
+  </div>
+`).join("")}
     </div>
   ` : ""
 }
@@ -371,7 +418,11 @@ const container = document.getElementById("productDetail")
 if(thumbList){
   thumbList.querySelectorAll("img").forEach(img=>{
     img.addEventListener("click", ()=>{
-      changeImage(img.dataset.imageUrl || "", img)
+changeImage(
+  img.dataset.imageUrl || "",
+  img.dataset.imageLabel || `圖${Array.from(img.parentElement.parentElement.children).indexOf(img.parentElement) + 1}`,
+  img
+)
     })
   })
 }
@@ -390,15 +441,21 @@ if(addDetailBtn){
 }
 
 // ⭐ 切換圖片
-window.changeImage = function(url, el){
+window.changeImage = function(url, label, el){
   const mainImg = document.getElementById("mainImg")
+  const mainImgLabel = document.getElementById("mainImgLabel")
+
   if(mainImg){
     mainImg.src = url
   }
 
+  if(mainImgLabel){
+    mainImgLabel.textContent = label || ""
+  }
+
   document.querySelectorAll("#thumbList img").forEach(img=>{
-  img.style.border = "1px solid #ddd"
-})
+    img.style.border = "1px solid #ddd"
+  })
 
   if(el){
     el.style.border = "2px solid #d87a2f"
