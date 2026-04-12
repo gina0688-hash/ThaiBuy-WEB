@@ -142,6 +142,14 @@ ${
 }
 
 ${
+  o.shipping_method === "交貨便"
+  ? `<span style="margin-left:8px;color:${money.shippingFeeMode === "cap100" ? "#16a34a" : "#ea580c"};font-weight:700;">
+       ${money.shippingFeeMode === "cap100" ? "不累加" : "有累加"}
+     </span>`
+  : ""
+}
+
+${
   o.note
   ? `<span style="margin-left:8px;color:#6b7280;">📝</span>`
   : ""
@@ -445,6 +453,19 @@ class="status-btn"
   </span>
 </div>
 
+${
+  o.shipping_method === "交貨便"
+    ? `
+      <div style="margin-bottom:4px;">
+        運費模式：
+        <span style="font-weight:bold;color:${money.shippingFeeMode === "cap100" ? "#16a34a" : "#ea580c"};">
+          ${money.shippingFeeMode === "cap100" ? "最高只收100（不累加）" : "超過5000分段累加"}
+        </span>
+      </div>
+    `
+    : ""
+}
+
 <div style="margin-bottom:4px;">
   本次已收：
   <span style="font-weight:bold;color:#2563eb;">
@@ -646,29 +667,47 @@ window.cancelItem = async function(itemId, orderId){
   }
 }
 
-function calcC2CShippingFee(totalAmount){
-  let remaining = Number(totalAmount || 0)
+function getC2CBaseFee(amount){
+  const total = Number(amount || 0)
+
+  if(total <= 0){
+    return 0
+  }else if(total <= 1000){
+    return 60
+  }else if(total < 2000){
+    return 70
+  }else if(total <= 3000){
+    return 80
+  }else if(total <= 4000){
+    return 90
+  }else{
+    return 100
+  }
+}
+
+function calcC2CShippingFee(totalAmount, feeMode = "split"){
+  const total = Number(totalAmount || 0)
+
+  if(total <= 0) return 0
+
+  if(feeMode === "cap100"){
+    return getC2CBaseFee(Math.min(total, 5000))
+  }
+
+  let remaining = total
   let fee = 0
 
   while(remaining > 0){
     const chunk = Math.min(remaining, 5000)
-
-    if(chunk <= 1000){
-      fee += 60
-    }else if(chunk < 2000){
-      fee += 70
-    }else if(chunk <= 3000){
-      fee += 80
-    }else if(chunk <= 4000){
-      fee += 90
-    }else{
-      fee += 100
-    }
-
+    fee += getC2CBaseFee(chunk)
     remaining -= chunk
   }
 
   return fee
+}
+
+function getShippingFeeModeText(mode){
+  return mode === "cap100" ? "最高100" : "分段累加"
 }
 
 function calcOrderMoney(order, items){
@@ -678,9 +717,11 @@ function calcOrderMoney(order, items){
     return sum + Number(i.price || 0) * Number(i.quantity || 1)
   }, 0)
 
-  const shippingFee = order.shipping_method === "交貨便"
-    ? calcC2CShippingFee(originalItemsTotal)
-    : 0
+  const shippingFeeMode = order.shipping_fee_mode || "split"
+
+const shippingFee = order.shipping_method === "交貨便"
+  ? calcC2CShippingFee(originalItemsTotal, shippingFeeMode)
+  : 0
 
   const isDepositOrder = !!order.is_deposit_order
   const needSecondPayment = !!order.need_second_payment
@@ -712,6 +753,7 @@ function calcOrderMoney(order, items){
     activeItems,
     originalItemsTotal,
     shippingFee,
+    shippingFeeMode,
     firstCharge,
     totalAmount,
     finalFullAmount,
@@ -724,7 +766,7 @@ async function recalcOrder(orderId){
 
   const { data: order, error: orderError } = await supabase
     .from("orders")
-    .select("id, shipping_method, need_second_payment, is_deposit_order, total_amount, second_payment_amount, refund_amount")
+    .select("id, shipping_method, shipping_fee_mode, need_second_payment, is_deposit_order, total_amount, second_payment_amount, refund_amount")
     .eq("id", orderId)
     .single()
 
