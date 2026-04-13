@@ -809,7 +809,13 @@ if(preview){
         value="${img.image_label || `圖${numberToChinese(index + 1)}`}"
         placeholder="例如：圖一"
       >
-    `
+        <button type="button"
+    onclick="deleteImage('${img.id}')"
+    style="margin-top:4px; color:red;">
+    刪除
+  </button>
+`
+    
 
     preview.appendChild(div)
   })
@@ -952,4 +958,28 @@ window.previewImages = function(){
 
     reader.readAsDataURL(file)
   })
+}
+
+window.deleteImage = async function(imageId){
+
+  const ok = confirm("確定要刪除這張圖片嗎？")
+  if(!ok) return
+
+  const { error } = await supabase
+    .from("product_images")
+    .delete()
+    .eq("id", imageId)
+
+  if(error){
+    console.error("delete image error:", error)
+    alert("刪除失敗")
+    return
+  }
+
+  alert("已刪除")
+
+  // ⭐ 重新載入畫面（關鍵）
+  if(editingId){
+    await editProduct(editingId)
+  }
 }
