@@ -17,6 +17,7 @@ let batchSearchTimer = null
 let currentUser = null
 let batchOptions = []
 let isBatchLoading = false
+let productOptions = []
 
 window.saveBatch = saveBatch
 window.saveBatchItem = saveBatchItem
@@ -73,9 +74,12 @@ batchSearchInputMain?.addEventListener("input", () => {
   document.getElementById("batch_date_start")?.addEventListener("change", filterBatchList)
   document.getElementById("batch_date_end")?.addEventListener("change", filterBatchList)
 document.getElementById("creator_search")?.addEventListener("change", filterBatchList)
+document.getElementById("reward_used_search")?.addEventListener("change", filterBatchList)
 
 const batchSearchInput = document.getElementById("batch_search_input")
 const batchDropdown = document.getElementById("batch_dropdown")
+const productSearchInput = document.getElementById("product_search_input")
+const productDropdown = document.getElementById("product_dropdown")
 
 batchSearchInput?.addEventListener("focus", () => {
   renderBatchDropdown(batchOptions)
@@ -87,6 +91,16 @@ batchSearchInput?.addEventListener("input", (e) => {
   if(batchDropdown) batchDropdown.style.display = "block"
 })
 
+productSearchInput?.addEventListener("focus", () => {
+  renderProductDropdown(productOptions)
+  if(productDropdown) productDropdown.style.display = "block"
+})
+
+productSearchInput?.addEventListener("input", (e) => {
+  filterProductDropdown(e.target.value)
+  if(productDropdown) productDropdown.style.display = "block"
+})
+
 document.addEventListener("click", (e) => {
   if(!e.target.closest(".batch-select-wrap")){
     if(batchDropdown) batchDropdown.style.display = "none"
@@ -95,6 +109,10 @@ document.addEventListener("click", (e) => {
   if(!e.target.closest(".batch-list-search-wrap")){
     const mainDropdown = document.getElementById("batch_search_dropdown")
     if(mainDropdown) mainDropdown.style.display = "none"
+  }
+
+  if(!e.target.closest(".product-select-wrap")){
+    if(productDropdown) productDropdown.style.display = "none"
   }
 })
 
@@ -586,15 +604,21 @@ async function loadProducts(){
     return
   }
 
-  const select = document.getElementById("product_select")
- select.innerHTML = `<option value="">請選擇商品</option>`
+  productOptions = data || []
 
-for(const p of data || []){
-  const option = document.createElement("option")
-  option.value = String(p.id || "")
-  option.textContent = p.name || ""
-  select.appendChild(option)
-}
+  const select = document.getElementById("product_select")
+  if(select){
+    select.innerHTML = `<option value="">請選擇商品</option>`
+
+    for(const p of productOptions){
+      const option = document.createElement("option")
+      option.value = String(p.id || "")
+      option.textContent = p.name || ""
+      select.appendChild(option)
+    }
+  }
+
+  renderProductDropdown(productOptions)
 }
 
 async function loadVariantsForSettlement(){
@@ -692,10 +716,11 @@ function clearItemForm(){
   editingItemId = null
   const title = document.getElementById("itemFormTitle")
   if(title) title.textContent = "加入批次商品"
-  document.getElementById("batch_select").value = ""
-  document.getElementById("product_select").value = ""
-  document.getElementById("batch_search_input").value = ""
-  document.getElementById("variant_select").innerHTML = `<option value="">請先選規格</option>`
+ document.getElementById("batch_select").value = ""
+document.getElementById("product_select").value = ""
+document.getElementById("batch_search_input").value = ""
+document.getElementById("product_search_input").value = ""
+document.getElementById("variant_select").innerHTML = `<option value="">請先選規格</option>`
   document.getElementById("item_qty").value = 1
   document.getElementById("unit_price_original").value = 0
   document.getElementById("sale_price_override").value = ""
@@ -735,6 +760,12 @@ async function editBatchItem(itemId){
 
   document.getElementById("batch_select").value = data.batch_id
   document.getElementById("product_select").value = data.product_id
+
+const productOption = productOptions.find(p => String(p.id) === String(data.product_id))
+document.getElementById("product_search_input").value = productOption
+  ? (productOption.name || "")
+  : ""
+
 const selectedBatch = batchOptions.find(b => b.id === data.batch_id)
 document.getElementById("batch_search_input").value = selectedBatch
   ? `${selectedBatch.batch_date}｜${selectedBatch.batch_name}`
@@ -894,7 +925,12 @@ if(searchInput){
 async function renderBatchList(batchRows){
   const container = document.getElementById("batch_list")
   const overview = document.getElementById("settlement_overview")
+  const batchCountText = document.getElementById("batch_count_text")
   container.innerHTML = ""
+
+  if(batchCountText){
+    batchCountText.textContent = `目前建立筆數：${batchRows?.length || 0}`
+  }
 
   if(!batchRows || batchRows.length === 0){
     if(overview){
@@ -1241,12 +1277,13 @@ async function filterBatchList(){
   if(isBatchLoading){
   return
 }
-  const keyword = document.getElementById("batch_search")?.value.trim().toLowerCase() || ""
-  const stockStatus = document.getElementById("stock_status_search")?.value || ""
-  const packedStatus = document.getElementById("packed_status_search")?.value || ""
-  const startDate = document.getElementById("batch_date_start")?.value || ""
-  const endDate = document.getElementById("batch_date_end")?.value || ""
-  const creatorId = document.getElementById("creator_search")?.value || ""
+ const keyword = document.getElementById("batch_search")?.value.trim().toLowerCase() || ""
+const stockStatus = document.getElementById("stock_status_search")?.value || ""
+const packedStatus = document.getElementById("packed_status_search")?.value || ""
+const rewardUsed = document.getElementById("reward_used_search")?.value || ""
+const startDate = document.getElementById("batch_date_start")?.value || ""
+const endDate = document.getElementById("batch_date_end")?.value || ""
+const creatorId = document.getElementById("creator_search")?.value || ""
 
   const filtered = allBatchRows.filter(batch => {
     const batchName = String(batch.batch_name || "").toLowerCase()
@@ -1275,6 +1312,10 @@ async function filterBatchList(){
       !packedStatus ||
       String(!!batch.packed_status) === packedStatus
 
+      const matchRewardUsed =
+  !rewardUsed ||
+  String(!!batch.is_reward_used) === rewardUsed
+
     const matchStartDate =
       !startDate ||
       batchDate >= startDate
@@ -1287,14 +1328,15 @@ async function filterBatchList(){
       !creatorId ||
       String(batch.created_by || "") === creatorId
 
-    return (
-      matchKeyword &&
-      matchStockStatus &&
-      matchPackedStatus &&
-      matchStartDate &&
-      matchEndDate &&
-      matchCreator
-    )
+   return (
+  matchKeyword &&
+  matchStockStatus &&
+  matchPackedStatus &&
+  matchRewardUsed &&
+  matchStartDate &&
+  matchEndDate &&
+  matchCreator
+)
   })
 
   await renderBatchList(filtered)
@@ -1556,4 +1598,41 @@ function filterBatchListSearchDropdown(keyword){
   })
 
   renderBatchListSearchDropdown(filtered)
+}
+
+function renderProductDropdown(list){
+  const dropdown = document.getElementById("product_dropdown")
+  if(!dropdown) return
+
+  dropdown.innerHTML = ""
+
+  list.forEach(p => {
+    const div = document.createElement("div")
+    div.className = "product-option"
+    div.textContent = p.name || "-"
+
+    div.onclick = async () => {
+      const productSelect = document.getElementById("product_select")
+      const productSearchInput = document.getElementById("product_search_input")
+
+      if(productSelect) productSelect.value = String(p.id || "")
+      if(productSearchInput) productSearchInput.value = p.name || ""
+
+      dropdown.style.display = "none"
+      await loadVariantsForSettlement()
+    }
+
+    dropdown.appendChild(div)
+  })
+}
+
+function filterProductDropdown(keyword){
+  const text = String(keyword || "").trim().toLowerCase()
+
+  const filtered = productOptions.filter(p => {
+    const name = String(p.name || "").toLowerCase()
+    return name.includes(text)
+  })
+
+  renderProductDropdown(filtered)
 }

@@ -377,25 +377,39 @@ function normalizePhone(str){
   return String(str || "").replace(/\D/g, "")
 }
 
-function calcC2CShippingFee(totalAmount){
-  let remaining = Number(totalAmount || 0)
+function getC2CBaseFee(amount){
+  const total = Number(amount || 0)
+
+  if(total <= 0){
+    return 0
+  }else if(total <= 1000){
+    return 60
+  }else if(total < 2000){
+    return 70
+  }else if(total <= 3000){
+    return 80
+  }else if(total <= 4000){
+    return 90
+  }else{
+    return 100
+  }
+}
+
+function calcC2CShippingFee(totalAmount, feeMode = "split"){
+  const total = Number(totalAmount || 0)
+
+  if(total <= 0) return 0
+
+  if(feeMode === "cap100"){
+    return getC2CBaseFee(Math.min(total, 5000))
+  }
+
+  let remaining = total
   let fee = 0
 
   while(remaining > 0){
     const chunk = Math.min(remaining, 5000)
-
-    if(chunk <= 1000){
-      fee += 60
-    }else if(chunk < 2000){
-      fee += 70
-    }else if(chunk <= 3000){
-      fee += 80
-    }else if(chunk <= 4000){
-      fee += 90
-    }else{
-      fee += 100
-    }
-
+    fee += getC2CBaseFee(chunk)
     remaining -= chunk
   }
 
@@ -409,9 +423,11 @@ function calcOrderMoney(order, items){
     return sum + Number(i.price || 0) * Number(i.quantity || 1)
   }, 0)
 
-  const shippingFee = order.shipping_method === "交貨便"
-    ? calcC2CShippingFee(originalItemsTotal)
-    : 0
+  const shippingFeeMode = order.shipping_fee_mode || "split"
+
+const shippingFee = order.shipping_method === "交貨便"
+  ? calcC2CShippingFee(originalItemsTotal, shippingFeeMode)
+  : 0
 
   const isDepositOrder = !!order.is_deposit_order
   const needSecondPayment = !!order.need_second_payment

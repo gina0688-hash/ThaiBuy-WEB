@@ -591,3 +591,32 @@ textarea{
 .batch-search-option:hover{
   background: #f8f8f8;
 }
+
+.product-select-wrap{
+  position: relative;
+}
+
+.product-dropdown{
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  max-height: 260px;
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+  z-index: 30;
+  display: none;
+}
+
+.product-option{
+  padding: 10px 12px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.product-option:hover{
+  background: #f7f7f7;
+}

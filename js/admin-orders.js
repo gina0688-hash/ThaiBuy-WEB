@@ -766,7 +766,16 @@ async function recalcOrder(orderId){
 
   const { data: order, error: orderError } = await supabase
     .from("orders")
-    .select("id, shipping_method, shipping_fee_mode, need_second_payment, is_deposit_order, total_amount, second_payment_amount, refund_amount")
+    .select(`
+      id,
+      shipping_method,
+      shipping_fee_mode,
+      need_second_payment,
+      is_deposit_order,
+      total_amount,
+      second_payment_amount,
+      refund_amount
+    `)
     .eq("id", orderId)
     .single()
 
@@ -785,14 +794,30 @@ async function recalcOrder(orderId){
     return false
   }
 
-  const money = calcOrderMoney(order, items || [])
+  const activeItems = (items || []).filter(i => i.status !== "cancelled")
+
+  const originalItemsTotal = activeItems.reduce((sum, i) => {
+    return sum + Number(i.price || 0) * Number(i.quantity || 1)
+  }, 0)
+
+  const shippingFeeMode = order.shipping_fee_mode || "split"
+
+  const shippingFee = order.shipping_method === "交貨便"
+    ? calcC2CShippingFee(originalItemsTotal, shippingFeeMode)
+    : 0
+
+  const finalFullAmount = originalItemsTotal + shippingFee
+
+  const alreadyPaid = Number(order.total_amount || 0)
+
+  const needPayNow = Math.max(finalFullAmount - alreadyPaid, 0)
+  const refundAmount = Math.max(alreadyPaid - finalFullAmount, 0)
 
   const updateData = {
-    refund_amount: money.refundAmount
-  }
-
-  if(order.is_deposit_order){
-    updateData.total_amount = money.totalAmount
+    second_payment_amount: needPayNow,
+    refund_amount: refundAmount,
+    need_second_payment: needPayNow > 0,
+    second_payment_status: needPayNow > 0 ? "unpaid" : "paid"
   }
 
   const { error: updateError } = await supabase

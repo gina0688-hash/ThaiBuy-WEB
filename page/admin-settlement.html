@@ -246,12 +246,18 @@
 <select id="batch_select" style="display:none;"></select>
         </div>
 
-        <div class="field">
-          <label>商品</label>
-          <select id="product_select" onchange="loadVariantsForSettlement()">
-            <option value="">請先選商品</option>
-          </select>
-        </div>
+      <div class="field">
+  <label>商品</label>
+
+  <div class="product-select-wrap">
+    <input type="text" id="product_search_input" placeholder="搜尋商品..." autocomplete="off">
+    <div id="product_dropdown" class="product-dropdown"></div>
+  </div>
+
+  <select id="product_select" onchange="loadVariantsForSettlement()" style="display:none;">
+    <option value="">請先選商品</option>
+  </select>
+</div>
 
         <div class="field">
           <label>規格</label>
@@ -325,9 +331,10 @@
  </div>
   <!-- 批次列表 -->
   <div class="card">
-    <h2>批次列表</h2>
+  <h2>批次列表</h2>
+  <div id="batch_count_text" class="batch-count-text">目前建立筆數：0</div>
 
-    <div class="settlement-toolbar">
+  <div class="settlement-toolbar">
       <div class="settlement-toolbar-row">
        <div class="batch-list-search-wrap">
   <input type="text" id="batch_search" placeholder="搜尋批次名稱 / 官方訂單編號 / 貨態編號" autocomplete="off">
@@ -347,12 +354,22 @@
           <option value="true">已打包回台</option>
           <option value="false">未打包回台</option>
         </select>
+
+<select id="reward_used_search">
+  <option value="">全部回饋抵用</option>
+  <option value="true">已抵用</option>
+  <option value="false">未抵用</option>
+</select>
+
       <select id="creator_search">
   <option value="">全部建立者</option>
   <option value="fa754f11-9a7e-4ced-8cbb-da30f01292e0">只看青</option>
   <option value="6dfc15fc-dacc-4515-ae56-49a8722fe534">只看媛媛</option>
 </select>
         
+
+
+
       </div>
 
 
