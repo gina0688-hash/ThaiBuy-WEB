@@ -1121,9 +1121,10 @@ let itemsHtml = ""
             ${batch.packed_status ? "已打包回台" : "未打包回台"}
           </span>
         </div>
-       <div class="batch-summary">
+ <div class="batch-summary">
   <span>購買商品件數：${totalQty}</span>
   <span>批次總重量：${totalWeight.toFixed(3)}</span>
+  <span>國際運費總額：${estimatedInternationalShipping.toFixed(2)}</span>
   <span>二補總額：${totalSecondPaymentAmount.toFixed(2)}</span>
   <span>批次參考總額：${batchReferenceCost.toFixed(2)}</span>
   <span>商品試算總成本：${batchActualCost.toFixed(2)}</span>
