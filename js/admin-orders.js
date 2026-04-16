@@ -1109,3 +1109,117 @@ window.confirmSecondPayment = async function(orderId){
   alert("已確認補款完成")
   loadOrders()
 }
+
+window.exportShippingList = async function(){
+
+  // 1️⃣ 先抓所有訂單（照送單時間）
+  const { data: orders, error: orderError } = await supabase
+    .from("orders")
+    .select(`
+      id,
+      order_number,
+      customer_name,
+      phone,
+      email,
+      shipping_method,
+      receiver_name,
+      receiver_phone,
+      store_name,
+      store_code,
+      note,
+      created_at
+    `)
+    .order("created_at", { ascending: true })
+
+  if(orderError){
+    console.error(orderError)
+    alert("訂單讀取失敗")
+    return
+  }
+
+  // 2️⃣ 再抓所有待出貨商品
+  const { data: items, error: itemError } = await supabase
+    .from("order_items")
+    .select(`
+      id,
+      order_id,
+      product_name,
+      variant_name,
+      quantity,
+      price,
+      status
+    `)
+    .eq("status", "arrived")
+
+  if(itemError){
+    console.error(itemError)
+    alert("商品讀取失敗")
+    return
+  }
+
+  if(!orders || !items || items.length === 0){
+    alert("目前沒有待出貨商品")
+    return
+  }
+
+  // 3️⃣ 建立訂單對照表
+  const orderMap = {}
+  for(const o of orders){
+    orderMap[o.id] = o
+  }
+
+  // 4️⃣ 組成匯出資料
+  const rows = items
+    .filter(i => orderMap[i.order_id])   // 保險
+    .map(i => {
+      const o = orderMap[i.order_id]
+
+      return {
+        "送單時間": new Date(o.created_at).toLocaleString(),
+        "訂單編號": o.order_number || o.id,
+        "客人姓名": o.customer_name || "",
+        "電話": o.phone || "",
+        "Email": o.email || "",
+        "運送方式": o.shipping_method || "",
+        "收件人": o.receiver_name || "",
+        "收件電話": o.receiver_phone || "",
+        "門市名稱": o.store_name || "",
+        "店號": o.store_code || "",
+        "商品名稱": i.product_name || "",
+        "規格": i.variant_name || "",
+        "數量": i.quantity || 0,
+        "單價": i.price || 0,
+        "訂單備註": o.note || ""
+      }
+    })
+
+  if(rows.length === 0){
+    alert("目前沒有待出貨商品")
+    return
+  }
+
+  // 5️⃣ 轉 CSV
+  const headers = Object.keys(rows[0])
+
+  const csv = [
+    headers.join(","),
+    ...rows.map(row =>
+      headers.map(key => {
+        const value = String(row[key] ?? "")
+          .replaceAll('"', '""')
+        return `"${value}"`
+      }).join(",")
+    )
+  ].join("\n")
+
+  // 6️⃣ 下載
+  const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8;" })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement("a")
+  a.href = url
+  a.download = `待出貨清單_${new Date().toISOString().slice(0,10)}.csv`
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
+}

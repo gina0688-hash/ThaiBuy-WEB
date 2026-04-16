@@ -43,24 +43,45 @@
 </div>
   </div>
 
-  <!-- ⭐ 搜尋 -->
-<!-- ⭐ 搜尋 + 狀態篩選 -->
-<div style="display:flex;gap:12px;align-items:center;margin-bottom:20px;flex-wrap:wrap;">
-  <input id="searchInput"
-    placeholder="搜尋 訂單編號 / ID / 姓名 / 電話 / Email"
-    style="flex:1;min-width:260px;padding:10px;font-size:14px"
-    oninput="loadOrders()">
+<div class="order-toolbar">
+  <div class="order-toolbar-row">
+    <input
+      id="searchInput"
+      class="toolbar-input"
+      type="text"
+      placeholder="搜尋 訂單編號 / ID / 姓名 / 電話 / Email"
+      oninput="loadOrders()"
+    >
 
-  <select id="statusFilter"
-    style="padding:10px;font-size:14px;min-width:180px"
-    onchange="loadOrders()">
-    <option value="all">全部狀態</option>
-    <option value="new">只看新訂單</option>
-    <option value="collecting">只看等待回台</option>
-    <option value="shipping">只看等待出貨</option>
-    <option value="done">只看已完成</option>
-    <option value="cancelled">只看已取消</option>
-  </select>
+    <select
+      id="statusFilter"
+      class="toolbar-select"
+      onchange="loadOrders()"
+    >
+      <option value="all">全部狀態</option>
+      <option value="new">只看新訂單</option>
+      <option value="collecting">只看等待回台</option>
+      <option value="shipping">只看等待出貨</option>
+      <option value="done">只看已完成</option>
+      <option value="cancelled">只看已取消</option>
+    </select>
+
+    <button
+      type="button"
+      onclick="loadOrders()"
+      class="toolbar-btn toolbar-btn-secondary"
+    >
+      搜尋
+    </button>
+
+    <button
+      type="button"
+      onclick="exportShippingList()"
+      class="toolbar-btn toolbar-btn-primary"
+    >
+      匯出待出貨清單
+    </button>
+  </div>
 </div>
 
 <!-- ⭐ 新訂單 -->
