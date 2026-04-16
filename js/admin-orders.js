@@ -58,15 +58,25 @@ if(error){
   return
 }
 console.log("orders:", orders)
-  const newBox = document.getElementById("order-new")
-  const collectingBox = document.getElementById("order-collecting")   // ⭐新增
-  const shippingBox = document.getElementById("order-shipping")
-  const doneBox = document.getElementById("order-done")
+const newBox = document.getElementById("order-new")
+const collectingBox = document.getElementById("order-collecting")
+const shippingBox = document.getElementById("order-shipping")
+const doneBox = document.getElementById("order-done")
 
-  newBox.innerHTML = ""
-  collectingBox.innerHTML = ""   // ⭐新增
-  shippingBox.innerHTML = ""
-  doneBox.innerHTML = ""
+const countNewEl = document.getElementById("count-new")
+const countCollectingEl = document.getElementById("count-collecting")
+const countShippingEl = document.getElementById("count-shipping")
+const countDoneEl = document.getElementById("count-done")
+
+newBox.innerHTML = ""
+collectingBox.innerHTML = ""
+shippingBox.innerHTML = ""
+doneBox.innerHTML = ""
+
+let newCount = 0
+let collectingCount = 0
+let shippingCount = 0
+let doneCount = 0
 
   for(const o of orders){
 
@@ -554,23 +564,33 @@ div.querySelectorAll(".admin-status-select").forEach(sel=>{
     // ⭐ 分類
    const s = statusText
 
-    if(s.includes("新訂單") || s.includes("部分已購買")){
-      newBox.appendChild(div)
-    }
-    else if(s.includes("已下單") || s.includes("等待商品回台")){
-      collectingBox.appendChild(div)
-    }
-    else if(s.includes("已回台") || s.includes("部分出貨")){
-      shippingBox.appendChild(div)
-    }
-    else if(s.includes("已完成")){
-      doneBox.appendChild(div)
-    }
+  if(s.includes("新訂單") || s.includes("部分已購買")){
+  newBox.appendChild(div)
+  newCount++
+}
+else if(s.includes("已下單") || s.includes("等待商品回台")){
+  collectingBox.appendChild(div)
+  collectingCount++
+}
+else if(s.includes("已回台") || s.includes("部分出貨")){
+  shippingBox.appendChild(div)
+  shippingCount++
+}
+else if(s.includes("已完成")){
+  doneBox.appendChild(div)
+  doneCount++
+}
+else {
+  newBox.appendChild(div)
+  newCount++
+}
 
-    else {
-      // ⭐ 這行很關鍵（補救）
-      newBox.appendChild(div)
-  }
+
+if(countNewEl) countNewEl.textContent = newCount
+if(countCollectingEl) countCollectingEl.textContent = collectingCount
+if(countShippingEl) countShippingEl.textContent = shippingCount
+if(countDoneEl) countDoneEl.textContent = doneCount
+
 }}
 
 // ⭐ 展開

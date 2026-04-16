@@ -110,3 +110,25 @@
 .toolbar-btn-primary:hover{
   background:#ea580c;
 }
+
+.section-title{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin:26px 0 14px;
+}
+
+.order-count-badge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:28px;
+  height:28px;
+  padding:0 10px;
+  border-radius:999px;
+  background:#fff7ed;
+  color:#ea580c;
+  font-size:14px;
+  font-weight:700;
+  border:1px solid #fdba74;
+}
