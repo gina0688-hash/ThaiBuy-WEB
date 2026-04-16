@@ -25,9 +25,11 @@ const endDateInput = document.getElementById("endDate")
 const keywordInput = document.getElementById("keywordInput")
 const sortSelect = document.getElementById("sortSelect")
 
+let currentStatsRows = []
+
 document.getElementById("searchBtn").addEventListener("click", loadStats)
 document.getElementById("resetBtn").addEventListener("click", resetFilters)
-
+document.getElementById("exportBtn").addEventListener("click", exportStatsCsv)
 setDefaultDates()
 await loadStats()
 
@@ -220,11 +222,13 @@ let rows = Array.from(demandMap.values()).map(row => {
     })
   }
 
-  rows = sortRows(rows, sortType)
+rows = sortRows(rows, sortType)
 
-  renderSummary(rows)
-  renderTable(rows)
-  renderPurchaseLogs(purchaseRecords || [], keyword)
+currentStatsRows = [...rows]
+
+renderSummary(rows)
+renderTable(rows)
+renderPurchaseLogs(purchaseRecords || [], keyword)
 }
 
 function sortRows(rows, sortType){
@@ -496,4 +500,46 @@ async function showUser(user){
     el.style.color = color
     el.style.fontWeight = "bold"
   }
+}
+
+function exportStatsCsv(){
+  if(!currentStatsRows.length){
+    alert("目前沒有可匯出的統計資料")
+    return
+  }
+
+  const startDate = startDateInput.value || ""
+  const endDate = endDateInput.value || ""
+
+  const rows = currentStatsRows.map(row => ({
+    "品項": row.product_name || "",
+    "規格": row.variant_name || "",
+    "需求量": Number(row.demand_qty || 0),
+    "已購量": Number(row.purchased_qty || 0),
+    "尚差": Number(row.remaining_qty || 0),
+    "多買": Number(row.extra_qty || 0),
+    "成功率": `${Number(row.success_rate || 0).toFixed(1)}%`
+  }))
+
+  const headers = Object.keys(rows[0])
+
+  const csv = [
+    headers.join(","),
+    ...rows.map(row =>
+      headers.map(key => {
+        const value = String(row[key] ?? "").replaceAll('"', '""')
+        return `"${value}"`
+      }).join(",")
+    )
+  ].join("\n")
+
+  const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8;" })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement("a")
+  a.href = url
+  a.download = `商品需求清單_${startDate}_${endDate}.csv`
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
 }
