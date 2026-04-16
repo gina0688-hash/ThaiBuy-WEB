@@ -1169,37 +1169,63 @@ window.exportShippingList = async function(){
   }
 
   // 4️⃣ 組成匯出資料
-  const rows = items
-    .filter(i => orderMap[i.order_id])   // 保險
-    .map(i => {
-      const o = orderMap[i.order_id]
+const rows = items
+  .filter(i => orderMap[i.order_id])
+  .map(i => {
+    const o = orderMap[i.order_id]
 
-      return {
-        "送單時間": new Date(o.created_at).toLocaleString(),
-        "訂單編號": o.order_number || o.id,
-        "客人姓名": o.customer_name || "",
-        "電話": o.phone || "",
-        "Email": o.email || "",
-        "運送方式": o.shipping_method || "",
-        "收件人": o.receiver_name || "",
-        "收件電話": o.receiver_phone || "",
-        "門市名稱": o.store_name || "",
-        "店號": o.store_code || "",
-        "商品名稱": i.product_name || "",
-        "規格": i.variant_name || "",
-        "數量": i.quantity || 0,
-        "單價": i.price || 0,
-        "訂單備註": o.note || ""
-      }
-    })
+    const customerName = (o.customer_name || "").trim()
+    const phone = (o.phone || "").trim()
+    const email = (o.email || "").trim().toLowerCase()
+
+    // ⭐ 分組key：優先用 電話+Email，其次電話，其次Email，最後才姓名
+    const groupKey =
+      phone && email ? `${phone}__${email}` :
+      phone ? `phone__${phone}` :
+      email ? `email__${email}` :
+      `name__${customerName}`
+
+    return {
+      _groupKey: groupKey,
+      _createdAt: o.created_at || "",
+      "送單時間": new Date(o.created_at).toLocaleString(),
+      "訂單編號": o.order_number || o.id,
+      "客人姓名": customerName,
+      "電話": phone,
+      "Email": email,
+      "運送方式": o.shipping_method || "",
+      "收件人": o.receiver_name || "",
+      "收件電話": o.receiver_phone || "",
+      "門市名稱": o.store_name || "",
+      "店號": o.store_code || "",
+      "商品名稱": i.product_name || "",
+      "規格": i.variant_name || "",
+      "數量": i.quantity || 0,
+      "單價": i.price || 0,
+      "訂單備註": o.note || ""
+    }
+  })
 
   if(rows.length === 0){
     alert("目前沒有待出貨商品")
     return
   }
 
+rows.sort((a, b) => {
+  // 1️⃣ 先讓同客人排一起
+  const keyCompare = a._groupKey.localeCompare(b._groupKey, "zh-Hant")
+  if(keyCompare !== 0) return keyCompare
+
+  // 2️⃣ 同客人內，再照送單時間早到晚
+  const timeCompare = String(a._createdAt).localeCompare(String(b._createdAt))
+  if(timeCompare !== 0) return timeCompare
+
+  // 3️⃣ 同時間再用訂單編號補排序，避免順序飄
+  return String(a["訂單編號"]).localeCompare(String(b["訂單編號"]))
+})
+
   // 5️⃣ 轉 CSV
-  const headers = Object.keys(rows[0])
+  const headers = Object.keys(rows[0]).filter(key => !key.startsWith("_"))
 
   const csv = [
     headers.join(","),
