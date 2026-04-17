@@ -156,7 +156,8 @@ body{
   display:none;
   z-index:1000;
 
-  overflow-y:auto;
+  overflow:hidden;
+  flex-direction:column;
 }
   
   /* 單筆商品 */
@@ -164,10 +165,14 @@ body{
     border-bottom:1px solid #eee;
     padding:8px 0;
   }
-
-  #cartItems{
-  max-height:50vh;
+#cartItems{
+  flex:1;
+  min-height:0;
   overflow-y:auto;
+  margin:12px 0;
+}
+
+#cartTotal{
   margin-bottom:12px;
 }
   /* 商品 grid */
