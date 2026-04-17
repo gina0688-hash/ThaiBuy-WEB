@@ -125,7 +125,6 @@ if(adminStatusFilter === "paid" && normalizedAdminStatus !== "paid"){
 if(adminStatusFilter === "hold" && normalizedAdminStatus !== "hold"){
   continue
 }
-}
 
     const div = document.createElement("div")
     div.className = "order-card"
