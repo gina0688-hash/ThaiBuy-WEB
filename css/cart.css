@@ -144,36 +144,51 @@ body{
   
   /* 🛒 彈出購物車 */
 #cartPanel{
-  position:fixed;
-  top:60px;
-  right:20px;
-  width:300px;
-  max-height:calc(100vh - 100px);
-  background:white;
-  border-radius:10px;
-  box-shadow:0 10px 30px rgba(0,0,0,0.2);
-  padding:15px;
-  display:none;
-  z-index:1000;
-
-  overflow:hidden;
-  flex-direction:column;
+  position: fixed;
+  top: 60px;
+  right: 20px;
+  width: 300px;
+  height: calc(100vh - 100px);
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  padding: 15px;
+  display: none;
+  z-index: 1000;
+  overflow: hidden;
+  box-sizing: border-box;
 }
-  
-  /* 單筆商品 */
-  .cart-item{
-    border-bottom:1px solid #eee;
-    padding:8px 0;
-  }
+
+#cartPanel h3{
+  margin: 0 0 12px 0;
+}
+
 #cartItems{
-  flex:1;
-  min-height:0;
-  overflow-y:auto;
-  margin:12px 0;
+  height: calc(100% - 170px);
+  overflow-y: auto;
+  margin: 0 0 12px 0;
+  padding-right: 4px;
+  box-sizing: border-box;
+}
+
+.cart-footer{
+  height: 158px;
+  box-sizing: border-box;
+  padding-top: 8px;
+  border-top: 1px solid #eee;
+  background: #fff;
 }
 
 #cartTotal{
-  margin-bottom:12px;
+  margin: 0 0 10px 0;
+  font-weight: bold;
+}
+
+.cart-footer .btn-primary,
+.cart-footer button{
+  width: 100%;
+  display: block;
+  margin-top: 10px;
 }
   /* 商品 grid */
 .product-grid{
