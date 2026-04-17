@@ -111,7 +111,21 @@ if(statusFilter !== "all"){
   }
 }
 
+const normalizedAdminStatus = String(o.admin_status || "").trim()
 
+if(adminStatusFilter === "unset" && normalizedAdminStatus !== ""){
+  continue
+}
+if(adminStatusFilter === "checking" && normalizedAdminStatus !== "checking"){
+  continue
+}
+if(adminStatusFilter === "paid" && normalizedAdminStatus !== "paid"){
+  continue
+}
+if(adminStatusFilter === "hold" && normalizedAdminStatus !== "hold"){
+  continue
+}
+}
 
     const div = document.createElement("div")
     div.className = "order-card"
