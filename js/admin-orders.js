@@ -994,20 +994,24 @@ window.updateItemStatus = async function(itemId, newStatus){
 
 window.updateAdminStatus = async function(id, status){
   console.log("更新狀態:", status)
+
   const { data, error } = await supabase
-  .from("orders")
-  .update({ admin_status: status })
-  .eq("id", id)
-  .select()   // ⭐ 加這行（超關鍵）
+    .from("orders")
+    .update({
+      admin_status: status || null
+    })
+    .eq("id", id)
+    .select()
+
   console.log("update結果:", data)
+
   if(error){
     console.error(error)
     alert("更新失敗")
     return
   }
 
-  await new Promise(r => setTimeout(r, 200))
-await loadOrders()
+  console.log("管理狀態已更新")
 }
 
 window.loadLogs = async function(orderId){
