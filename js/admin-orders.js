@@ -753,14 +753,14 @@ const shippingFee = order.shipping_method === "交貨便"
   let refundAmount = 0
   let totalAmount = 0
 
-  if(isDepositOrder){
-    firstCharge = activeItems.length === 0 ? 500 : 500
-    secondPaymentAmount = needSecondPayment
-      ? Number(order.second_payment_amount || Math.max(finalFullAmount - firstCharge, 0))
-      : 0
-    refundAmount = Math.max(firstCharge - finalFullAmount, 0)
-    totalAmount = firstCharge
-  }else{
+if(isDepositOrder){
+  firstCharge = Number(order.total_amount ?? 500)
+  secondPaymentAmount = needSecondPayment
+    ? Number(order.second_payment_amount ?? Math.max(finalFullAmount - firstCharge, 0))
+    : 0
+  refundAmount = Math.max(firstCharge - finalFullAmount, 0)
+  totalAmount = firstCharge
+}else{
     firstCharge = Number(order.total_amount || finalFullAmount)
     secondPaymentAmount = needSecondPayment
       ? Number(order.second_payment_amount || 0)
