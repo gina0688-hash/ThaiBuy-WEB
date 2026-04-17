@@ -111,9 +111,9 @@ if(statusFilter !== "all"){
   }
 }
 
-const normalizedAdminStatus = String(o.admin_status || "").trim()
+const normalizedAdminStatus = o.admin_status
 
-if(adminStatusFilter === "unset" && normalizedAdminStatus !== ""){
+if(adminStatusFilter === "unset" && normalizedAdminStatus !== null){
   continue
 }
 if(adminStatusFilter === "checking" && normalizedAdminStatus !== "checking"){
