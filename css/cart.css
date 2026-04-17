@@ -143,18 +143,21 @@ body{
   }
   
   /* 🛒 彈出購物車 */
-  #cartPanel{
-    position:fixed;
-    top:60px;
-    right:20px;
-    width:300px;
-    background:white;
-    border-radius:10px;
-    box-shadow:0 10px 30px rgba(0,0,0,0.2);
-    padding:15px;
-    display:none;
-    z-index:1000;
-  }
+#cartPanel{
+  position:fixed;
+  top:60px;
+  right:20px;
+  width:300px;
+  max-height:calc(100vh - 100px);
+  background:white;
+  border-radius:10px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.2);
+  padding:15px;
+  display:none;
+  z-index:1000;
+
+  overflow-y:auto;
+}
   
   /* 單筆商品 */
   .cart-item{
@@ -162,6 +165,11 @@ body{
     padding:8px 0;
   }
 
+  #cartItems{
+  max-height:50vh;
+  overflow-y:auto;
+  margin-bottom:12px;
+}
   /* 商品 grid */
 .product-grid{
     display:grid;
