@@ -21,6 +21,7 @@ showUser(user)
 
 window.loadOrders = async function(){
   console.log("🚀 loadOrders開始")
+  console.trace("loadOrders 是誰叫的")
 const keyword = document.getElementById("searchInput")?.value.trim() || ""
 const statusFilter = document.getElementById("statusFilter")?.value || "all"
 const adminStatusFilter = document.getElementById("adminStatusFilter")?.value || "all"
