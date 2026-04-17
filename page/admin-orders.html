@@ -42,7 +42,6 @@
   <button id="logoutBtn" type="button">登出</button>
 </div>
   </div>
-
 <div class="order-toolbar">
   <div class="order-toolbar-row">
     <input
@@ -64,6 +63,18 @@
       <option value="shipping">只看等待出貨</option>
       <option value="done">只看已完成</option>
       <option value="cancelled">只看已取消</option>
+    </select>
+
+    <select
+      id="adminStatusFilter"
+      class="toolbar-select"
+      onchange="loadOrders()"
+    >
+      <option value="all">全部管理狀態</option>
+      <option value="unset">未設定</option>
+      <option value="checking">等待對帳</option>
+      <option value="paid">對帳完成</option>
+      <option value="hold">暫停處理</option>
     </select>
 
     <button

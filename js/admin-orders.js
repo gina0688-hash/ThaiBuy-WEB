@@ -21,8 +21,9 @@ showUser(user)
 
 window.loadOrders = async function(){
   console.log("🚀 loadOrders開始")
- const keyword = document.getElementById("searchInput")?.value.trim() || ""
+const keyword = document.getElementById("searchInput")?.value.trim() || ""
 const statusFilter = document.getElementById("statusFilter")?.value || "all"
+const adminStatusFilter = document.getElementById("adminStatusFilter")?.value || "all"
 
   let query = supabase
     .from("orders")
