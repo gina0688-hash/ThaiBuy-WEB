@@ -615,11 +615,12 @@ container.innerHTML = ""
 
 for(const p of data){
 
-   const { data: variantRows } = await supabase
+  const { data: variantRows } = await supabase
   .from("product_variants")
   .select("*")
   .eq("product_id", p.id)
   .eq("is_active", true)
+  .order("name", { ascending: true })
 
   const { data: images } = await supabase
     .from("product_images")
@@ -768,6 +769,7 @@ if(formCard){
   .select("*")
   .eq("product_id", id)
   .eq("is_active", true)
+  .order("name", { ascending: true })
 
   if(variantReadError){
     console.error("editProduct variants error:", variantReadError)
