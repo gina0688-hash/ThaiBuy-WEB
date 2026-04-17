@@ -3,6 +3,8 @@ import { supabase } from "./supabase.js"
 let variants = []
 let editingId = null
 let expandedProducts = new Set()
+let isSavingProduct = false
+
 function numberToChinese(num){
   const map = ["一","二","三","四","五","六","七","八","九","十"]
   return map[num - 1] || String(num)
@@ -303,7 +305,20 @@ function validateProductForm(){
 // ⭐ 儲存商品（含圖片）
 window.saveProduct = async function(){
 
+  if(isSavingProduct) return
   if(!validateProductForm()) return
+
+  isSavingProduct = true
+
+  const submitBtn = document.getElementById("submitBtn")
+  const isEditMode = !!editingId
+
+  if(submitBtn){
+    submitBtn.disabled = true
+    submitBtn.textContent = isEditMode ? "更新中..." : "送出中..."
+  }
+
+  try{
 
     const name = document.getElementById("name").value.trim()
   const series_id = document.getElementById("series_id").value || null
@@ -531,8 +546,16 @@ if(wasEditing){
   keepProductFormOpen()
 }else{
   resetForm()
-
 }
+
+  } finally {
+    isSavingProduct = false
+
+    if(submitBtn){
+      submitBtn.disabled = false
+      submitBtn.textContent = editingId ? "更新商品" : "送出商品"
+    }
+  }
 }
 
 window.toggleProductVariants = function(productId){

@@ -63,10 +63,11 @@ async function loadProduct(){
 
   currentProduct = product
 
-  const { data: variants } = await supabase
-    .from("product_variants")
-    .select("*")
-    .eq("product_id", id)
+ const { data: variants } = await supabase
+  .from("product_variants")
+  .select("*")
+  .eq("product_id", id)
+  .eq("is_active", true)
 
   const { data: images } = await supabase
     .from("product_images")
