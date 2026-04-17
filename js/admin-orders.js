@@ -613,6 +613,20 @@ window.toggleDetail = function(id){
   el.style.display = el.style.display === "none" ? "block" : "none"
 }
 
+// ⭐ 一鍵全部展開
+window.expandAllOrders = function(){
+  document.querySelectorAll(".order-detail").forEach(el => {
+    el.style.display = "block"
+  })
+}
+
+// ⭐ 一鍵全部收合
+window.collapseAllOrders = function(){
+  document.querySelectorAll(".order-detail").forEach(el => {
+    el.style.display = "none"
+  })
+}
+
 // ⭐ 更新狀態
 window.updateStatus = async function(id, status){
 
