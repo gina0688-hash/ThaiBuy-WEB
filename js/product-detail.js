@@ -63,11 +63,12 @@ async function loadProduct(){
 
   currentProduct = product
 
- const { data: variants } = await supabase
+const { data: variants } = await supabase
   .from("product_variants")
   .select("*")
   .eq("product_id", id)
   .eq("is_active", true)
+  .order("name", { ascending: true })
 
   const { data: images } = await supabase
     .from("product_images")
@@ -75,7 +76,9 @@ async function loadProduct(){
     .eq("product_id", id)
     .order("sort_order")
 
-const safeVariants = (variants || []).filter(v => Number(v.stock || 0) > 0)
+const safeVariants = (variants || [])
+  .filter(v => Number(v.stock || 0) > 0)
+  .sort((a, b) => String(a.name || "").localeCompare(String(b.name || ""), "zh-Hant"))
 const safeImages = (images || []).map((img, index) => ({
   ...img,
   safe_url: safeImageUrl(img.image_url),
