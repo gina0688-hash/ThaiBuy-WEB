@@ -655,11 +655,12 @@ window.updateSecondPayment = async function(id, value){
 
   if(error){
     console.error(error)
+    alert("二補開關更新失敗")
     return
   }
 
   await recalcOrder(id)
-  await loadOrders()
+  alert("二補狀態已更新，畫面未重整，請手動F5查看")
 }
 
 // ⭐ 補款金額
@@ -676,7 +677,7 @@ window.updateSecondAmount = async function(id, value){
     return
   }
 
-  await loadOrders()
+  alert("補款金額已更新，畫面未重整，請手動F5查看")
 }
 
 
@@ -711,9 +712,9 @@ window.cancelItem = async function(itemId, orderId){
 
   const ok = await recalcOrder(orderId)
 
-  if(ok){
-    loadOrders()
-  }
+if(ok){
+  alert("已取消商品，畫面未重整，請手動F5查看")
+}
 }
 
 function getC2CBaseFee(amount){
@@ -952,7 +953,6 @@ window.updateNote = async function(id, value){
 
 window.updateItemStatus = async function(itemId, newStatus){
 
-  // 1️⃣ 先拿舊資料
   const { data: oldData, error: fetchError } = await supabase
     .from("order_items")
     .select("status, order_id")
@@ -967,7 +967,6 @@ window.updateItemStatus = async function(itemId, newStatus){
   const oldStatus = oldData.status || "pending"
   const orderId = oldData.order_id
 
-  // 2️⃣ 更新狀態
   const { error } = await supabase
     .from("order_items")
     .update({ status: newStatus })
@@ -979,7 +978,6 @@ window.updateItemStatus = async function(itemId, newStatus){
     return
   }
 
-  // 3️⃣ 寫入 log
   const { data: userData } = await supabase.auth.getUser()
 
   await supabase.from("order_item_logs").insert({
@@ -987,10 +985,10 @@ window.updateItemStatus = async function(itemId, newStatus){
     item_id: itemId,
     old_status: oldStatus,
     new_status: newStatus,
-    changed_by: userData.user?.id   // ⭐新增
+    changed_by: userData.user?.id
   })
 
-  loadOrders()
+  alert("商品狀態已更新，畫面未重整，請手動F5查看最新結果")
 }
 
 window.updateAdminStatus = async function(id, status){
@@ -1074,9 +1072,8 @@ window.resetOrder = async function(orderId){
     alert("回復失敗")
     return
   }
-
-  await recalcOrder(orderId)
-  loadOrders()
+await recalcOrder(orderId)
+alert("整筆訂單已回復，畫面未重整，請手動F5查看")
 }
 
 function formatStatus(s){
@@ -1159,8 +1156,7 @@ window.confirmSecondPayment = async function(orderId){
     return
   }
 
-  alert("已確認補款完成")
-  loadOrders()
+  alert("已確認補款完成，畫面未重整，請手動F5查看")
 }
 
 window.exportShippingList = async function(){
