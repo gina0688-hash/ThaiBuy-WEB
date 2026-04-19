@@ -1306,3 +1306,138 @@ rows.sort((a, b) => {
   document.body.removeChild(a)
   URL.revokeObjectURL(url)
 }
+
+window.exportPurchasedAndCancelledList = async function(){
+
+  // 1️⃣ 抓所有訂單
+  const { data: orders, error: orderError } = await supabase
+    .from("orders")
+    .select(`
+      id,
+      order_number,
+      customer_name,
+      phone,
+      email,
+      shipping_method,
+      note,
+      created_at
+    `)
+    .order("created_at", { ascending: true })
+
+  if(orderError){
+    console.error(orderError)
+    alert("訂單讀取失敗")
+    return
+  }
+
+  // 2️⃣ 抓已購買 + 已取消商品
+  const { data: items, error: itemError } = await supabase
+    .from("order_items")
+    .select(`
+      id,
+      order_id,
+      product_name,
+      variant_name,
+      quantity,
+      price,
+      status
+    `)
+    .in("status", ["ordered", "cancelled"])
+    .order("order_id", { ascending: true })
+
+  if(itemError){
+    console.error(itemError)
+    alert("商品讀取失敗")
+    return
+  }
+
+  if(!orders || !items || items.length === 0){
+    alert("目前沒有已購買或已取消商品")
+    return
+  }
+
+  // 3️⃣ 建立訂單對照表
+  const orderMap = {}
+  for(const o of orders){
+    orderMap[o.id] = o
+  }
+
+  // 4️⃣ 組成匯出資料
+  const rows = items
+    .filter(i => orderMap[i.order_id])
+    .map(i => {
+      const o = orderMap[i.order_id]
+
+      const customerName = (o.customer_name || "").trim()
+      const phone = (o.phone || "").trim()
+      const email = (o.email || "").trim().toLowerCase()
+
+      const groupKey =
+        phone && email ? `${phone}__${email}` :
+        phone ? `phone__${phone}` :
+        email ? `email__${email}` :
+        `name__${customerName}`
+
+      return {
+        _groupKey: groupKey,
+        _createdAt: o.created_at || "",
+        _statusSort: i.status === "ordered" ? 0 : 1,
+
+        "送單時間": new Date(o.created_at).toLocaleString(),
+        "訂單編號": o.order_number || o.id,
+        "客人姓名": customerName,
+        "電話": phone,
+        "Email": email,
+        "運送方式": o.shipping_method || "",
+        "商品名稱": i.product_name || "",
+        "規格": i.variant_name || "",
+        "數量": i.quantity || 0,
+        "單價": i.price || 0,
+        "商品狀態": i.status === "ordered" ? "已購" : "已取消",
+        "訂單備註": o.note || ""
+      }
+    })
+
+  if(rows.length === 0){
+    alert("目前沒有已購買或已取消商品")
+    return
+  }
+
+  // 5️⃣ 排序
+  rows.sort((a, b) => {
+    const keyCompare = a._groupKey.localeCompare(b._groupKey, "zh-Hant")
+    if(keyCompare !== 0) return keyCompare
+
+    const timeCompare = String(a._createdAt).localeCompare(String(b._createdAt))
+    if(timeCompare !== 0) return timeCompare
+
+    const statusCompare = a._statusSort - b._statusSort
+    if(statusCompare !== 0) return statusCompare
+
+    return String(a["訂單編號"]).localeCompare(String(b["訂單編號"]))
+  })
+
+  // 6️⃣ 轉 CSV
+  const headers = Object.keys(rows[0]).filter(key => !key.startsWith("_"))
+
+  const csv = [
+    headers.join(","),
+    ...rows.map(row =>
+      headers.map(key => {
+        const value = String(row[key] ?? "").replaceAll('"', '""')
+        return `"${value}"`
+      }).join(",")
+    )
+  ].join("\n")
+
+  // 7️⃣ 下載
+  const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8;" })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement("a")
+  a.href = url
+  a.download = `已購已取消清單_${new Date().toISOString().slice(0,10)}.csv`
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
+}
