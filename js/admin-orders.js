@@ -64,21 +64,25 @@ const newBox = document.getElementById("order-new")
 const collectingBox = document.getElementById("order-collecting")
 const shippingBox = document.getElementById("order-shipping")
 const doneBox = document.getElementById("order-done")
+const cancelledBox = document.getElementById("order-cancelled")
 
 const countNewEl = document.getElementById("count-new")
 const countCollectingEl = document.getElementById("count-collecting")
 const countShippingEl = document.getElementById("count-shipping")
 const countDoneEl = document.getElementById("count-done")
+const countCancelledEl = document.getElementById("count-cancelled")
 
 newBox.innerHTML = ""
 collectingBox.innerHTML = ""
 shippingBox.innerHTML = ""
 doneBox.innerHTML = ""
+cancelledBox.innerHTML = ""
 
 let newCount = 0
 let collectingCount = 0
 let shippingCount = 0
 let doneCount = 0
+let cancelledCount = 0
 
   for(const o of orders){
 
@@ -579,7 +583,11 @@ div.querySelectorAll(".admin-status-select").forEach(sel=>{
     // ⭐ 分類
    const s = statusText
 
-  if(s.includes("新訂單") || s.includes("部分已購買")){
+if(s.includes("已取消")){
+  cancelledBox.appendChild(div)
+  cancelledCount++
+}
+else if(s.includes("新訂單") || s.includes("部分已購買")){
   newBox.appendChild(div)
   newCount++
 }
@@ -600,11 +608,11 @@ else {
   newCount++
 }
 
-
 if(countNewEl) countNewEl.textContent = newCount
 if(countCollectingEl) countCollectingEl.textContent = collectingCount
 if(countShippingEl) countShippingEl.textContent = shippingCount
 if(countDoneEl) countDoneEl.textContent = doneCount
+if(countCancelledEl) countCancelledEl.textContent = cancelledCount
 
 }}
 
