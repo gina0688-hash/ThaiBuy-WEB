@@ -130,13 +130,13 @@ function render(){
     item.preorder_type === "limited" && item.deposit_required
   )
 
-  const orderDepositAmount = hasLimitedDeposit
-    ? Number(
-        cart.find(item =>
-          item.preorder_type === "limited" && item.deposit_required
-        )?.deposit_amount || 500
-      )
-    : 0
+ const limitedDepositItem = cart.find(item =>
+  item.preorder_type === "limited" && item.deposit_required
+)
+
+const orderDepositAmount = hasLimitedDeposit
+  ? Number(limitedDepositItem?.deposit_amount ?? 0)
+  : 0
 
   const shippingMethod = document.getElementById("shippingMethod")?.value || ""
   const originalItemsTotal = getOriginalItemsTotal()
@@ -328,14 +328,14 @@ window.submitOrder = async function(){
     i.preorder_type === "limited" && i.deposit_required
   )
 
-  const productChargeTotal = hasLimitedDeposit
-    ? Number(
-        cart.find(i =>
-          i.preorder_type === "limited" && i.deposit_required
-        )?.deposit_amount || 500
-      )
-    : cart.reduce((sum, i) =>
-        sum + Number(i.checkout_price || 0) * Number(i.quantity || 1), 0)
+ const limitedDepositItem = cart.find(i =>
+  i.preorder_type === "limited" && i.deposit_required
+)
+
+const productChargeTotal = hasLimitedDeposit
+  ? Number(limitedDepositItem?.deposit_amount ?? 0)
+  : cart.reduce((sum, i) =>
+      sum + Number(i.checkout_price || 0) * Number(i.quantity || 1), 0)
 
   const originalItemsTotal = cart.reduce((sum, i) => {
     return sum + Number(i.original_price || 0) * Number(i.quantity || 1)
