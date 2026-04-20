@@ -122,6 +122,92 @@ if(shippingMethod === "交貨便"){
 }
 }
 
+async function validateCartWithLatestData(){
+
+  if(cart.length === 0){
+    return { ok: false }
+  }
+
+  const variantIds = cart
+    .map(i => i.variant_id)
+    .filter(Boolean)
+
+  if(variantIds.length === 0){
+    return { ok: false }
+  }
+
+  const { data, error } = await supabase
+    .from("product_variants")
+    .select(`
+      id,
+      price,
+      stock,
+      product:products(
+        id,
+        is_active,
+        preorder_type,
+        deposit_amount
+      )
+    `)
+    .in("id", variantIds)
+
+  if(error){
+    console.error("validateCart error:", error)
+    return { ok: false }
+  }
+
+  const latestMap = new Map()
+  data.forEach(v => {
+    latestMap.set(v.id, v)
+  })
+
+  let hasError = false
+
+  for(const item of cart){
+    const latest = latestMap.get(item.variant_id)
+
+    // ❌ 規格不存在
+    if(!latest){
+      hasError = true
+      break
+    }
+
+    // ❌ 商品下架
+    if(!latest.product?.is_active){
+      hasError = true
+      break
+    }
+
+    // ❌ 價格改了
+    if(Number(item.original_price) !== Number(latest.price)){
+      hasError = true
+      break
+    }
+
+    // ❌ 庫存不足
+    if(Number(item.quantity) > Number(latest.stock)){
+      hasError = true
+      break
+    }
+
+    // ❌ 預購類型變了
+    if(item.preorder_type !== latest.product?.preorder_type){
+      hasError = true
+      break
+    }
+
+    // ❌ 訂金變了（限量）
+    if(item.preorder_type === "limited"){
+      if(Number(item.deposit_amount || 0) !== Number(latest.product?.deposit_amount || 0)){
+        hasError = true
+        break
+      }
+    }
+  }
+
+  return { ok: !hasError }
+}
+
 function render(){
   const summary = document.getElementById("orderSummary")
   summary.innerHTML = ""
@@ -360,6 +446,19 @@ const rpcItems = cart.map(i => ({
   quantity: Number(i.quantity || 1)
 }))
 
+const validation = await validateCartWithLatestData()
+
+if(!validation.ok){
+  alert("商品資訊已更新，請重新確認購物車後再下單")
+
+  isSubmitting = false
+  if(submitBtn){
+    submitBtn.disabled = false
+    submitBtn.textContent = "送出訂單"
+  }
+
+  return
+}
  const { data, error } = await supabase.rpc("create_order_with_items_and_stock", {
   p_customer_name: name,
   p_phone: phone,
