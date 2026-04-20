@@ -223,7 +223,7 @@ function renderOrders(orders){
   </div>
 
   <div style="display:grid;gap:6px;font-size:14px;line-height:1.6;color:#7c2d12;">
-    <div>銀行：你的銀行名稱</div>
+    <div>銀行：台新銀行/div>
     <div>代碼：812</div>
     <div>帳號：28881023699634</div>
   </div>
