@@ -215,9 +215,9 @@ function renderOrders(orders){
               color:#7c2d12;
               white-space:pre-line;
             ">
-              <b>補款匯款資訊</b><br>
-（請務必確認帳號再匯款）<br>
-              ${escapeHtml(SECOND_PAYMENT_ACCOUNT_INFO)}
+                <b>補款匯款資訊</b><br>
+  <span style="font-size:13px;color:#9a3412;">（請務必確認帳號再匯款）</span><br>
+  ${escapeHtml(SECOND_PAYMENT_ACCOUNT_INFO)}
             </div>
           `
           : ""
