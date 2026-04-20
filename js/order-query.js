@@ -1,5 +1,12 @@
 import { supabase } from "./supabase.js"
 
+const SECOND_PAYMENT_ACCOUNT_INFO = `
+補款帳號：
+銀行：你的銀行名稱
+代碼：812
+帳號：28881023699634
+`.trim()
+
 const queryOrderNumber = document.getElementById("queryOrderNumber")
 const queryEmail = document.getElementById("queryEmail")
 const queryPhone = document.getElementById("queryPhone")
@@ -180,7 +187,7 @@ function renderOrders(orders){
           </div>
         </div>
 
-       ${
+      ${
   order.need_second_payment && Number(order.second_payment_amount || money.secondPaymentAmount || 0) > 0
   ? `
     <div style="
@@ -195,6 +202,26 @@ function renderOrders(orders){
       <b>補款提醒：</b> 尚有補款金額
       <b>$${Number(order.second_payment_amount || money.secondPaymentAmount || 0)}</b><br>
       補款狀態：<b>${formatSecondPaymentStatus(order.second_payment_status)}</b>
+
+      ${
+        order.second_payment_status !== "paid"
+          ? `
+            <div style="
+              margin-top:10px;
+              background:#fff;
+              border:1px dashed #fdba74;
+              border-radius:14px;
+              padding:12px 14px;
+              color:#7c2d12;
+              white-space:pre-line;
+            ">
+              <b>補款匯款資訊</b><br>
+（請務必確認帳號再匯款）<br>
+              ${escapeHtml(SECOND_PAYMENT_ACCOUNT_INFO)}
+            </div>
+          `
+          : ""
+      }
     </div>
 
     ${
