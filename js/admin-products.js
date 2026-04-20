@@ -89,9 +89,11 @@ window.toggleDepositAmount = function(){
 
   if(!depositRequired){
     document.getElementById("deposit_amount").value = 0
-  }else if(!document.getElementById("deposit_amount").value){
-    document.getElementById("deposit_amount").value = 500
-  }
+}else if(
+  document.getElementById("deposit_amount").value === "" ||
+  document.getElementById("deposit_amount").value === null
+){
+  document.getElementById("deposit_amount").value = 500
 }
 
 async function loadSearchSeriesOptions(){
@@ -277,10 +279,10 @@ function validateProductForm(){
     return false
   }
 
-  if(preorder_type === "limited" && deposit_required && (isNaN(deposit_amount) || deposit_amount <= 0)){
-    alert("限量預購若需訂金，請輸入正確的訂金金額")
-    return false
-  }
+if(preorder_type === "limited" && deposit_required && (isNaN(deposit_amount) || deposit_amount < 0)){
+  alert("限量預購若需訂金，請輸入正確的訂金金額")
+  return false
+}
 
   for(const v of activeVariants){
     if(!v.name || !v.name.trim()){
