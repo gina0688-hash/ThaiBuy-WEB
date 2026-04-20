@@ -247,7 +247,7 @@ button{
   padding: 10px 15px;
   border-radius: 999px;
   cursor: pointer;
-  z-index: 2000;
+  z-index: 9999;
   box-shadow: 0 8px 20px rgba(0,0,0,0.12);
 }
 
@@ -262,8 +262,8 @@ button{
   box-shadow: 0 10px 30px rgba(0,0,0,0.2);
   padding: 16px;
   display: none;
-  z-index: 2000;
-  overflow: hidden;
+  flex-direction: column;
+  z-index: 9999;
   box-sizing: border-box;
   border: 1px solid var(--brand-border);
 }
@@ -273,11 +273,12 @@ button{
 }
 
 #cartItems{
-  height: calc(100% - 222px);
+  flex: 1;
   overflow-y: auto;
   margin: 0 0 12px 0;
   padding-right: 4px;
   box-sizing: border-box;
+  min-height: 0;
 }
 
 .cart-item{
@@ -286,7 +287,7 @@ button{
 }
 
 .cart-footer{
-  height: 210px;
+  flex-shrink: 0;
   box-sizing: border-box;
   padding-top: 8px;
   border-top: 1px solid #eee;
