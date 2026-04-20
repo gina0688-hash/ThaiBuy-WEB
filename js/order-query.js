@@ -206,19 +206,28 @@ function renderOrders(orders){
       ${
         order.second_payment_status !== "paid"
           ? `
-            <div style="
-              margin-top:10px;
-              background:#fff;
-              border:1px dashed #fdba74;
-              border-radius:14px;
-              padding:12px 14px;
-              color:#7c2d12;
-              white-space:pre-line;
-            ">
-                <b>補款匯款資訊</b><br>
-  <span style="font-size:13px;color:#9a3412;">（請務必確認帳號再匯款）</span><br>
-  ${escapeHtml(SECOND_PAYMENT_ACCOUNT_INFO)}
-            </div>
+         <div style="
+  margin-top:10px;
+  background:linear-gradient(180deg,#fffaf5 0%, #fff 100%);
+  border:1px solid #f7c9a8;
+  border-radius:14px;
+  padding:14px 16px;
+  color:#7c2d12;
+">
+  <div style="font-size:15px;font-weight:800;color:#9a3412;margin-bottom:4px;">
+    補款匯款資訊
+  </div>
+
+  <div style="font-size:12px;color:#c2410c;margin-bottom:10px;">
+    請務必確認帳號後再匯款
+  </div>
+
+  <div style="display:grid;gap:6px;font-size:14px;line-height:1.6;color:#7c2d12;">
+    <div>銀行：你的銀行名稱</div>
+    <div>代碼：812</div>
+    <div>帳號：28881023699634</div>
+  </div>
+</div>
           `
           : ""
       }
