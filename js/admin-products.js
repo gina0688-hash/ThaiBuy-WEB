@@ -94,7 +94,7 @@ window.toggleDepositAmount = function(){
   document.getElementById("deposit_amount").value === null
 ){
   document.getElementById("deposit_amount").value = 500
-}
+}}
 
 async function loadSearchSeriesOptions(){
   const select = document.getElementById("searchSeries")
