@@ -603,36 +603,44 @@ function formatSecondPaymentStatus(status){
 window.submitSecondPayment = async function(orderId){
   const last5 = document.getElementById(`secondLast5-${orderId}`)?.value.trim() || ""
   const remitRaw = document.getElementById(`secondTime-${orderId}`)?.value || ""
-const remitTime = remitRaw ? remitRaw.replace("T", " ") : ""
+  const remitTime = remitRaw ? remitRaw.replace("T", " ") : ""
   const note = document.getElementById(`secondNote-${orderId}`)?.value.trim() || ""
+
+  const orderNumber = queryOrderNumber.value.trim().toUpperCase()
+  const email = queryEmail.value.trim().toLowerCase()
+  const phone = normalizePhone(queryPhone.value)
 
   if(!last5){
     alert("請填寫補款帳號末五碼")
     return
   }
 
- if(!remitTime){
-  alert("請選擇補款日期時間")
-  return
-}
+  if(!remitTime){
+    alert("請選擇補款日期時間")
+    return
+  }
 
-  const { error } = await supabase
-    .from("orders")
-    .update({
-      second_payment_last5: last5,
-      second_payment_time: remitTime,
-      second_payment_note: note,
-      second_payment_status: "submitted"
-    })
-    .eq("id", orderId)
+  const { data, error } = await supabase.rpc("submit_second_payment", {
+    p_order_id: orderId,
+    p_order_number: orderNumber || null,
+    p_email: email || null,
+    p_phone: phone || null,
+    p_second_payment_last5: last5,
+    p_second_payment_time: remitTime,
+    p_second_payment_note: note || null
+  })
 
   if(error){
-    console.error(error)
+    console.error("submit second payment rpc error:", error)
     alert("補款資料送出失敗，請稍後再試")
     return
   }
 
-  alert("已送出補款資訊，請等待對帳確認")
+  if(!data?.success){
+    alert(data?.message || "補款資料送出失敗，請稍後再試")
+    return
+  }
 
+  alert("已送出補款資訊，請等待對帳確認")
   handleQuery()
 }
