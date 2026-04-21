@@ -205,8 +205,12 @@ export async function syncCartWithStock(showAlert = false){
 // ⭐ 刪除
 export async function removeFromCart(index){
   let cart = getCart()
- if(index < 0 || index >= cart.length) return
-    saveCart(cart)
+
+  if(index < 0 || index >= cart.length) return
+
+  cart.splice(index, 1)   // ⭐ 你漏掉這行
+
+  saveCart(cart)
   await renderCart()
 }
 
