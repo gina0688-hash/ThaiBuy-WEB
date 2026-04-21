@@ -1,3 +1,5 @@
+import { supabase } from "./supabase.js"
+
 function escapeHtml(str = ""){
   return String(str || "")
     .replaceAll("&", "&amp;")
@@ -30,7 +32,7 @@ export function saveCart(cart){
 }
 
 // ⭐ 加入購物車
-export function addToCart(itemData){
+export async function addToCart(itemData){
 
   let cart = getCart()
 
@@ -65,22 +67,154 @@ export function addToCart(itemData){
     })
   }
 
-  saveCart(cart)
-  renderCart()
+   saveCart(cart)
+  await renderCart()
   return true
 }
 
-// ⭐ 刪除
-export function removeFromCart(index){
+// ⭐ 同步購物車庫存狀態
+export async function syncCartWithStock(showAlert = false){
   let cart = getCart()
-  cart.splice(index, 1)
-  saveCart(cart)
-  renderCart()
+
+  if(!cart.length){
+    return {
+      cart: [],
+      removedItems: [],
+      changed: false
+    }
+  }
+
+  const variantIds = [...new Set(
+    cart.map(item => item.variant_id).filter(Boolean)
+  )]
+
+  if(!variantIds.length){
+    return {
+      cart,
+      removedItems: [],
+      changed: false
+    }
+  }
+
+  const { data, error } = await supabase
+    .from("product_variants")
+    .select(`
+      id,
+      stock,
+      product_id,
+      products (
+        id,
+        is_active
+      )
+    `)
+    .in("id", variantIds)
+
+  if(error){
+    console.error("檢查購物車庫存失敗：", error)
+    return {
+      cart,
+      removedItems: [],
+      changed: false
+    }
+  }
+
+  const variantMap = new Map(
+    (data || []).map(row => [row.id, row])
+  )
+
+  const removedItems = []
+  const adjustedItems = []
+
+  const validCart = cart
+    .map(item => {
+      const variant = variantMap.get(item.variant_id)
+
+      let productActive = false
+
+      if(Array.isArray(variant?.products)){
+        productActive = !!variant.products[0]?.is_active
+      }else{
+        productActive = !!variant?.products?.is_active
+      }
+
+      const stock = Number(variant?.stock || 0)
+      const hasStock = stock > 0
+      const isValid = !!variant && productActive && hasStock
+
+      if(!isValid){
+        removedItems.push(item)
+        return null
+      }
+
+      if(Number(item.quantity || 0) > stock){
+        adjustedItems.push({
+          ...item,
+          oldQuantity: Number(item.quantity || 0),
+          newQuantity: stock
+        })
+
+        return {
+          ...item,
+          quantity: stock
+        }
+      }
+
+      return item
+    })
+    .filter(Boolean)
+
+  const changed = removedItems.length > 0 || adjustedItems.length > 0
+
+  if(changed){
+    saveCart(validCart)
+
+    if(showAlert){
+      let message = ""
+
+      if(removedItems.length){
+        const removedNames = removedItems
+          .map(item => `${item.product_name} / ${item.variant}`)
+          .join("\n")
+
+        message += `以下商品已無庫存或已下架，已自動從購物車移除：\n${removedNames}`
+      }
+
+      if(adjustedItems.length){
+        const adjustedNames = adjustedItems
+          .map(item => `${item.product_name} / ${item.variant}：${item.oldQuantity} → ${item.newQuantity}`)
+          .join("\n")
+
+        if(message) message += `\n\n`
+
+        message += `以下商品因庫存不足，已自動調整數量：\n${adjustedNames}`
+      }
+
+      alert(message)
+    }
+  }
+
+  return {
+    cart: validCart,
+    removedItems,
+    adjustedItems,
+    changed
+  }
+}
+
+
+// ⭐ 刪除
+export async function removeFromCart(index){
+  let cart = getCart()
+ if(index < 0 || index >= cart.length) return
+    saveCart(cart)
+  await renderCart()
 }
 
 // ⭐ 數量變更
-export function changeQty(index, delta){
+export async function changeQty(index, delta){
   let cart = getCart()
+
+  if(!cart[index]) return
 
   cart[index].quantity += delta
 
@@ -89,15 +223,16 @@ export function changeQty(index, delta){
   }
 
   saveCart(cart)
-  renderCart()
+  await renderCart()
 }
 
 
 
 // ⭐ render 購物車
-export function renderCart(){
+export async function renderCart(){
 
-  const cart = getCart()
+  const syncResult = await syncCartWithStock(false)
+  const cart = syncResult.cart
 
   const items = document.getElementById("cartItems")
   const totalDiv = document.getElementById("cartTotal")
@@ -105,7 +240,14 @@ export function renderCart(){
 
   if(!items) return
 
-  items.innerHTML = ""
+    items.innerHTML = ""
+
+  if(!cart.length){
+    items.innerHTML = `<div style="color:#666;">購物車目前沒有商品</div>`
+    count.innerText = 0
+    totalDiv.innerHTML = `<b>本次結帳金額：$0</b>`
+    return
+  }
 
   // ⭐ 先算整車總金額
   let total = 0
@@ -170,10 +312,20 @@ ${
 }
 
 // ⭐ toggle cart
-export function toggleCart(){
+export async function toggleCart(){
   const panel = document.getElementById("cartPanel")
-  panel.style.display =
-    panel.style.display === "block" ? "none" : "block"
+
+  const willOpen = panel.style.display !== "block"
+
+  if(willOpen){
+    await syncCartWithStock(true)
+await renderCart()
+
+    panel.style.display = "block"
+    return
+  }
+
+  panel.style.display = "none"
 }
 
 // ⭐ 對外掛 window（給 HTML onclick 用）
@@ -181,7 +333,16 @@ window.changeQty = changeQty
 window.removeFromCart = removeFromCart
 window.toggleCart = toggleCart
 
-export function goCheckout(){
+export async function goCheckout(){
+  const result = await syncCartWithStock(true)
+
+  if(!result.cart.length){
+    await renderCart()
+    alert("購物車內已沒有可結帳商品")
+    return
+  }
+
+  await renderCart()
   window.location.href = "./checkout.html"
 }
 
