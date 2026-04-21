@@ -214,6 +214,7 @@ const container = document.getElementById("productDetail")
   border-left:4px solid #f2a66a;
   box-shadow:0 1px 0 rgba(255,255,255,0.7) inset;
 ">
+
             <h4 style="
               margin:0 0 8px 0;
               color:#3a1d14;
@@ -270,7 +271,7 @@ const container = document.getElementById("productDetail")
       <!-- 右邊資訊 -->
       <div style="flex:1;min-width:300px;">
 
-      <div style="margin-bottom:14px;">
+ <div style="margin-bottom:14px;">
   <h2 style="
     margin:0 0 8px 0;
     font-size:24px;
@@ -281,25 +282,66 @@ const container = document.getElementById("productDetail")
   </h2>
 
   <div style="
-    display:inline-block;
-    font-size:13px;
-    color:#b55b1f;
-    background:linear-gradient(135deg, rgba(255,248,242,0.95) 0%, rgba(255,233,214,0.95) 100%);
-    border:1px solid #f0c29a;
-    border-radius:999px;
-    padding:5px 12px;
-    font-weight:600;
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    align-items:center;
   ">
-    ${
-      product.preorder_type === "limited"
-        ? "限量預購"
-        : product.preorder_type === "instock"
-        ? "現貨"
-        : "一般預購"
-    }
+    <div style="
+      display:inline-block;
+      font-size:13px;
+      color:#b55b1f;
+      background:linear-gradient(135deg, rgba(255,248,242,0.95) 0%, rgba(255,233,214,0.95) 100%);
+      border:1px solid #f0c29a;
+      border-radius:999px;
+      padding:5px 12px;
+      font-weight:600;
+    ">
+      ${
+        product.preorder_type === "limited"
+          ? "限量預購"
+          : product.preorder_type === "instock"
+          ? "現貨"
+          : "一般預購"
+      }
+    </div>
+
+    <div style="
+      display:inline-block;
+      font-size:13px;
+      border-radius:999px;
+      padding:5px 12px;
+      font-weight:600;
+      ${
+        product.second_payment_rule === "required"
+          ? `
+            color:#b42318;
+            background:#ffe3e3;
+            border:1px solid #f5b5b5;
+          `
+          : product.second_payment_rule === "possible"
+          ? `
+            color:#b26b00;
+            background:#fff1db;
+            border:1px solid #f3cf8e;
+          `
+          : `
+            color:#2f6f3e;
+            background:#eaf7ee;
+            border:1px solid #b7dfc2;
+          `
+      }
+    ">
+      ${
+        product.second_payment_rule === "required"
+          ? "需二補"
+          : product.second_payment_rule === "possible"
+          ? "若運送過程中產生額外超出的費用需二補"
+          : "不用二補"
+      }
+    </div>
   </div>
 </div>
-
       
 
         <!-- 規格區 -->

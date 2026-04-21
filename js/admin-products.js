@@ -333,8 +333,9 @@ window.saveProduct = async function(){
   const desc = document.getElementById("desc").value.trim()
   const release_date = document.getElementById("release_date").value
   const preorder_note = document.getElementById("preorder_note").value.trim()
-  const payment_method = document.getElementById("payment_method").value.trim()
-  const shipping_method = document.getElementById("shipping_method").value.trim()
+const payment_method = document.getElementById("payment_method").value.trim()
+const second_payment_rule = document.getElementById("second_payment_rule").value
+const shipping_method = document.getElementById("shipping_method").value.trim()
 
   let productId = null
 
@@ -343,7 +344,7 @@ window.saveProduct = async function(){
 
     const { error } = await supabase
       .from("products")
-     .update({
+.update({
   release_date,
   name,
   description: desc,
@@ -352,6 +353,7 @@ window.saveProduct = async function(){
   deposit_amount,
   preorder_note,
   payment_method,
+  second_payment_rule,
   shipping_method,
   series_id,
   is_active
@@ -374,7 +376,7 @@ window.saveProduct = async function(){
     // ➕ 新增
     const { data: product, error } = await supabase
       .from("products")
-      .insert({
+.insert({
   release_date,
   name,
   description: desc,
@@ -383,6 +385,7 @@ window.saveProduct = async function(){
   deposit_amount,
   preorder_note,
   payment_method,
+  second_payment_rule,
   shipping_method,
   series_id,
   is_active
@@ -662,18 +665,25 @@ div.innerHTML = `
   <br>
 
   系列：${p.product_series?.name || "未分類"}<br>
-  預購類型：${
-    p.preorder_type === "limited"
-      ? "限量預購"
-      : p.preorder_type === "instock"
-      ? "現貨"
-      : "一般預購"
-  }<br>
-  訂金：${
-    p.deposit_required
-      ? `需訂金 NT$${p.deposit_amount || 0}`
-      : "不需訂金"
-  }<br>
+預購類型：${
+  p.preorder_type === "limited"
+    ? "限量預購"
+    : p.preorder_type === "instock"
+    ? "現貨"
+    : "一般預購"
+}<br>
+二補設定：${
+  p.second_payment_rule === "required"
+    ? "需要二補"
+    : p.second_payment_rule === "possible"
+    ? "如產生額外費用需二補"
+    : "不用二補"
+}<br>
+訂金：${
+  p.deposit_required
+    ? `需訂金 NT$${p.deposit_amount || 0}`
+    : "不需訂金"
+}<br>
   ${p.description || ""}<br><br>
 
   上架日期：${p.release_date || "未設定"}<br>
@@ -799,6 +809,7 @@ document.getElementById("deposit_required").value = String(product.deposit_requi
 document.getElementById("deposit_amount").value = product.deposit_amount || 0
 document.getElementById("preorder_note").value = product.preorder_note || ""
 document.getElementById("payment_method").value = product.payment_method || ""
+document.getElementById("second_payment_rule").value = product.second_payment_rule || "none"
 document.getElementById("shipping_method").value = product.shipping_method || ""
 document.getElementById("is_active").value = String(product.is_active)
 
@@ -879,8 +890,9 @@ function resetForm(){
   document.getElementById("deposit_required").value = "false"
   document.getElementById("deposit_amount").value = 0
   document.getElementById("preorder_note").value = ""
-  document.getElementById("payment_method").value = ""
-  document.getElementById("shipping_method").value = ""
+document.getElementById("payment_method").value = ""
+document.getElementById("second_payment_rule").value = "none"
+document.getElementById("shipping_method").value = ""
   document.getElementById("series_id").value = ""
   document.getElementById("is_active").value = "true"
   document.getElementById("images").value = ""

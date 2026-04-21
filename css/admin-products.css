@@ -366,3 +366,14 @@ textarea{
   border-radius: 8px;
   box-sizing: border-box;
 }
+.form-grid-5{
+  display:grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap:12px;
+}
+
+@media (max-width: 900px){
+  .form-grid-5{
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
