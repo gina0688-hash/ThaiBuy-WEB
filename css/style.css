@@ -257,6 +257,7 @@ button{
   right: 20px;
   width: 320px;
   height: calc(100vh - 100px);
+  max-height: calc(100vh - 100px);
   background: #fff;
   border-radius: 16px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.2);
@@ -266,6 +267,7 @@ button{
   z-index: 9999;
   box-sizing: border-box;
   border: 1px solid var(--brand-border);
+  overflow: hidden;
 }
 
 #cartPanel h3{
@@ -273,12 +275,12 @@ button{
 }
 
 #cartItems{
-  flex: 1;
+  flex: 1 1 auto;
+  min-height: 0;
   overflow-y: auto;
   margin: 0 0 12px 0;
   padding-right: 4px;
   box-sizing: border-box;
-  min-height: 0;
 }
 
 .cart-item{
