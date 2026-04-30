@@ -319,13 +319,13 @@ ${
 export async function toggleCart(){
   const panel = document.getElementById("cartPanel")
 
-  const willOpen = panel.style.display !== "block"
+  const willOpen = panel.style.display !== "flex"
 
   if(willOpen){
     await syncCartWithStock(true)
-await renderCart()
+    await renderCart()
 
-    panel.style.display = "block"
+    panel.style.display = "flex"
     return
   }
 
