@@ -366,38 +366,6 @@ textarea:focus{
   color: #6b7280;
 }
 
-/* ===== 舊購物車元件保留 ===== */
-#cartIcon{
-  position: fixed;
-  top: 110px;
-  right: 20px;
-  background: #f97316;
-  color: white;
-  padding: 10px 15px;
-  border-radius: 999px;
-  cursor: pointer;
-  z-index: 1000;
-  box-shadow: 0 10px 20px rgba(249, 115, 22, 0.24);
-}
-
-#cartPanel{
-  position: fixed;
-  top: 150px;
-  right: 20px;
-  width: 300px;
-  background: white;
-  border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.16);
-  padding: 15px;
-  display: none;
-  z-index: 1000;
-}
-
-.cart-item{
-  border-bottom: 1px solid #eee;
-  padding: 8px 0;
-}
-
 /* ===== footer ===== */
 .site-footer{
   text-align: center;
