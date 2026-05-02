@@ -1441,3 +1441,145 @@ window.exportPurchasedAndCancelledList = async function(){
   document.body.removeChild(a)
   URL.revokeObjectURL(url)
 }
+
+window.exportPendingManagementList = async function(){
+
+  const { data: orders, error } = await supabase
+    .from("orders")
+    .select(`
+      id,
+      order_number,
+      customer_name,
+      phone,
+      email,
+      community_name,
+      contact_method,
+      contact_account,
+      admin_status,
+      need_second_payment,
+      second_payment_status,
+      second_payment_amount,
+      second_payment_last5,
+      second_payment_time,
+      bank_last5,
+      expected_remit_time,
+      shipping_method,
+      note,
+      created_at
+    `)
+    .order("created_at", { ascending: true })
+
+  if(error){
+    console.error(error)
+    alert("訂單讀取失敗")
+    return
+  }
+
+  const rows = (orders || [])
+    .filter(o => {
+      const isAdminUnset = !o.admin_status
+      const isChecking = o.admin_status === "checking"
+
+      const needSecondPaymentUnpaid =
+        o.need_second_payment === true &&
+        Number(o.second_payment_amount || 0) > 0 &&
+        o.second_payment_status !== "paid"
+
+      return isAdminUnset || isChecking || needSecondPaymentUnpaid
+    })
+    .map(o => {
+
+      const adminStatusText = {
+        checking: "等待對帳",
+        paid: "對帳完成",
+        hold: "暫停處理"
+      }[o.admin_status] || "未設定"
+
+      const needSecondPaymentUnpaid =
+        o.need_second_payment === true &&
+        Number(o.second_payment_amount || 0) > 0 &&
+        o.second_payment_status !== "paid"
+
+      const pendingReasons = []
+
+      if(!o.admin_status){
+        pendingReasons.push("管理狀態未設定")
+      }
+
+      if(o.admin_status === "checking"){
+        pendingReasons.push("等待對帳")
+      }
+
+      if(needSecondPaymentUnpaid){
+        pendingReasons.push("需要補款未完成")
+      }
+
+      const secondPaymentStatusText = {
+        unpaid: "尚未補款",
+        submitted: "已送出，等待確認",
+        paid: "補款完成"
+      }[o.second_payment_status] || "尚未補款"
+
+      return {
+        _createdAt: o.created_at || "",
+
+        "送單時間": new Date(o.created_at).toLocaleString(),
+        "訂單編號": o.order_number || o.id,
+        "待處理原因": pendingReasons.join(" / "),
+        "管理狀態": adminStatusText,
+
+        "客人姓名": o.customer_name || "",
+        "電話": o.phone || "",
+        "Email": o.email || "",
+        "社群名字": o.community_name || "",
+        "聯繫方式": o.contact_method || "",
+        "聯繫帳號": o.contact_account || "",
+
+        "原匯款末五碼": o.bank_last5 || "",
+        "預計匯款時間": o.expected_remit_time || "",
+
+        "是否需補款": o.need_second_payment ? "是" : "否",
+        "補款金額": Number(o.second_payment_amount || 0),
+        "補款狀態": secondPaymentStatusText,
+        "補款末五碼": o.second_payment_last5 || "",
+        "補款時間": o.second_payment_time || "",
+
+        "運送方式": o.shipping_method || "",
+        "訂單備註": o.note || ""
+      }
+    })
+
+  if(rows.length === 0){
+    alert("目前沒有待處理名單")
+    return
+  }
+
+  rows.sort((a, b) => {
+    return String(a._createdAt).localeCompare(String(b._createdAt))
+  })
+
+  const headers = Object.keys(rows[0]).filter(key => !key.startsWith("_"))
+
+  const csv = [
+    headers.join(","),
+    ...rows.map(row =>
+      headers.map(key => {
+        const value = String(row[key] ?? "")
+          .replaceAll('"', '""')
+        return `"${value}"`
+      }).join(",")
+    )
+  ].join("\n")
+
+  const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8;" })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement("a")
+
+  a.href = url
+  a.download = `待處理名單_${new Date().toISOString().slice(0,10)}.csv`
+
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
+}
