@@ -184,7 +184,7 @@
 
 .pending-overview{
   display:grid;
-  grid-template-columns:repeat(5, 1fr);
+  grid-template-columns:repeat(6, 1fr);
   gap:10px;
 }
 
@@ -232,6 +232,10 @@
   border-left:5px solid #f59e0b;
 }
 
+.pending-card.success{
+  border-left:5px solid #16a34a;
+}
+
 .pending-card.info{
   border-left:5px solid #3b82f6;
 }
@@ -254,5 +258,22 @@
   .pending-overview-header{
     align-items:flex-start;
     flex-direction:column;
+  }
+}
+
+.pending-card-count.is-loading{
+  color:#f97316;
+  animation:pendingPulse 1s infinite ease-in-out;
+}
+
+@keyframes pendingPulse{
+  0%{
+    opacity:0.35;
+  }
+  50%{
+    opacity:1;
+  }
+  100%{
+    opacity:0.35;
   }
 }

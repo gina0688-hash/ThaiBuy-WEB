@@ -23,6 +23,8 @@ showUser(user)
 window.loadOrders = async function(){
   console.log("🚀 loadOrders開始")
   console.trace("loadOrders 是誰叫的")
+
+  setOverviewLoading(true)
 const keyword = document.getElementById("searchInput")?.value.trim() || ""
 const statusFilter = document.getElementById("statusFilter")?.value || "all"
 const adminStatusFilter = document.getElementById("adminStatusFilter")?.value || "all"
@@ -86,7 +88,8 @@ let doneCount = 0
 let cancelledCount = 0
 let overviewUnsetCount = 0
 let overviewCheckingCount = 0
-let overviewSecondPaymentCount = 0
+let overviewSecondPaymentUnpaidCount = 0
+let overviewSecondPaymentSubmittedCount = 0
 let overviewArrivedCount = 0
 let overviewCancelledItemCount = 0
 
@@ -103,22 +106,38 @@ const statusText = calcOrderStatus(items || []).text
 const hasArrivedItem = (items || []).some(i => i.status === "arrived")
 const hasCancelledItem = (items || []).some(i => i.status === "cancelled")
 
-const needSecondPaymentUnpaid =
+const needSecondPayment = 
   o.need_second_payment === true &&
-  Number(o.second_payment_amount || 0) > 0 &&
-  o.second_payment_status !== "paid"
+  Number(o.second_payment_amount || 0) > 0
+
+const secondPaymentStatus = String(o.second_payment_status || "unpaid").trim()
+
+const secondPaymentUnpaid =
+  needSecondPayment &&
+  secondPaymentStatus !== "submitted" &&
+  secondPaymentStatus !== "paid"
+
+const secondPaymentSubmitted =
+  needSecondPayment &&
+  secondPaymentStatus === "submitted"
+
+const adminStatus = String(o.admin_status || "").trim()
 
 // ⭐ 待處理總覽統計
-if(o.admin_status === null){
+if(adminStatus === ""){
   overviewUnsetCount++
 }
 
-if(o.admin_status === "checking"){
+if(adminStatus === "checking"){
   overviewCheckingCount++
 }
 
-if(needSecondPaymentUnpaid){
-  overviewSecondPaymentCount++
+if(secondPaymentUnpaid){
+  overviewSecondPaymentUnpaidCount++
+}
+
+if(secondPaymentSubmitted){
+  overviewSecondPaymentSubmittedCount++
 }
 
 if(hasArrivedItem){
@@ -130,15 +149,19 @@ if(hasCancelledItem){
 }
 
 // ⭐ 點待處理總覽卡片後的篩選
-if(overviewFilter === "unset" && o.admin_status !== null){
+if(overviewFilter === "unset" && adminStatus !== ""){
   continue
 }
 
-if(overviewFilter === "checking" && o.admin_status !== "checking"){
+if(overviewFilter === "checking" && adminStatus !== "checking"){
   continue
 }
 
-if(overviewFilter === "secondPayment" && !needSecondPaymentUnpaid){
+if(overviewFilter === "secondPaymentUnpaid" && !secondPaymentUnpaid){
+  continue
+}
+
+if(overviewFilter === "secondPaymentSubmitted" && !secondPaymentSubmitted){
   continue
 }
 
@@ -173,9 +196,9 @@ if(statusFilter !== "all"){
   }
 }
 
-const normalizedAdminStatus = o.admin_status
+const normalizedAdminStatus = adminStatus
 
-if(adminStatusFilter === "unset" && normalizedAdminStatus !== null){
+if(adminStatusFilter === "unset" && normalizedAdminStatus !== ""){
   continue
 }
 if(adminStatusFilter === "checking" && normalizedAdminStatus !== "checking"){
@@ -676,15 +699,19 @@ if(countCancelledEl) countCancelledEl.textContent = cancelledCount
 // ⭐ 更新待處理總覽數字
 const overviewUnsetEl = document.getElementById("overview-unset")
 const overviewCheckingEl = document.getElementById("overview-checking")
-const overviewSecondPaymentEl = document.getElementById("overview-second-payment")
+const overviewSecondPaymentUnpaidEl = document.getElementById("overview-second-payment-unpaid")
+const overviewSecondPaymentSubmittedEl = document.getElementById("overview-second-payment-submitted")
 const overviewArrivedEl = document.getElementById("overview-arrived")
 const overviewCancelledItemEl = document.getElementById("overview-cancelled-item")
 
 if(overviewUnsetEl) overviewUnsetEl.textContent = overviewUnsetCount
 if(overviewCheckingEl) overviewCheckingEl.textContent = overviewCheckingCount
-if(overviewSecondPaymentEl) overviewSecondPaymentEl.textContent = overviewSecondPaymentCount
+if(overviewSecondPaymentUnpaidEl) overviewSecondPaymentUnpaidEl.textContent = overviewSecondPaymentUnpaidCount
+if(overviewSecondPaymentSubmittedEl) overviewSecondPaymentSubmittedEl.textContent = overviewSecondPaymentSubmittedCount
 if(overviewArrivedEl) overviewArrivedEl.textContent = overviewArrivedCount
 if(overviewCancelledItemEl) overviewCancelledItemEl.textContent = overviewCancelledItemCount
+
+setOverviewLoading(false)
 
 }
 
@@ -1679,4 +1706,34 @@ window.filterPendingOverview = function(type){
   }
 
   loadOrders()
+}
+
+function setOverviewLoading(isLoading){
+  const overviewIds = [
+    "overview-unset",
+    "overview-checking",
+    "overview-second-payment-unpaid",
+    "overview-second-payment-submitted",
+    "overview-arrived",
+    "overview-cancelled-item"
+  ]
+
+  overviewIds.forEach(id => {
+    const el = document.getElementById(id)
+    if(!el) return
+
+    if(isLoading){
+      el.textContent = "..."
+      el.classList.add("is-loading")
+    }else{
+      el.classList.remove("is-loading")
+    }
+  })
+
+  const subtitle = document.querySelector(".pending-overview-subtitle")
+  if(subtitle){
+    subtitle.textContent = isLoading
+      ? "統計中，請稍候..."
+      : "點擊卡片可快速篩選訂單"
+  }
 }

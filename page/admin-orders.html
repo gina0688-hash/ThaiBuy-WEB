@@ -151,10 +151,15 @@
       <div class="pending-card-count" id="overview-checking">0</div>
     </button>
 
-    <button type="button" class="pending-card money" onclick="filterPendingOverview('secondPayment')">
-      <div class="pending-card-title">💰 補款未完成</div>
-      <div class="pending-card-count" id="overview-second-payment">0</div>
-    </button>
+    <button type="button" class="pending-card money" onclick="filterPendingOverview('secondPaymentUnpaid')">
+  <div class="pending-card-title">💰 尚未補款</div>
+  <div class="pending-card-count" id="overview-second-payment-unpaid">0</div>
+</button>
+
+<button type="button" class="pending-card success" onclick="filterPendingOverview('secondPaymentSubmitted')">
+  <div class="pending-card-title">✅ 補款待確認</div>
+  <div class="pending-card-count" id="overview-second-payment-submitted">0</div>
+</button>
 
     <button type="button" class="pending-card info" onclick="filterPendingOverview('arrived')">
       <div class="pending-card-title">📦 待出貨</div>
