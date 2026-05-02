@@ -16,12 +16,15 @@ if(!user) throw new Error("未登入")
 
 bindLogout()
 let overviewFilter = "all"
+let loadOrdersRunId = 0
 
 // ⭐ 這行你要留就留，不留也可以
 showUser(user)
 
 window.loadOrders = async function(){
-  console.log("🚀 loadOrders開始")
+  const currentRunId = ++loadOrdersRunId
+
+  console.log("🚀 loadOrders開始", currentRunId)
   console.trace("loadOrders 是誰叫的")
 
   setOverviewLoading(true)
@@ -56,10 +59,16 @@ if(keyword){
   }
 }
 
-  const { data: orders, error } = await query
+const { data: orders, error } = await query
+
+if(currentRunId !== loadOrdersRunId){
+  console.log("舊的 loadOrders 已取消", currentRunId)
+  return
+}
 
 if(error){
   console.error("orders error:", error)
+  setOverviewLoading(false)
   return
 }
 console.log("orders:", orders)
@@ -95,10 +104,15 @@ let overviewCancelledItemCount = 0
 
   for(const o of orders){
 
-    const { data: items } = await supabase
+const { data: items } = await supabase
   .from("order_items")
   .select("*")
   .eq("order_id", o.id)
+
+if(currentRunId !== loadOrdersRunId){
+  console.log("舊的 loadOrders 中途停止", currentRunId)
+  return
+}
 
 const money = calcOrderMoney(o, items || [])
 const statusText = calcOrderStatus(items || []).text
