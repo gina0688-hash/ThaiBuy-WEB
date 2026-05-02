@@ -15,6 +15,7 @@ const user = await loadAuth()
 if(!user) throw new Error("未登入")
 
 bindLogout()
+let overviewFilter = "all"
 
 // ⭐ 這行你要留就留，不留也可以
 showUser(user)
@@ -83,6 +84,11 @@ let collectingCount = 0
 let shippingCount = 0
 let doneCount = 0
 let cancelledCount = 0
+let overviewUnsetCount = 0
+let overviewCheckingCount = 0
+let overviewSecondPaymentCount = 0
+let overviewArrivedCount = 0
+let overviewCancelledItemCount = 0
 
   for(const o of orders){
 
@@ -93,6 +99,57 @@ let cancelledCount = 0
 
 const money = calcOrderMoney(o, items || [])
 const statusText = calcOrderStatus(items || []).text
+
+const hasArrivedItem = (items || []).some(i => i.status === "arrived")
+const hasCancelledItem = (items || []).some(i => i.status === "cancelled")
+
+const needSecondPaymentUnpaid =
+  o.need_second_payment === true &&
+  Number(o.second_payment_amount || 0) > 0 &&
+  o.second_payment_status !== "paid"
+
+// ⭐ 待處理總覽統計
+if(o.admin_status === null){
+  overviewUnsetCount++
+}
+
+if(o.admin_status === "checking"){
+  overviewCheckingCount++
+}
+
+if(needSecondPaymentUnpaid){
+  overviewSecondPaymentCount++
+}
+
+if(hasArrivedItem){
+  overviewArrivedCount++
+}
+
+if(hasCancelledItem){
+  overviewCancelledItemCount++
+}
+
+// ⭐ 點待處理總覽卡片後的篩選
+if(overviewFilter === "unset" && o.admin_status !== null){
+  continue
+}
+
+if(overviewFilter === "checking" && o.admin_status !== "checking"){
+  continue
+}
+
+if(overviewFilter === "secondPayment" && !needSecondPaymentUnpaid){
+  continue
+}
+
+if(overviewFilter === "arrived" && !hasArrivedItem){
+  continue
+}
+
+if(overviewFilter === "cancelledItem" && !hasCancelledItem){
+  continue
+}
+
 
 if(statusFilter !== "all"){
   if(statusFilter === "new" && !(statusText.includes("新訂單") || statusText.includes("部分已購買"))){
@@ -614,7 +671,22 @@ if(countShippingEl) countShippingEl.textContent = shippingCount
 if(countDoneEl) countDoneEl.textContent = doneCount
 if(countCancelledEl) countCancelledEl.textContent = cancelledCount
 
-}}
+}
+
+// ⭐ 更新待處理總覽數字
+const overviewUnsetEl = document.getElementById("overview-unset")
+const overviewCheckingEl = document.getElementById("overview-checking")
+const overviewSecondPaymentEl = document.getElementById("overview-second-payment")
+const overviewArrivedEl = document.getElementById("overview-arrived")
+const overviewCancelledItemEl = document.getElementById("overview-cancelled-item")
+
+if(overviewUnsetEl) overviewUnsetEl.textContent = overviewUnsetCount
+if(overviewCheckingEl) overviewCheckingEl.textContent = overviewCheckingCount
+if(overviewSecondPaymentEl) overviewSecondPaymentEl.textContent = overviewSecondPaymentCount
+if(overviewArrivedEl) overviewArrivedEl.textContent = overviewArrivedCount
+if(overviewCancelledItemEl) overviewCancelledItemEl.textContent = overviewCancelledItemCount
+
+}
 
 // ⭐ 展開
 window.toggleDetail = function(id){
@@ -1582,4 +1654,29 @@ window.exportPendingManagementList = async function(){
   a.click()
   document.body.removeChild(a)
   URL.revokeObjectURL(url)
+}
+
+window.filterPendingOverview = function(type){
+  overviewFilter = type
+
+  const statusFilter = document.getElementById("statusFilter")
+  const adminStatusFilter = document.getElementById("adminStatusFilter")
+
+  if(statusFilter){
+    statusFilter.value = "all"
+  }
+
+  if(adminStatusFilter){
+    adminStatusFilter.value = "all"
+  }
+
+  if(type === "unset" && adminStatusFilter){
+    adminStatusFilter.value = "unset"
+  }
+
+  if(type === "checking" && adminStatusFilter){
+    adminStatusFilter.value = "checking"
+  }
+
+  loadOrders()
 }

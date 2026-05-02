@@ -127,6 +127,48 @@
   </div>
 </div>
 
+<div class="pending-overview-wrap">
+
+  <div class="pending-overview-header">
+    <div>
+      <div class="pending-overview-title">待處理總覽</div>
+      <div class="pending-overview-subtitle">點擊卡片可快速篩選訂單</div>
+    </div>
+
+    <button type="button" class="pending-reset-btn" onclick="filterPendingOverview('all')">
+      顯示全部
+    </button>
+  </div>
+
+  <div class="pending-overview">
+    <button type="button" class="pending-card danger" onclick="filterPendingOverview('unset')">
+      <div class="pending-card-title">🔴 未設定</div>
+      <div class="pending-card-count" id="overview-unset">0</div>
+    </button>
+
+    <button type="button" class="pending-card warning" onclick="filterPendingOverview('checking')">
+      <div class="pending-card-title">🟠 等待對帳</div>
+      <div class="pending-card-count" id="overview-checking">0</div>
+    </button>
+
+    <button type="button" class="pending-card money" onclick="filterPendingOverview('secondPayment')">
+      <div class="pending-card-title">💰 補款未完成</div>
+      <div class="pending-card-count" id="overview-second-payment">0</div>
+    </button>
+
+    <button type="button" class="pending-card info" onclick="filterPendingOverview('arrived')">
+      <div class="pending-card-title">📦 待出貨</div>
+      <div class="pending-card-count" id="overview-arrived">0</div>
+    </button>
+
+    <button type="button" class="pending-card muted" onclick="filterPendingOverview('cancelledItem')">
+      <div class="pending-card-title">❌ 含取消品項</div>
+      <div class="pending-card-count" id="overview-cancelled-item">0</div>
+    </button>
+  </div>
+
+</div>
+
 <!-- ⭐ 新訂單 -->
 <h3 class="section-title">
   🆕 新訂單
