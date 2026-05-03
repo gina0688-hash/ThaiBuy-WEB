@@ -502,6 +502,16 @@ async function showUser(user){
   }
 }
 
+function normalizeProductName(name){
+  return String(name || "")
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .replace(/[（）()【】\[\]＿_－\-]/g, " ")
+    .replace(/\bpre[\s-]*order\b/g, "")
+    .replace(/\b25\s*day\b/g, "")
+    .trim()
+}
+
 function exportStatsCsv(){
   if(!currentStatsRows.length){
     alert("目前沒有可匯出的統計資料")
