@@ -511,15 +511,32 @@ function exportStatsCsv(){
   const startDate = startDateInput.value || ""
   const endDate = endDateInput.value || ""
 
-  const rows = currentStatsRows.map(row => ({
-    "品項": row.product_name || "",
-    "規格": row.variant_name || "",
-    "需求量": Number(row.demand_qty || 0),
-    "已購量": Number(row.purchased_qty || 0),
-    "尚差": Number(row.remaining_qty || 0),
-    "多買": Number(row.extra_qty || 0),
-    "成功率": `${Number(row.success_rate || 0).toFixed(1)}%`
-  }))
+const exportRows = [...currentStatsRows].sort((a, b) => {
+  const aName = normalizeProductName(a.product_name)
+  const bName = normalizeProductName(b.product_name)
+
+  const nameCompare = aName.localeCompare(bName, "zh-Hant", {
+    numeric: true,
+    sensitivity: "base"
+  })
+
+  if(nameCompare !== 0) return nameCompare
+
+  return String(a.variant_name || "").localeCompare(String(b.variant_name || ""), "zh-Hant", {
+    numeric: true,
+    sensitivity: "base"
+  })
+})
+
+const rows = exportRows.map(row => ({
+  "品項": row.product_name || "",
+  "規格": row.variant_name || "",
+  "需求量": Number(row.demand_qty || 0),
+  "已購量": Number(row.purchased_qty || 0),
+  "尚差": Number(row.remaining_qty || 0),
+  "多買": Number(row.extra_qty || 0),
+  "成功率": `${Number(row.success_rate || 0).toFixed(1)}%`
+}))
 
   const headers = Object.keys(rows[0])
 
