@@ -114,10 +114,11 @@ const container = document.getElementById("productDetail")
           border-radius:14px;
           padding:12px;
         ">
-       <img
+  <img
   id="mainImg"
   src="${safeImages?.[0]?.safe_url || "https://via.placeholder.com/300"}"
   alt="${safeProductName}"
+  decoding="async"
   style="
     width:100%;
     border-radius:10px;
@@ -162,12 +163,14 @@ const container = document.getElementById("productDetail")
     width:66px;
     text-align:center;
   ">
-    <img
-      src="${img.safe_url}"
-      data-image-url="${safeAttr(img.safe_url)}"
-      data-image-label="${safeAttr(img.safe_label)}"
-      alt="${safeProductName}"
-      style="
+   <img
+  src="${img.safe_url}"
+  data-image-url="${safeAttr(img.safe_url)}"
+  data-image-label="${safeAttr(img.safe_label)}"
+  alt="${safeProductName}"
+  loading="lazy"
+  decoding="async"
+  style="
         width:58px;
         height:58px;
         object-fit:cover;

@@ -59,113 +59,146 @@ async function loadProducts(){
     return
   }
 
-productsData = data
+  productsData = data
 
-let filteredProducts = data || []
+  let filteredProducts = data || []
 
-if(currentPreorderType !== "all"){
-  filteredProducts = filteredProducts.filter(p => p.preorder_type === currentPreorderType)
-}
-
-const container = document.getElementById("productGrid")
-
-container.innerHTML = ""
-
-for(const p of filteredProducts){
-
-    // ⭐ 取圖片（第一張）
-    const { data: images } = await supabase
-      .from("product_images")
-      .select("*")
-      .eq("product_id", p.id)
-      .order("sort_order")
-      .limit(1)
-  
-    const imgUrl = safeImageUrl(images?.[0]?.image_url)
-  
-    // ⭐ 取價格（最低）
-    const { data: variants } = await supabase
-      .from("product_variants")
-      .select("price, stock")
-      .eq("product_id", p.id)
-  
-const minPrice = variants?.length
-  ? Math.min(...variants.map(v => Number(v.price || 0)))
-  : 0
-
-const maxPrice = variants?.length
-  ? Math.max(...variants.map(v => Number(v.price || 0)))
-  : 0
-
-const priceText = minPrice === maxPrice
-  ? `$${minPrice}`
-  : `$${minPrice} ~ $${maxPrice}`
-
-const isSoldOut = !variants || variants.length === 0 || variants.every(v => Number(v.stock || 0) <= 0)
-
-if(currentStockStatus === "available" && isSoldOut){
-  continue
-}
-
-if(currentStockStatus === "soldout" && !isSoldOut){
-  continue
-}
-
-const div = document.createElement("div")
-div.className = `product-card ${isSoldOut ? "soldout" : ""}`
-
-let preorderLabel = "一般預購"
-
-if(p.preorder_type === "limited"){
-  preorderLabel = "限量預購"
-}else if(p.preorder_type === "instock"){
-  preorderLabel = "現貨"
-}
-
-const safeProductId = String(p.id || "")
-const safeProductName = escapeHtml(p.name)
-const safeBadgeClass = ["limited", "instock", "normal"].includes(p.preorder_type)
-  ? p.preorder_type
-  : "normal"
-
-div.innerHTML = `
-  <div class="product-img-wrap">
-   <span class="product-badge ${safeBadgeClass}">
-      ${preorderLabel}
-    </span>
-
-    ${isSoldOut ? `<span class="soldout-badge">SOLD OUT</span>` : ""}
-
-   <img src="${imgUrl}" class="product-img" alt="${safeProductName}">
-
-    <button class="add-btn" type="button">
-      查看詳情
-    </button>
-  </div>
-
-  <div class="product-info">
-   <div class="product-name">${safeProductName}</div>
-    <div class="product-price">${priceText}</div>
-  </div>
-`
-
-const detailBtn = div.querySelector(".add-btn")
-if(detailBtn){
-  detailBtn.addEventListener("click", (event)=>{
-    event.stopPropagation()
-   goToDetail(safeProductId)
-  })
-}
-
-div.addEventListener("click", ()=>{
-goToDetail(safeProductId)
-})
-
-container.appendChild(div)
+  if(currentPreorderType !== "all"){
+    filteredProducts = filteredProducts.filter(p => p.preorder_type === currentPreorderType)
   }
 
- 
+  const productIds = filteredProducts.map(p => p.id)
+
+  // ⭐ 一次抓全部商品的圖片，不要每個商品查一次
+  const { data: allImages, error: imageError } = await supabase
+    .from("product_images")
+    .select("product_id, image_url, sort_order")
+    .in("product_id", productIds)
+    .order("sort_order", { ascending: true })
+
+  if(imageError){
+    console.error("load images error:", imageError)
   }
+
+  // ⭐ 一次抓全部商品的規格，不要每個商品查一次
+  const { data: allVariants, error: variantError } = await supabase
+    .from("product_variants")
+    .select("product_id, price, stock")
+    .in("product_id", productIds)
+
+  if(variantError){
+    console.error("load variants error:", variantError)
+  }
+
+  // ⭐ 整理圖片：每個商品只取第一張
+  const imageMap = {}
+
+  for(const img of allImages || []){
+    if(!imageMap[img.product_id]){
+      imageMap[img.product_id] = img
+    }
+  }
+
+  // ⭐ 整理規格：依商品分組
+  const variantMap = {}
+
+  for(const v of allVariants || []){
+    if(!variantMap[v.product_id]){
+      variantMap[v.product_id] = []
+    }
+
+    variantMap[v.product_id].push(v)
+  }
+
+  const container = document.getElementById("productGrid")
+  container.innerHTML = ""
+
+  for(const p of filteredProducts){
+
+    const imgUrl = safeImageUrl(imageMap[p.id]?.image_url)
+    const variants = variantMap[p.id] || []
+
+    const minPrice = variants.length
+      ? Math.min(...variants.map(v => Number(v.price || 0)))
+      : 0
+
+    const maxPrice = variants.length
+      ? Math.max(...variants.map(v => Number(v.price || 0)))
+      : 0
+
+    const priceText = minPrice === maxPrice
+      ? `$${minPrice}`
+      : `$${minPrice} ~ $${maxPrice}`
+
+    const isSoldOut = !variants || variants.length === 0 || variants.every(v => Number(v.stock || 0) <= 0)
+
+    if(currentStockStatus === "available" && isSoldOut){
+      continue
+    }
+
+    if(currentStockStatus === "soldout" && !isSoldOut){
+      continue
+    }
+
+    const div = document.createElement("div")
+    div.className = `product-card ${isSoldOut ? "soldout" : ""}`
+
+    let preorderLabel = "一般預購"
+
+    if(p.preorder_type === "limited"){
+      preorderLabel = "限量預購"
+    }else if(p.preorder_type === "instock"){
+      preorderLabel = "現貨"
+    }
+
+    const safeProductId = String(p.id || "")
+    const safeProductName = escapeHtml(p.name)
+    const safeBadgeClass = ["limited", "instock", "normal"].includes(p.preorder_type)
+      ? p.preorder_type
+      : "normal"
+
+    div.innerHTML = `
+      <div class="product-img-wrap">
+        <span class="product-badge ${safeBadgeClass}">
+          ${preorderLabel}
+        </span>
+
+        ${isSoldOut ? `<span class="soldout-badge">SOLD OUT</span>` : ""}
+
+        <img 
+          src="${imgUrl}" 
+          class="product-img" 
+          alt="${safeProductName}"
+          loading="lazy"
+          decoding="async"
+        >
+
+        <button class="add-btn" type="button">
+          查看詳情
+        </button>
+      </div>
+
+      <div class="product-info">
+        <div class="product-name">${safeProductName}</div>
+        <div class="product-price">${priceText}</div>
+      </div>
+    `
+
+    const detailBtn = div.querySelector(".add-btn")
+    if(detailBtn){
+      detailBtn.addEventListener("click", (event)=>{
+        event.stopPropagation()
+        goToDetail(safeProductId)
+      })
+    }
+
+    div.addEventListener("click", ()=>{
+      goToDetail(safeProductId)
+    })
+
+    container.appendChild(div)
+  }
+}
 
 async function loadSeries(){
 

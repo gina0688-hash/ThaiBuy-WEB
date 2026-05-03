@@ -10,6 +10,17 @@ function numberToChinese(num){
   return map[num - 1] || String(num)
 }
 
+function getStoragePathFromPublicUrl(url){
+  const str = String(url || "")
+
+  const marker = "/storage/v1/object/public/product-images/"
+  const index = str.indexOf(marker)
+
+  if(index === -1) return null
+
+  return decodeURIComponent(str.slice(index + marker.length))
+}
+
 function setFormMode(isEdit){
   const title = document.getElementById("formTitle")
   const submitBtn = document.getElementById("submitBtn")
@@ -483,8 +494,27 @@ if(existingImagesError){
 }
 
 // 情況 A：有重新選新圖片 → 刪掉舊圖，重建圖片資料
+// 情況 A：有重新選新圖片 → 刪掉舊圖，重建圖片資料
 if(files.length > 0){
 
+  // ⭐ 先刪 Storage 裡的舊圖片檔案
+  const oldPaths = (existingImages || [])
+    .map(img => getStoragePathFromPublicUrl(img.image_url))
+    .filter(Boolean)
+
+  if(oldPaths.length > 0){
+    const { error: storageDeleteError } = await supabase.storage
+      .from("product-images")
+      .remove(oldPaths)
+
+    if(storageDeleteError){
+      console.error("delete old storage images error:", storageDeleteError)
+      alert("刪除 Storage 舊圖片失敗：" + (storageDeleteError.message || "未知錯誤"))
+      return
+    }
+  }
+
+  // ⭐ 再刪 DB 裡的舊圖片紀錄
   const { error: deleteImageError } = await supabase
     .from("product_images")
     .delete()
@@ -1004,6 +1034,35 @@ window.deleteImage = async function(imageId){
   const ok = confirm("確定要刪除這張圖片嗎？")
   if(!ok) return
 
+  // ⭐ 先讀取這張圖片資料，取得 image_url
+  const { data: img, error: readError } = await supabase
+    .from("product_images")
+    .select("*")
+    .eq("id", imageId)
+    .single()
+
+  if(readError || !img){
+    console.error("read image error:", readError)
+    alert("讀取圖片資料失敗")
+    return
+  }
+
+  // ⭐ 刪 Storage 檔案
+  const storagePath = getStoragePathFromPublicUrl(img.image_url)
+
+  if(storagePath){
+    const { error: storageDeleteError } = await supabase.storage
+      .from("product-images")
+      .remove([storagePath])
+
+    if(storageDeleteError){
+      console.error("delete storage image error:", storageDeleteError)
+      alert("刪除 Storage 圖片失敗：" + (storageDeleteError.message || "未知錯誤"))
+      return
+    }
+  }
+
+  // ⭐ 再刪 DB 紀錄
   const { error } = await supabase
     .from("product_images")
     .delete()
@@ -1011,13 +1070,12 @@ window.deleteImage = async function(imageId){
 
   if(error){
     console.error("delete image error:", error)
-    alert("刪除失敗")
+    alert("刪除圖片資料失敗")
     return
   }
 
   alert("已刪除")
 
-  // ⭐ 重新載入畫面（關鍵）
   if(editingId){
     await editProduct(editingId)
   }
