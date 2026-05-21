@@ -165,7 +165,7 @@ function renderOrders(orders){
               line-height:1.8;
             ">
               <div style="font-weight:800;margin-bottom:6px;">
-                🛒 下單連結
+                🛒 賣貨便下單連結
               </div>
 
               <div style="font-size:14px;margin-bottom:10px;">
