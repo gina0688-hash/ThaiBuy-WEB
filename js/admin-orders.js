@@ -349,6 +349,14 @@ ${
 <b>預計匯款時間：</b>${escapeHtml(o.expected_remit_time || "-")}<br>
 <b>時間：</b>${new Date(o.created_at).toLocaleString()}<br><br>
 
+<b>下單連結：</b>
+<input type="text"
+  value="${escapeHtml(o.order_purchase_url || "")}"
+  placeholder="貼上這筆訂單要給客人的下單連結"
+  style="width:100%;margin:6px 0 10px 0;"
+  onchange="updateOrderPurchaseUrl('${o.id}', this.value)">
+<br>
+
 <b>運送方式：</b>${escapeHtml(o.shipping_method || "-")}<br>
 ${
   o.shipping_method === "交貨便"
@@ -1070,6 +1078,24 @@ window.updateNote = async function(id, value){
   if(error){
     console.error(error)
   }
+}
+
+window.updateOrderPurchaseUrl = async function(id, value){
+
+  const url = String(value || "").trim()
+
+  const { error } = await supabase
+    .from("orders")
+    .update({ order_purchase_url: url || null })
+    .eq("id", id)
+
+  if(error){
+    console.error(error)
+    alert("下單連結更新失敗")
+    return
+  }
+
+  alert("下單連結已更新")
 }
 
 window.updateItemStatus = async function(itemId, newStatus){

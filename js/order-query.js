@@ -152,6 +152,46 @@ function renderOrders(orders){
           </div>
         </div>
 
+        ${
+          order.order_purchase_url
+          ? `
+            <div style="
+              margin-bottom:14px;
+              background:#fff7ed;
+              border:1px solid #fed7aa;
+              border-radius:16px;
+              padding:14px;
+              color:#9a3412;
+              line-height:1.8;
+            ">
+              <div style="font-weight:800;margin-bottom:6px;">
+                🛒 下單連結
+              </div>
+
+              <div style="font-size:14px;margin-bottom:10px;">
+                請依照此筆訂單提供的連結完成下單。
+              </div>
+
+              <a href="${escapeHtml(order.order_purchase_url)}"
+                target="_blank"
+                rel="noopener noreferrer"
+                style="
+                  display:inline-block;
+                  background:linear-gradient(135deg,#ffb36b,#ff8b3d);
+                  color:white;
+                  text-decoration:none;
+                  font-weight:800;
+                  padding:10px 16px;
+                  border-radius:999px;
+                ">
+                前往下單
+              </a>
+            </div>
+          `
+          : ""
+        }
+
+
         <div style="
           display:grid;
           grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
@@ -165,6 +205,8 @@ function renderOrders(orders){
             </div>
           </div>
 
+
+          
           <div style="background:#fff;border:1px solid #f3e5da;border-radius:16px;padding:14px;">
             <div style="font-size:13px;color:#8b776a;">運費</div>
             <div style="margin-top:6px;font-size:20px;font-weight:800;color:#3f352f;">
