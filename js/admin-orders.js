@@ -1311,20 +1311,21 @@ window.exportShippingList = async function(){
   // 1️⃣ 先抓所有訂單（照送單時間）
   const { data: orders, error: orderError } = await supabase
     .from("orders")
-    .select(`
-      id,
-      order_number,
-      customer_name,
-      phone,
-      email,
-      shipping_method,
-      receiver_name,
-      receiver_phone,
-      store_name,
-      store_code,
-      note,
-      created_at
-    `)
+  .select(`
+  id,
+  order_number,
+  customer_name,
+  phone,
+  email,
+  community_name,
+  shipping_method,
+  receiver_name,
+  receiver_phone,
+  store_name,
+  store_code,
+  note,
+  created_at
+`)
     .order("created_at", { ascending: true })
 
   if(orderError){
@@ -1386,10 +1387,11 @@ const rows = items
       _createdAt: o.created_at || "",
       "送單時間": new Date(o.created_at).toLocaleString(),
       "訂單編號": o.order_number || o.id,
-      "客人姓名": customerName,
-      "電話": phone,
-      "Email": email,
-      "運送方式": o.shipping_method || "",
+     "客人姓名": customerName,
+"社群名字": o.community_name || "",
+"電話": phone,
+"Email": email,
+"運送方式": o.shipping_method || "",
       "收件人": o.receiver_name || "",
       "收件電話": o.receiver_phone || "",
       "門市名稱": o.store_name || "",
