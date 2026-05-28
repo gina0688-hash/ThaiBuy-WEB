@@ -333,9 +333,10 @@ window.saveProduct = async function(){
 
   try{
 
-    const name = document.getElementById("name").value.trim()
-  const series_id = document.getElementById("series_id").value || null
-  const is_active = document.getElementById("is_active").value === "true"
+ const name = document.getElementById("name").value.trim()
+const sort_order = Number(document.getElementById("sort_order").value || 9999)
+const series_id = document.getElementById("series_id").value || null
+const is_active = document.getElementById("is_active").value === "true"
   const preorder_type = document.getElementById("preorder_type").value
   const deposit_required = document.getElementById("deposit_required").value === "true"
   const deposit_amount = deposit_required
@@ -358,6 +359,7 @@ const shipping_method = document.getElementById("shipping_method").value.trim()
 .update({
   release_date,
   name,
+  sort_order,
   description: desc,
   preorder_type,
   deposit_required,
@@ -390,6 +392,7 @@ const shipping_method = document.getElementById("shipping_method").value.trim()
 .insert({
   release_date,
   name,
+  sort_order,
   description: desc,
   preorder_type,
   deposit_required,
@@ -610,16 +613,16 @@ window.loadProducts = async function(){
   const searchSeries = document.getElementById("searchSeries")?.value || ""
   const searchStatus = document.getElementById("searchStatus")?.value || ""
 
-  let query = supabase
-    .from("products")
-    .select(`
-      *,
-      product_series (
-        id,
-        name
-      )
-    `)
-    .order("created_at", { ascending: false })
+let query = supabase
+  .from("products")
+  .select(`
+    *,
+    product_series (
+      id,
+      name
+    )
+  `)
+  .order("created_at", { ascending: false })
 
 
   // 系列篩選
@@ -833,6 +836,7 @@ if(formCard){
 
 document.getElementById("release_date").value = product.release_date || ""
 document.getElementById("name").value = product.name || ""
+document.getElementById("sort_order").value = product.sort_order || 9999
 document.getElementById("desc").value = product.description || ""
 document.getElementById("preorder_type").value = product.preorder_type || "normal"
 document.getElementById("deposit_required").value = String(product.deposit_required || false)
@@ -913,9 +917,10 @@ window.deleteProduct = async function(id){
 
 // ⭐ 重置
 function resetForm(){
-  document.getElementById("release_date").value = ""
-  document.getElementById("name").value = ""
-  document.getElementById("desc").value = ""
+ document.getElementById("release_date").value = ""
+document.getElementById("name").value = ""
+document.getElementById("sort_order").value = 9999
+document.getElementById("desc").value = ""
   document.getElementById("preorder_type").value = "normal"
   document.getElementById("deposit_required").value = "false"
   document.getElementById("deposit_amount").value = 0

@@ -42,11 +42,12 @@ window.goToDetail = function(productId){
 // ⭐ 載入商品
 async function loadProducts(){
 
-  let query = supabase
-    .from("products")
-    .select("*")
-    .eq("is_active", true)
-    .order("created_at", { ascending: false })
+let query = supabase
+  .from("products")
+  .select("*")
+  .eq("is_active", true)
+  .order("sort_order", { ascending: true })
+  .order("created_at", { ascending: true })
 
   if(currentSeriesId !== "all"){
     query = query.eq("series_id", currentSeriesId)
