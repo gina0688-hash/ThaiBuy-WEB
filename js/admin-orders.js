@@ -1448,7 +1448,7 @@ rows.sort((a, b) => {
   URL.revokeObjectURL(url)
 }
 
-window.exportPurchasedAndCancelledList = async function(){
+async function exportOrderItemsByStatus(status, fileLabel){
 
   // 1️⃣ 抓所有訂單
   const { data: orders, error: orderError } = await supabase
@@ -1459,6 +1459,7 @@ window.exportPurchasedAndCancelledList = async function(){
       customer_name,
       phone,
       email,
+      community_name,
       shipping_method,
       note,
       created_at
@@ -1471,7 +1472,7 @@ window.exportPurchasedAndCancelledList = async function(){
     return
   }
 
-  // 2️⃣ 抓已購買 + 已取消商品
+  // 2️⃣ 只抓指定狀態商品
   const { data: items, error: itemError } = await supabase
     .from("order_items")
     .select(`
@@ -1483,7 +1484,7 @@ window.exportPurchasedAndCancelledList = async function(){
       price,
       status
     `)
-    .in("status", ["ordered", "cancelled"])
+    .eq("status", status)
     .order("order_id", { ascending: true })
 
   if(itemError){
@@ -1493,7 +1494,7 @@ window.exportPurchasedAndCancelledList = async function(){
   }
 
   if(!orders || !items || items.length === 0){
-    alert("目前沒有已購買或已取消商品")
+    alert(`目前沒有${fileLabel}商品`)
     return
   }
 
@@ -1522,11 +1523,11 @@ window.exportPurchasedAndCancelledList = async function(){
       return {
         _groupKey: groupKey,
         _createdAt: o.created_at || "",
-        _statusSort: i.status === "ordered" ? 0 : 1,
 
         "送單時間": new Date(o.created_at).toLocaleString(),
         "訂單編號": o.order_number || o.id,
         "客人姓名": customerName,
+        "社群名字": o.community_name || "",
         "電話": phone,
         "Email": email,
         "運送方式": o.shipping_method || "",
@@ -1534,26 +1535,23 @@ window.exportPurchasedAndCancelledList = async function(){
         "規格": i.variant_name || "",
         "數量": i.quantity || 0,
         "單價": i.price || 0,
-        "商品狀態": i.status === "ordered" ? "已購" : "已取消",
+        "商品狀態": status === "ordered" ? "已購" : "已取消",
         "訂單備註": o.note || ""
       }
     })
 
   if(rows.length === 0){
-    alert("目前沒有已購買或已取消商品")
+    alert(`目前沒有${fileLabel}商品`)
     return
   }
 
-  // 5️⃣ 排序
+  // 5️⃣ 排序：同客人排一起，再照送單時間
   rows.sort((a, b) => {
     const keyCompare = a._groupKey.localeCompare(b._groupKey, "zh-Hant")
     if(keyCompare !== 0) return keyCompare
 
     const timeCompare = String(a._createdAt).localeCompare(String(b._createdAt))
     if(timeCompare !== 0) return timeCompare
-
-    const statusCompare = a._statusSort - b._statusSort
-    if(statusCompare !== 0) return statusCompare
 
     return String(a["訂單編號"]).localeCompare(String(b["訂單編號"]))
   })
@@ -1575,12 +1573,22 @@ window.exportPurchasedAndCancelledList = async function(){
   const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8;" })
   const url = URL.createObjectURL(blob)
   const a = document.createElement("a")
+
   a.href = url
-  a.download = `已購已取消清單_${new Date().toISOString().slice(0,10)}.csv`
+  a.download = `${fileLabel}清單_${new Date().toISOString().slice(0,10)}.csv`
+
   document.body.appendChild(a)
   a.click()
   document.body.removeChild(a)
   URL.revokeObjectURL(url)
+}
+
+window.exportPurchasedList = async function(){
+  await exportOrderItemsByStatus("ordered", "已購")
+}
+
+window.exportCancelledList = async function(){
+  await exportOrderItemsByStatus("cancelled", "已取消")
 }
 
 window.exportPendingManagementList = async function(){
