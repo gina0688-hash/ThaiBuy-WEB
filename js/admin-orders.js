@@ -1453,7 +1453,7 @@ async function exportOrderItemsByStatus(status, fileLabel, includePaymentInfo = 
   // 1️⃣ 抓所有訂單
   const { data: orders, error: orderError } = await supabase
     .from("orders")
- .select(`
+.select(`
   id,
   order_number,
   customer_name,
@@ -1463,6 +1463,7 @@ async function exportOrderItemsByStatus(status, fileLabel, includePaymentInfo = 
   bank_last5,
   total_amount,
   expected_remit_time,
+  admin_status,
   shipping_method,
   note,
   created_at
@@ -1523,17 +1524,24 @@ async function exportOrderItemsByStatus(status, fileLabel, includePaymentInfo = 
         email ? `email__${email}` :
         `name__${customerName}`
 
+const adminStatusText = {
+  checking: "等待對帳",
+  paid: "對帳完成",
+  hold: "暫停處理"
+}[o.admin_status] || "未設定"
+
 const row = {
   _groupKey: groupKey,
   _createdAt: o.created_at || "",
 
   "送單時間": new Date(o.created_at).toLocaleString(),
   "訂單編號": o.order_number || o.id,
-  "客人姓名": customerName,
-  "社群名字": o.community_name || "",
-  "電話": phone,
-  "Email": email,
-  "運送方式": o.shipping_method || "",
+"客人姓名": customerName,
+"社群名字": o.community_name || "",
+"管理狀態": adminStatusText,
+"電話": phone,
+"Email": email,
+"運送方式": o.shipping_method || "",
   "商品名稱": i.product_name || "",
   "規格": i.variant_name || "",
   "數量": i.quantity || 0,
