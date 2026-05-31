@@ -1448,22 +1448,25 @@ rows.sort((a, b) => {
   URL.revokeObjectURL(url)
 }
 
-async function exportOrderItemsByStatus(status, fileLabel){
+async function exportOrderItemsByStatus(status, fileLabel, includePaymentInfo = false){
 
   // 1️⃣ 抓所有訂單
   const { data: orders, error: orderError } = await supabase
     .from("orders")
-    .select(`
-      id,
-      order_number,
-      customer_name,
-      phone,
-      email,
-      community_name,
-      shipping_method,
-      note,
-      created_at
-    `)
+ .select(`
+  id,
+  order_number,
+  customer_name,
+  phone,
+  email,
+  community_name,
+  bank_last5,
+  total_amount,
+  expected_remit_time,
+  shipping_method,
+  note,
+  created_at
+`)
     .order("created_at", { ascending: true })
 
   if(orderError){
@@ -1520,24 +1523,32 @@ async function exportOrderItemsByStatus(status, fileLabel){
         email ? `email__${email}` :
         `name__${customerName}`
 
-      return {
-        _groupKey: groupKey,
-        _createdAt: o.created_at || "",
+const row = {
+  _groupKey: groupKey,
+  _createdAt: o.created_at || "",
 
-        "送單時間": new Date(o.created_at).toLocaleString(),
-        "訂單編號": o.order_number || o.id,
-        "客人姓名": customerName,
-        "社群名字": o.community_name || "",
-        "電話": phone,
-        "Email": email,
-        "運送方式": o.shipping_method || "",
-        "商品名稱": i.product_name || "",
-        "規格": i.variant_name || "",
-        "數量": i.quantity || 0,
-        "單價": i.price || 0,
-        "商品狀態": status === "ordered" ? "已購" : "已取消",
-        "訂單備註": o.note || ""
-      }
+  "送單時間": new Date(o.created_at).toLocaleString(),
+  "訂單編號": o.order_number || o.id,
+  "客人姓名": customerName,
+  "社群名字": o.community_name || "",
+  "電話": phone,
+  "Email": email,
+  "運送方式": o.shipping_method || "",
+  "商品名稱": i.product_name || "",
+  "規格": i.variant_name || "",
+  "數量": i.quantity || 0,
+  "單價": i.price || 0,
+  "商品狀態": status === "ordered" ? "已購" : "已取消",
+  "訂單備註": o.note || ""
+}
+
+if(includePaymentInfo){
+  row["匯款末五碼"] = o.bank_last5 || ""
+  row["匯款金額"] = Number(o.total_amount || 0)
+  row["匯款時間"] = o.expected_remit_time || ""
+}
+
+return row
     })
 
   if(rows.length === 0){
@@ -1584,11 +1595,11 @@ async function exportOrderItemsByStatus(status, fileLabel){
 }
 
 window.exportPurchasedList = async function(){
-  await exportOrderItemsByStatus("ordered", "已購")
+  await exportOrderItemsByStatus("ordered", "已購", true)
 }
 
 window.exportCancelledList = async function(){
-  await exportOrderItemsByStatus("cancelled", "已取消")
+  await exportOrderItemsByStatus("cancelled", "已取消", true)
 }
 
 window.exportPendingManagementList = async function(){
