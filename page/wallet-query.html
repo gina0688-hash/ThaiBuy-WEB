@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>儲值金查詢</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/wallet-query.css">
+</head>
+
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <img src="../LOGO.png" class="brand-logo" alt="THAI BUY logo">
+    <div>
+      <div class="brand-title">THAI BUY</div>
+      <div class="brand-subtitle">泰國代購</div>
+    </div>
+  </div>
+
+  <div class="topbar-nav">
+    <a href="./index.html" class="topbar-link">商品頁</a>
+    <a href="./order-query.html" class="topbar-link">訂單查詢</a>
+    <a href="./wallet-query.html" class="topbar-link active">儲值金查詢</a>
+    <a href="./notice.html" class="topbar-link">購物須知</a>
+    <a href="./tracking.html" class="topbar-link">貨態狀況</a>
+    <a href="./shipping.html" class="topbar-link">運送須知</a>
+    <a href="./contact.html" class="topbar-link">聯繫方式</a>
+    <a href="./shipping-711.html" class="topbar-link">賣貨便</a>
+    <a href="./news.html" class="topbar-link">最新活動</a>
+  </div>
+</div>
+
+<div class="query-page">
+
+  <div class="query-hero">
+    <div class="hero-badge">THAI BUY 儲值金服務</div>
+    <h2>儲值金查詢</h2>
+    <p>
+      可於此頁查詢目前儲值金餘額、儲值紀錄、扣抵紀錄與使用狀態。
+    </p>
+  </div>
+
+  <div class="query-grid">
+
+    <div class="query-card">
+      <div class="section-title">查詢你的儲值金</div>
+      <p class="section-desc">
+        請輸入提供儲值帳戶時使用的 Email 與電話。<br>
+        系統會依照兩項資料比對，顯示目前可使用餘額與異動紀錄。<br>
+        如須下單使用請下單後，聯繫客服人員並且提供訂單編號。
+      </p>
+    </div>
+
+    <div class="query-card">
+      <div class="section-title">查詢提醒</div>
+      <div class="tip-box">
+        <strong>建議查詢資訊</strong><br>
+        請使用下單或聯繫時填寫的 Email 與電話查詢。<br>
+        若查無資料，可能是資料填寫不同、尚未建立儲值帳戶，或儲值金已完成處理。<br>
+        如需協助確認，請聯繫客服人員。
+
+        <div class="contact-links">
+          <a class="contact-btn line" href="https://lin.ee/PiLP7NP" target="_blank">
+            💬 LINE ID：@373ujbuu
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="query-card full">
+      <div class="section-title">輸入查詢資訊</div>
+
+      <div class="query-form">
+        <label for="queryEmail">Email</label>
+        <input id="queryEmail" type="email" placeholder="請輸入建立儲值帳戶時填寫的 Email">
+
+        <label for="queryPhone">電話</label>
+        <input id="queryPhone" type="text" placeholder="請輸入建立儲值帳戶時填寫的電話">
+
+        <button id="queryBtn" class="query-btn" type="button">查詢儲值金</button>
+      </div>
+    </div>
+
+    <div class="query-card full">
+      <div class="section-title">查詢結果</div>
+
+      <div id="queryResult">
+        <div class="result-empty">
+          <div class="result-icon">💰</div>
+          <h3>尚未查詢儲值金</h3>
+          <p>
+            這裡之後會顯示目前儲值金餘額、加值紀錄、扣抵紀錄與使用狀態。<br>
+            請先輸入 Email 與電話進行查詢。
+          </p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer-copy">2025 © ThaiBuy代購</div>
+
+</div>
+
+<script type="module" src="../js/wallet-query.js"></script>
+</body>
+</html>
