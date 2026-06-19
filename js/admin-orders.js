@@ -1311,13 +1311,22 @@ window.exportShippingList = async function(){
   // 1️⃣ 先抓所有訂單（照送單時間）
   const { data: orders, error: orderError } = await supabase
     .from("orders")
-  .select(`
+.select(`
   id,
   order_number,
   customer_name,
   phone,
   email,
   community_name,
+  admin_status,
+  need_second_payment,
+  second_payment_status,
+  second_payment_amount,
+  second_payment_last5,
+  second_payment_time,
+  bank_last5,
+  total_amount,
+  expected_remit_time,
   shipping_method,
   receiver_name,
   receiver_phone,
@@ -1381,27 +1390,60 @@ const rows = items
       phone ? `phone__${phone}` :
       email ? `email__${email}` :
       `name__${customerName}`
+const adminStatusText = {
+  checking: "等待對帳",
+  paid: "對帳完成",
+  hold: "暫停處理"
+}[o.admin_status] || "未設定"
 
-    return {
-      _groupKey: groupKey,
-      _createdAt: o.created_at || "",
-      "送單時間": new Date(o.created_at).toLocaleString(),
-      "訂單編號": o.order_number || o.id,
-     "客人姓名": customerName,
-"社群名字": o.community_name || "",
-"電話": phone,
-"Email": email,
-"運送方式": o.shipping_method || "",
-      "收件人": o.receiver_name || "",
-      "收件電話": o.receiver_phone || "",
-      "門市名稱": o.store_name || "",
-      "店號": o.store_code || "",
-      "商品名稱": i.product_name || "",
-      "規格": i.variant_name || "",
-      "數量": i.quantity || 0,
-      "單價": i.price || 0,
-      "訂單備註": o.note || ""
-    }
+const needSecondPayment =
+  o.need_second_payment === true &&
+  Number(o.second_payment_amount || 0) > 0
+
+const secondPaymentDone =
+  !needSecondPayment || String(o.second_payment_status || "").trim() === "paid"
+
+const secondPaymentStatusText = {
+  unpaid: "尚未補款",
+  submitted: "已送出，等待確認",
+  paid: "補款完成"
+}[o.second_payment_status] || "尚未補款"
+
+return {
+  _groupKey: groupKey,
+  _createdAt: o.created_at || "",
+
+  "送單時間": new Date(o.created_at).toLocaleString(),
+  "訂單編號": o.order_number || o.id,
+  "客人姓名": customerName,
+  "社群名字": o.community_name || "",
+
+ "是否對帳完成": String(o.admin_status || "").trim() === "paid" ? "是" : "否",
+  "管理狀態": adminStatusText,
+
+  "是否已補款完成": secondPaymentDone ? "是" : "否",
+  "補款狀態": needSecondPayment ? secondPaymentStatusText : "不需補款",
+  "補款金額": needSecondPayment ? Number(o.second_payment_amount || 0) : 0,
+  "補款末五碼": o.second_payment_last5 || "",
+  "補款時間": o.second_payment_time || "",
+
+  "原匯款末五碼": o.bank_last5 || "",
+  "匯款金額": Number(o.total_amount || 0),
+  "預計匯款時間": o.expected_remit_time || "",
+
+  "電話": phone,
+  "Email": email,
+  "運送方式": o.shipping_method || "",
+  "收件人": o.receiver_name || "",
+  "收件電話": o.receiver_phone || "",
+  "門市名稱": o.store_name || "",
+  "店號": o.store_code || "",
+  "商品名稱": i.product_name || "",
+  "規格": i.variant_name || "",
+  "數量": i.quantity || 0,
+  "單價": i.price || 0,
+  "訂單備註": o.note || ""
+}
   })
 
   if(rows.length === 0){
