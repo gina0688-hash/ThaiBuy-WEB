@@ -298,7 +298,7 @@ function renderBankSummary(rows){
       </div>
 
       <div>
-        <span>刷卡總額<br>已含手續費</span>
+        <span>刷卡總額 ( 已含手續費 )</span>
         <b>${formatMoney(item.totalAmount)}</b>
       </div>
     </div>
