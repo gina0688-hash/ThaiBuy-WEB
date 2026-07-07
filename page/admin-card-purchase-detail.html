@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>刷卡採購詳細資料</title>
+
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../css/admin-card-purchases.css">
+<link rel="stylesheet" href="../css/admin-card-purchase-detail.css">
+</head>
+
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <img src="../LOGO.png" class="brand-logo" alt="THAI BUY logo">
+    <div>
+      <div class="brand-title">THAI BUY</div>
+      <div class="brand-subtitle">可愛又安心的泰國代購</div>
+    </div>
+  </div>
+
+  <div class="topbar-nav">
+    <a href="./admin-orders.html" class="topbar-link">訂單管理</a>
+    <a href="./admin-product-stats.html" class="topbar-link">商品統計</a>
+    <a href="./admin-products.html" class="topbar-link">商品管理</a>
+    <a href="./admin-tracking.html" class="topbar-link">貨態管理</a>
+    <a href="./admin-711.html" class="topbar-link">賣貨便管理</a>
+    <a href="./admin-settlement.html" class="topbar-link">帳務管理</a>
+    <a href="./admin-card-purchases.html" class="topbar-link active">刷卡採購</a>
+    <a href="./admin-expenses.html" class="topbar-link">內帳支出</a>
+    <a href="./admin-wallet.html" class="topbar-link">儲值金管理</a>
+    <a href="./admin-711-income.html" class="topbar-link">7-11入帳</a>
+    <a href="./admin-self-usage.html" class="topbar-link">自用紀錄</a>
+  </div>
+</div>
+
+<div class="container detail-container">
+
+  <div class="card page-header-card">
+    <div>
+      <h2 id="detailTitle">刷卡採購詳細資料</h2>
+      <div class="helper-text" id="detailSubtitle">資料載入中...</div>
+    </div>
+
+    <div class="header-actions">
+      <a href="./admin-card-purchases.html" class="btn-secondary link-btn">
+        ← 回刷卡採購列表
+      </a>
+    </div>
+  </div>
+
+  <div class="card detail-card">
+    <div class="card-header-row">
+      <h3>主資料</h3>
+      <div class="helper-text">這裡顯示這筆官方訂單 / 刷卡紀錄的主要資訊</div>
+    </div>
+
+    <div class="detail-info-layout">
+
+      <div class="detail-main-block">
+        <div class="detail-section-title">基本資訊</div>
+
+        <div class="info-list">
+          <div class="info-row">
+            <span>商品名稱</span>
+            <b id="infoProductName">-</b>
+          </div>
+
+          <div class="info-row">
+            <span>購買來源</span>
+            <b id="infoPurchaseSource">-</b>
+          </div>
+
+          <div class="info-row">
+            <span>狀態</span>
+            <b id="infoStatus">-</b>
+          </div>
+
+          <div class="info-row">
+            <span>刷卡日期</span>
+            <b id="infoPurchaseDate">-</b>
+          </div>
+
+          <div class="info-row">
+            <span>銀行 / 卡片</span>
+            <b id="infoBankCard">-</b>
+          </div>
+
+          <div class="info-row">
+            <span>刷卡人</span>
+            <b id="infoCardHolder">-</b>
+          </div>
+
+          <div class="info-row">
+            <span>幣別</span>
+            <b id="infoCurrency">-</b>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-main-block amount-block">
+        <div class="detail-section-title">金額資訊</div>
+
+        <div class="amount-list">
+          <div class="amount-row">
+            <span>原訂單金額</span>
+            <b id="infoOriginalAmount">0</b>
+          </div>
+
+          <div class="amount-row">
+            <span>刷卡金額</span>
+            <b id="infoCardAmount">0</b>
+          </div>
+
+          <div class="amount-row">
+            <span>刷卡手續費</span>
+            <b id="infoCardFee">0</b>
+          </div>
+
+          <div class="amount-row total">
+            <span>刷卡總額已含手續費</span>
+            <b id="infoCardTotal">0</b>
+          </div>
+
+          <div class="amount-row">
+            <span>回台運費 / kg</span>
+            <b id="infoReturnShippingFeePerKg">0</b>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-main-block">
+        <div class="detail-section-title">官方訂單 / 物流</div>
+
+        <div class="info-list">
+          <div class="info-row">
+            <span>官方訂單編號</span>
+            <b id="infoOfficialOrderNo">-</b>
+          </div>
+
+          <div class="info-row">
+            <span>貨態編號</span>
+            <b id="infoTrackingNo">-</b>
+          </div>
+
+          <div class="info-row">
+            <span>預計出貨月份</span>
+            <b id="infoExpectedShipMonth">-</b>
+          </div>
+
+          <div class="info-row">
+            <span>入倉時間</span>
+            <b id="infoWarehouseArrivedAt">-</b>
+          </div>
+
+          <div class="info-row">
+            <span>回台時間</span>
+            <b id="infoReturnToTaiwanDate">-</b>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="detail-note-layout">
+      <div class="detail-note-block">
+        <div class="detail-section-title">官方出貨說明</div>
+        <p id="infoOfficialNote">-</p>
+      </div>
+
+      <div class="detail-note-block">
+        <div class="detail-section-title">內部備註</div>
+        <p id="infoAdminNote">-</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="summary-grid detail-summary-grid">
+    <div class="card summary-card">
+      <h3>明細統計</h3>
+
+      <div class="summary-number-grid detail-summary-number-grid">
+        <div class="summary-box">
+          <span>商品筆數</span>
+          <b id="itemCount">0</b>
+        </div>
+
+        <div class="summary-box">
+          <span>總件數</span>
+          <b id="itemQuantityTotal">0</b>
+        </div>
+
+        <div class="summary-box">
+          <span>官方商品小計</span>
+          <b id="itemSubtotalTotal">0</b>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card item-form-card">
+    <div class="card-header-row">
+      <h3 id="itemFormTitle">新增商品明細</h3>
+      <div class="helper-text">商品明細用來記錄這筆刷卡裡面實際買了哪些商品</div>
+    </div>
+
+    <form id="itemForm">
+      <input type="hidden" id="itemId">
+
+      <div class="form-grid-4">
+
+        <div class="field">
+          <label>連接商品</label>
+          <select id="itemProductId">
+            <option value="">不連接商品</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>商品名稱</label>
+          <input id="itemProductName" required placeholder="選商品後會自動帶入，也可手動修改">
+        </div>
+
+        <div class="field">
+          <label>品項 / 規格</label>
+          <select id="itemVariantId">
+            <option value="">請先選擇商品</option>
+          </select>
+
+          <input type="hidden" id="itemVariantName">
+        </div>
+
+        <div class="field">
+          <label>數量</label>
+          <input type="number" id="itemQuantity" min="1" step="1" value="1">
+        </div>
+
+        <div class="field">
+          <label>官方單價</label>
+          <input type="number" id="itemUnitPrice" min="0" step="1" value="0">
+        </div>
+
+        <div class="field">
+          <label>小計</label>
+          <input type="number" id="itemSubtotal" min="0" step="1" value="0">
+        </div>
+
+        <div class="field">
+          <label>單件重量 kg</label>
+          <input type="number" id="itemUnitWeight" min="0" step="0.01" value="0">
+        </div>
+
+        <div class="field">
+          <label>備註</label>
+          <input id="itemNote" placeholder="例如 缺貨 / 等補 / 特別款">
+        </div>
+
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn-cancel hidden" id="cancelItemEditBtn">
+          取消編輯
+        </button>
+
+        <button type="submit" class="btn-primary" id="saveItemBtn">
+          新增明細
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="card list-card">
+    <div class="card-header-row">
+      <h3>商品明細列表</h3>
+      <div class="helper-text">這裡是一筆刷卡紀錄底下的商品內容</div>
+    </div>
+
+    <div class="table-scroll">
+      <table class="purchase-table item-table">
+        <thead>
+          <tr>
+            <th>商品名稱</th>
+            <th>品項 / 規格</th>
+            <th>數量</th>
+            <th>官方單價</th>
+            <th>小計</th>
+            <th>單件重量 kg</th>
+            <th>備註</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+
+        <tbody id="itemTbody">
+          <tr>
+            <td colspan="8" class="empty-cell">商品明細載入中...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <footer class="site-footer">2025 © ThaiBuy代購</footer>
+
+</div>
+
+<script type="module" src="../js/admin-card-purchase-detail.js"></script>
+</body>
+</html>

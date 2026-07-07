@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>刷卡採購明細</title>
+
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../css/admin-card-purchases.css">
+</head>
+
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <img src="../LOGO.png" class="brand-logo" alt="THAI BUY logo">
+    <div>
+      <div class="brand-title">THAI BUY</div>
+      <div class="brand-subtitle">可愛又安心的泰國代購</div>
+    </div>
+  </div>
+
+  <div class="topbar-nav">
+    <a href="./admin-orders.html" class="topbar-link">訂單管理</a>
+    <a href="./admin-product-stats.html" class="topbar-link">商品統計</a>
+    <a href="./admin-products.html" class="topbar-link">商品管理</a>
+    <a href="./admin-tracking.html" class="topbar-link">貨態管理</a>
+    <a href="./admin-711.html" class="topbar-link">賣貨便管理</a>
+    <a href="./admin-settlement.html" class="topbar-link">帳務管理</a>
+    <a href="./admin-card-purchases.html" class="topbar-link active">刷卡採購</a>
+    <a href="./admin-expenses.html" class="topbar-link">內帳支出</a>
+    <a href="./admin-wallet.html" class="topbar-link">儲值金管理</a>
+    <a href="./admin-711-income.html" class="topbar-link">7-11入帳</a>
+    <a href="./admin-self-usage.html" class="topbar-link">自用紀錄</a>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="card page-header-card">
+    <div>
+      <h2>💳 刷卡採購明細</h2>
+      <div class="helper-text">
+        用來快速記錄官方訂單、刷卡金額、銀行、出貨、入倉與回台資訊。
+      </div>
+    </div>
+
+    <button type="button" class="btn-primary" id="openCreateBtn">
+      ＋新增刷卡紀錄
+    </button>
+  </div>
+
+  <div class="card filter-card">
+    <div class="filter-grid">
+      <div class="field">
+        <label>月份</label>
+        <select id="filterMonth">
+          <option value="">全部月份</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>銀行</label>
+        <select id="filterBank">
+          <option value="">全部銀行</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>狀態</label>
+        <select id="filterStatus">
+          <option value="">全部狀態</option>
+          <option value="pending">未出貨</option>
+          <option value="shipped">已出貨未入倉</option>
+          <option value="warehouse">已入倉</option>
+          <option value="completed">已完成</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>搜尋</label>
+       <input id="filterKeyword" placeholder="商品名稱 / 購買來源 / 官方訂單編號 / 貨態編號 / 備註">
+      </div>
+
+      <div class="field filter-button-field">
+        <label>&nbsp;</label>
+        <button type="button" class="btn-secondary" id="reloadBtn">重新整理</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="summary-grid">
+    <div class="card summary-card">
+      <h3>目前篩選統計</h3>
+
+      <div class="summary-number-grid">
+        <div class="summary-box">
+          <span>筆數</span>
+          <b id="summaryCount">0</b>
+        </div>
+
+        <div class="summary-box">
+          <span>原訂單總額</span>
+          <b id="summaryOriginalAmount">0</b>
+        </div>
+
+        <div class="summary-box">
+          <span>刷卡總額<br>已含手續費</span>
+          <b id="summaryCardAmount">0</b>
+        </div>
+
+        <div class="summary-box">
+          <span>手續費總額</span>
+          <b id="summaryCardFee">0</b>
+        </div>
+      </div>
+    </div>
+
+    <div class="card summary-card">
+      <h3>銀行刷卡統計</h3>
+      <div id="bankSummaryList" class="bank-summary-list">
+        <div class="empty-text">尚無資料</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card list-card">
+    <div class="card-header-row">
+      <h3>刷卡明細列表</h3>
+      <div class="helper-text">一列代表一筆官方訂單 / 刷卡紀錄</div>
+    </div>
+
+    <div class="table-scroll">
+      <table class="purchase-table">
+        <thead>
+          <tr>
+            <th>月份</th>
+            <th>商品名稱</th>
+            <th>刷卡日期</th>
+            <th>銀行 / 卡片</th>
+            <th>刷卡人</th>
+            <th>原訂單金額</th>
+            <th>刷卡金額</th>
+            <th>刷卡手續費</th>
+            <th>官方訂單編號</th>
+            <th>貨態編號</th>
+            <th>預計出貨</th>
+            <th>已出貨</th>
+            <th>已入倉</th>
+            <th>入倉時間</th>
+            <th>已回台</th>
+            <th>回台時間</th>
+            <th>回台運費 / kg</th>
+            <th>已完成</th>
+            <th>備註</th>
+            <th>細項</th>
+          </tr>
+        </thead>
+
+        <tbody id="purchaseTbody">
+          <tr>
+            <td colspan="20" class="empty-cell">資料載入中...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <footer class="site-footer">2025 © ThaiBuy代購</footer>
+</div>
+
+<!-- 新增 / 編輯刷卡紀錄 Modal -->
+<div id="batchModal" class="modal hidden">
+  <div class="modal-panel">
+    <div class="modal-header">
+      <h2 id="modalTitle">新增刷卡紀錄</h2>
+      <button type="button" class="modal-close-btn" id="closeModalBtn">×</button>
+    </div>
+
+    <form id="batchForm">
+      <input type="hidden" id="batchId">
+
+     <div class="form-section">
+  <div class="form-section-title">基本資料</div>
+
+  <div class="form-grid-4">
+<div class="field">
+  <label>商品名稱</label>
+  <select id="productId" required>
+    <option value="">請選擇商品</option>
+  </select>
+</div>
+
+<div class="field">
+  <label>購買來源</label>
+  <input id="purchaseSource" placeholder="例如 官方網站 / Shopee / Lazada">
+</div>
+
+          <div class="field">
+            <label>刷卡日期</label>
+            <input type="date" id="purchaseDate" required>
+          </div>
+
+         <div class="field">
+  <label>銀行</label>
+  <select id="bankName">
+    <option value="">請選擇銀行</option>
+    <option value="中信">中信</option>
+    <option value="聯邦">聯邦</option>
+    <option value="台新">台新</option>
+    <option value="國泰">國泰</option>
+    <option value="玉山">玉山</option>
+  </select>
+</div>
+
+          <div class="field">
+            <label>卡片</label>
+            <input id="cardName" placeholder="例如 CUBE / Pi / GoGo">
+          </div>
+
+          <div class="field">
+  <label>刷卡人</label>
+  <input id="cardHolder" placeholder="例如 媛媛 / 青">
+</div>
+
+          <div class="field">
+  <label>幣別</label>
+  <select id="currency">
+    <option value="TWD">台幣 TWD</option>
+    <option value="THB">泰銖 THB</option>
+    <option value="USD">美金 USD</option>
+  </select>
+</div>
+
+          <div class="field">
+            <label>原訂單金額</label>
+            <input type="number" id="originalOrderAmount" min="0" step="1" value="0">
+          </div>
+
+          <div class="field">
+            <label>刷卡金額</label>
+            <input type="number" id="cardAmount" min="0" step="1" value="0">
+          </div>
+
+          <div class="field">
+            <label>刷卡手續費</label>
+            <input type="number" id="cardFee" min="0" step="1" value="0">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">官方訂單 / 物流</div>
+
+        <div class="form-grid-4">
+          <div class="field">
+            <label>官方訂單編號</label>
+            <input id="officialOrderNo">
+          </div>
+
+          <div class="field">
+            <label>貨態編號</label>
+            <input id="trackingNo">
+          </div>
+
+          <div class="field">
+            <label>預計出貨月份</label>
+            <input id="expectedShipMonth" placeholder="例如 2026/08、8月底">
+          </div>
+
+          <div class="field">
+            <label>入倉時間</label>
+            <input type="datetime-local" id="warehouseArrivedAt">
+          </div>
+
+          <div class="field">
+            <label>回台時間</label>
+            <input type="date" id="returnToTaiwanDate">
+          </div>
+
+          <div class="field">
+            <label>回台運費 / kg</label>
+            <input type="number" id="returnShippingFeePerKg" min="0" step="1" value="0">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">狀態與備註</div>
+
+        <div class="check-row">
+          <label>
+            <input type="checkbox" id="isShipped">
+            已出貨
+          </label>
+
+          <label>
+            <input type="checkbox" id="isWarehouseArrived">
+            已入倉
+          </label>
+
+          <label>
+            <input type="checkbox" id="isCompleted">
+            已完成
+          </label>
+        </div>
+
+        <div class="form-grid-1">
+          <div class="field">
+            <label>官方出貨說明</label>
+            <textarea id="officialNote" placeholder="例如：官方公告預計 8 月底依序出貨"></textarea>
+          </div>
+
+          <div class="field">
+            <label>內部備註</label>
+            <textarea id="adminNote" placeholder="自己要記錄的注意事項"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn-cancel" id="cancelModalBtn">取消</button>
+        <button type="submit" class="btn-primary">儲存</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script type="module" src="../js/admin-card-purchases.js"></script>
+</body>
+</html>
