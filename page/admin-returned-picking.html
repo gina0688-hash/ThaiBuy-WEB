@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>當月回台點貨單</title>
+
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../css/admin-card-purchases.css">
+<link rel="stylesheet" href="../css/admin-returned-picking.css">
+</head>
+
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <img src="../LOGO.png" class="brand-logo" alt="THAI BUY logo">
+    <div>
+      <div class="brand-title">THAI BUY</div>
+      <div class="brand-subtitle">可愛又安心的泰國代購</div>
+    </div>
+  </div>
+
+  <div class="topbar-nav">
+    <a href="./admin-orders.html" class="topbar-link">訂單管理</a>
+    <a href="./admin-product-stats.html" class="topbar-link">商品統計</a>
+    <a href="./admin-products.html" class="topbar-link">商品管理</a>
+    <a href="./admin-tracking.html" class="topbar-link">貨態管理</a>
+    <a href="./admin-711.html" class="topbar-link">賣貨便管理</a>
+    <a href="./admin-settlement.html" class="topbar-link">帳務管理</a>
+     <a href="./admin-card-purchases.html" class="topbar-link">刷卡採購</a>
+    <a href="./admin-returned-picking.html" class="topbar-link active">回台點貨</a>
+    <a href="./admin-expenses.html" class="topbar-link">內帳支出</a>
+    <a href="./admin-wallet.html" class="topbar-link">儲值金管理</a>
+    <a href="./admin-711-income.html" class="topbar-link">7-11入帳</a>
+    <a href="./admin-self-usage.html" class="topbar-link">自用紀錄</a>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="card page-header-card no-print">
+    <div>
+      <h2>📦 當月回台點貨單</h2>
+      <div class="helper-text">
+        依回台時間篩選，合併相同商品與品項，方便列印點貨。
+      </div>
+    </div>
+
+    <button type="button" class="btn-primary" id="printBtn">
+      列印點貨單
+    </button>
+  </div>
+
+  <div class="card filter-card no-print">
+    <div class="filter-grid picking-filter-grid">
+      <div class="field">
+        <label>回台月份</label>
+        <input type="month" id="filterReturnMonth">
+      </div>
+
+      <div class="field">
+        <label>&nbsp;</label>
+        <button type="button" class="btn-secondary" id="reloadBtn">重新整理</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="print-title">
+    <h2 id="printTitle">當月回台點貨單</h2>
+    <div id="printSubtitle">資料載入中...</div>
+  </div>
+
+  <div class="card summary-card">
+    <h3>回台統計</h3>
+
+    <div class="summary-number-grid picking-summary-grid">
+      <div class="summary-box">
+        <span>回台單數</span>
+        <b id="batchCount">0</b>
+      </div>
+
+      <div class="summary-box">
+        <span>商品種類</span>
+        <b id="productTypeCount">0</b>
+      </div>
+
+      <div class="summary-box">
+        <span>總件數</span>
+        <b id="quantityTotal">0</b>
+      </div>
+    </div>
+  </div>
+
+  <div class="card list-card">
+    <div class="card-header-row no-print">
+      <h3>合併點貨明細</h3>
+      <div class="helper-text">相同商品 + 相同品項會自動合併數量</div>
+    </div>
+
+    <div class="table-scroll print-table-wrap">
+      <table class="purchase-table picking-table">
+        <thead>
+          <tr>
+            <th>勾選</th>
+            <th>商品名稱</th>
+            <th>品項 / 規格</th>
+            <th>總數量</th>
+            <th>來源訂單</th>
+            <th>回台日期</th>
+            <th>備註</th>
+          </tr>
+        </thead>
+
+        <tbody id="pickingTbody">
+          <tr>
+            <td colspan="7" class="empty-cell">資料載入中...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card list-card no-print">
+    <div class="card-header-row">
+      <h3>本月回台刷卡單</h3>
+      <div class="helper-text">只要回台時間符合月份，就會列在這裡</div>
+    </div>
+
+    <div class="table-scroll">
+      <table class="purchase-table returned-batch-table">
+        <thead>
+          <tr>
+            <th>回台日期</th>
+            <th>商品名稱</th>
+            <th>官方訂單編號</th>
+            <th>貨態編號</th>
+            <th>刷卡人</th>
+            <th>銀行 / 卡片</th>
+            <th>細項</th>
+          </tr>
+        </thead>
+
+        <tbody id="batchTbody">
+          <tr>
+            <td colspan="7" class="empty-cell">資料載入中...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <footer class="site-footer no-print">2025 © ThaiBuy代購</footer>
+</div>
+
+<script type="module" src="../js/admin-returned-picking.js"></script>
+</body>
+</html>

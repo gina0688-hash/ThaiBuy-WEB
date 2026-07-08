@@ -82,10 +82,9 @@ async function loadInitialData(){
 
 async function loadProducts(){
   const { data, error } = await supabase
-    .from("products")
-    .select("id, name, is_active, sort_order, created_at")
-    .eq("is_active", true)
-    .order("sort_order", { ascending: true })
+   .from("products")
+.select("id, name, is_active, sort_order, created_at")
+.order("sort_order", { ascending: true })
     .order("created_at", { ascending: false })
 
   if(error){
@@ -103,7 +102,9 @@ function renderProductOptions(selectedId = ""){
   products.forEach(product => {
     const option = document.createElement("option")
     option.value = product.id
-    option.textContent = product.name
+    option.textContent = product.is_active
+      ? product.name
+      : `${product.name}（已下架）`
 
     if(String(selectedId) === String(product.id)){
       option.selected = true

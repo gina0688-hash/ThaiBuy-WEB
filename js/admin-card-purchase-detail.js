@@ -84,9 +84,8 @@ async function loadInitialData(){
 async function loadProducts(){
   const { data, error } = await supabase
     .from("products")
-    .select("id, name, is_active, sort_order, created_at")
-    .eq("is_active", true)
-    .order("sort_order", { ascending: true })
+.select("id, name, is_active, sort_order, created_at")
+.order("sort_order", { ascending: true })
     .order("created_at", { ascending: false })
 
   if(error){
@@ -104,7 +103,9 @@ function renderProductOptions(selectedId = ""){
   products.forEach(product => {
     const option = document.createElement("option")
     option.value = product.id
-    option.textContent = product.name
+    option.textContent = product.is_active
+      ? product.name
+      : `${product.name}（已下架）`
 
     if(String(selectedId) === String(product.id)){
       option.selected = true
@@ -137,10 +138,9 @@ async function loadProductVariants(productId, selectedVariantId = ""){
 
   const { data, error } = await supabase
     .from("product_variants")
-    .select("id, product_id, name, is_active, created_at")
-    .eq("product_id", productId)
-    .eq("is_active", true)
-    .order("created_at", { ascending: true })
+.select("id, product_id, name, is_active, created_at")
+.eq("product_id", productId)
+.order("created_at", { ascending: true })
 
   if(error){
     console.error("loadProductVariants error:", error)
@@ -173,7 +173,9 @@ function renderVariantOptions(selectedVariantId = ""){
   productVariants.forEach(variant => {
     const option = document.createElement("option")
     option.value = variant.id
-    option.textContent = variant.name
+    option.textContent = variant.is_active
+  ? variant.name
+  : `${variant.name}（已下架）`
 
     if(String(selectedVariantId) === String(variant.id)){
       option.selected = true
