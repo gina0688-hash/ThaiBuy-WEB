@@ -18,6 +18,8 @@ bindLogout()
 let overviewFilter = "all"
 let loadOrdersRunId = 0
 
+let showCompletedOrders = false
+
 // ⭐ 這行你要留就留，不留也可以
 showUser(user)
 
@@ -702,8 +704,12 @@ else if(s.includes("已回台") || s.includes("部分出貨")){
   shippingCount++
 }
 else if(s.includes("已完成")){
-  doneBox.appendChild(div)
+
   doneCount++
+
+  if(showCompletedOrders){
+    doneBox.appendChild(div)
+  }
 }
 else {
   newBox.appendChild(div)
@@ -735,6 +741,34 @@ if(overviewCancelledItemEl) overviewCancelledItemEl.textContent = overviewCancel
 
 setOverviewLoading(false)
 
+}
+
+// ⭐ 已完成訂單 展開 / 收合
+window.toggleCompletedOrders = function(){
+
+  showCompletedOrders = !showCompletedOrders
+
+  const btn = document.getElementById("toggleCompletedBtn")
+  const doneBox = document.getElementById("order-done")
+
+  if(showCompletedOrders){
+
+    if(btn){
+      btn.textContent = "▲ 收起已完成訂單"
+    }
+
+    loadOrders()
+
+  }else{
+
+    if(btn){
+      btn.textContent = "▼ 查看已完成訂單"
+    }
+
+    if(doneBox){
+      doneBox.innerHTML = ""
+    }
+  }
 }
 
 // ⭐ 展開
