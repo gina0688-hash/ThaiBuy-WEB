@@ -5,6 +5,61 @@ let editingId = null
 let expandedProducts = new Set()
 let isSavingProduct = false
 
+const sizeOrder = {
+  "XXS Size": 1,
+  "XS Size": 2,
+  "S Size": 3,
+  "M Size": 4,
+  "L Size": 5,
+  "XL Size": 6,
+  "XXL Size": 7,
+  "2XL Size": 7,
+  "3XL Size": 8
+}
+
+function sortVariants(list){
+  return [...list].sort((a, b) => {
+
+    // ① 先照品名 / 款式排
+    const aGroup = String(a.group_name || "").trim()
+    const bGroup = String(b.group_name || "").trim()
+
+    const groupCompare = aGroup.localeCompare(
+      bGroup,
+      "zh-Hant",
+      {
+        numeric: true,
+        sensitivity: "base"
+      }
+    )
+
+    if(groupCompare !== 0){
+      return groupCompare
+    }
+
+    // ② 同一品名裡，再照尺寸排
+    const aName = String(a.name || "").trim()
+    const bName = String(b.name || "").trim()
+
+    const aOrder = sizeOrder[aName] ?? 999
+    const bOrder = sizeOrder[bName] ?? 999
+
+    if(aOrder !== bOrder){
+      return aOrder - bOrder
+    }
+
+    // ③ 不是標準尺寸的規格再照文字排
+    return aName.localeCompare(
+      bName,
+      "zh-Hant",
+      {
+        numeric: true,
+        sensitivity: "base"
+      }
+    )
+  })
+}
+
 function numberToChinese(num){
   const map = ["一","二","三","四","五","六","七","八","九","十"]
   return map[num - 1] || String(num)
@@ -205,7 +260,9 @@ function renderVariants(){
   const container = document.getElementById("variants")
   container.innerHTML = ""
 
-  const visibleVariants = variants.filter(v => !v.isDeleted)
+ const visibleVariants = sortVariants(
+  variants.filter(v => !v.isDeleted)
+)
 
   if(visibleVariants.length === 0){
     container.innerHTML = `<div class="helper-text">目前尚未新增規格</div>`
@@ -661,12 +718,11 @@ container.innerHTML = ""
 
 for(const p of data){
 
-  const { data: variantRows } = await supabase
+ const { data: variantRows } = await supabase
   .from("product_variants")
   .select("*")
   .eq("product_id", p.id)
   .eq("is_active", true)
-  .order("name", { ascending: true })
 
   const { data: images } = await supabase
     .from("product_images")
@@ -695,7 +751,9 @@ const div = document.createElement("div")
 div.className = "product-item"
 
 const isExpanded = expandedProducts.has(p.id)
-const variantLines = (variantRows || []).map(v =>
+const sortedVariantRows = sortVariants(variantRows || [])
+
+const variantLines = sortedVariantRows.map(v =>
   `- ${v.group_name ? `${v.group_name} / ` : ""}${v.name} / ${v.price} / 庫存：${v.stock || 0}`
 )
 const hasMoreThanThree = variantLines.length > 3
@@ -820,12 +878,11 @@ if(formCard){
     return
   }
 
-  const { data: vData, error: variantReadError } = await supabase
+ const { data: vData, error: variantReadError } = await supabase
   .from("product_variants")
   .select("*")
   .eq("product_id", id)
   .eq("is_active", true)
-  .order("name", { ascending: true })
 
   if(variantReadError){
     console.error("editProduct variants error:", variantReadError)

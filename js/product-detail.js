@@ -68,7 +68,6 @@ const { data: variants } = await supabase
   .select("*")
   .eq("product_id", id)
   .eq("is_active", true)
-  .order("name", { ascending: true })
 
   const { data: images } = await supabase
     .from("product_images")
@@ -76,16 +75,59 @@ const { data: variants } = await supabase
     .eq("product_id", id)
     .order("sort_order")
 
+const sizeOrder = {
+  "XXS Size": 1,
+  "XS Size": 2,
+  "S Size": 3,
+  "M Size": 4,
+  "L Size": 5,
+  "XL Size": 6,
+  "XXL Size": 7,
+  "2XL Size": 7,
+  "3XL Size": 8
+}
+
 const safeVariants = (variants || [])
   .filter(v => Number(v.stock || 0) > 0)
   .sort((a, b) => {
-    const groupCompare = String(a.group_name || "")
-      .localeCompare(String(b.group_name || ""), "zh-Hant")
 
-    if(groupCompare !== 0) return groupCompare
+    // ① 先照品名 / 款式排序
+    const aGroup = String(a.group_name || "").trim()
+    const bGroup = String(b.group_name || "").trim()
 
-    return String(a.name || "")
-      .localeCompare(String(b.name || ""), "zh-Hant")
+    const groupCompare = aGroup.localeCompare(
+      bGroup,
+      "zh-Hant",
+      {
+        numeric: true,
+        sensitivity: "base"
+      }
+    )
+
+    if(groupCompare !== 0){
+      return groupCompare
+    }
+
+    // ② 同一品名底下，再照尺寸排序
+    const aName = String(a.name || "").trim()
+    const bName = String(b.name || "").trim()
+
+    const aOrder = sizeOrder[aName] ?? 999
+    const bOrder = sizeOrder[bName] ?? 999
+
+    if(aOrder !== bOrder){
+      return aOrder - bOrder
+    }
+
+    // ③ 非標準尺寸再照文字排序
+    return aName.localeCompare(
+      bName,
+      "zh-Hant",
+      {
+        numeric: true,
+        sensitivity: "base"
+      }
+    )
   })
 
 // ⭐ 是否有使用新版「品名 / 款式群組」
