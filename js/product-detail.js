@@ -78,7 +78,35 @@ const { data: variants } = await supabase
 
 const safeVariants = (variants || [])
   .filter(v => Number(v.stock || 0) > 0)
-  .sort((a, b) => String(a.name || "").localeCompare(String(b.name || ""), "zh-Hant"))
+  .sort((a, b) => {
+    const groupCompare = String(a.group_name || "")
+      .localeCompare(String(b.group_name || ""), "zh-Hant")
+
+    if(groupCompare !== 0) return groupCompare
+
+    return String(a.name || "")
+      .localeCompare(String(b.name || ""), "zh-Hant")
+  })
+
+// ⭐ 是否有使用新版「品名 / 款式群組」
+const hasVariantGroups = safeVariants.some(v =>
+  String(v.group_name || "").trim()
+)
+
+// ⭐ 取得所有群組名稱
+const variantGroups = [
+  ...new Set(
+    safeVariants
+      .map(v => String(v.group_name || "").trim())
+      .filter(Boolean)
+  )
+]
+
+// ⭐ 如果同一商品同時存在新舊格式，舊規格仍然保留
+const hasLegacyVariants = safeVariants.some(v =>
+  !String(v.group_name || "").trim()
+)
+    
 const safeImages = (images || []).map((img, index) => ({
   ...img,
   safe_url: safeImageUrl(img.image_url),
@@ -347,13 +375,58 @@ const container = document.getElementById("productDetail")
 </div>
       
 
-        <!-- 規格區 -->
-        <div style="
-          background:#f6f1eb;
-          border-radius:12px;
-          padding:16px;
-          margin-bottom:16px;
-        ">
+      <!-- 規格區 -->
+<div style="
+  background:#f6f1eb;
+  border-radius:12px;
+  padding:16px;
+  margin-bottom:16px;
+">
+
+  ${
+    safeVariants.length > 0
+      ? hasVariantGroups
+        ? `
+          <!-- ⭐ 新版：先選品名 / 款式 -->
+          <div style="
+            font-size:14px;
+            color:#6b5b52;
+            margin-bottom:8px;
+            font-weight:600;
+          ">
+            選擇品名 / 款式
+          </div>
+
+          <select
+            id="variantGroupSelect"
+            style="
+              width:100%;
+              height:44px;
+              border:1px solid #d8d0c8;
+              border-radius:10px;
+              padding:0 12px;
+              font-size:15px;
+              background:#fff;
+              margin-bottom:14px;
+            "
+          >
+            ${variantGroups.map(group => `
+              <option value="${safeAttr(group)}">
+                ${escapeHtml(group)}
+              </option>
+            `).join("")}
+
+            ${
+              hasLegacyVariants
+                ? `
+                  <option value="__legacy__">
+                    其他規格
+                  </option>
+                `
+                : ""
+            }
+          </select>
+
           <div style="
             font-size:14px;
             color:#6b5b52;
@@ -363,61 +436,85 @@ const container = document.getElementById("productDetail")
             選擇規格
           </div>
 
-          ${
-  safeVariants.length > 0
-    ? `
-      <select
-        id="variantSelect"
-        style="
-          width:100%;
-          height:44px;
-          border:1px solid #d8d0c8;
-          border-radius:10px;
-          padding:0 12px;
-          font-size:15px;
-          background:#fff;
-        "
-      >
-        ${safeVariants.map(v=>`
-  <option
-    value="${Number(v.price || 0)}"
-    data-stock="${Number(v.stock || 0)}"
-    data-variant-name="${safeAttr(v.name)}"
-    data-variant-id="${safeAttr(v.id)}"
-  >
-    ${escapeHtml(v.name)} - TWD $${Number(v.price || 0)}（庫存：${Number(v.stock || 0)}）
-  </option>
-`).join("")}
-      </select>
-    `
-    : `
-      <div style="
-        padding:12px 14px;
-        border-radius:10px;
-        background:#fff3f3;
-        color:#c62828;
-        border:1px solid #f2c7c7;
-        font-size:14px;
-      ">
-        此商品目前已售完
-      </div>
-    `
-}
-
-          <div id="stockInfo" style="
-            margin-top:12px;
+          <select
+            id="variantSelect"
+            style="
+              width:100%;
+              height:44px;
+              border:1px solid #d8d0c8;
+              border-radius:10px;
+              padding:0 12px;
+              font-size:15px;
+              background:#fff;
+            "
+          >
+          </select>
+        `
+        : `
+          <!-- ⭐ 舊版資料：保持原本單一下拉 -->
+          <div style="
             font-size:14px;
-            color:#666;
-          "></div>
+            color:#6b5b52;
+            margin-bottom:8px;
+            font-weight:600;
+          ">
+            選擇規格
+          </div>
 
-          <div id="price" style="
-            font-size:20px;
-            font-weight:bold;
-            margin:12px 0 0 0;
-            color:#2f170f;
-          "></div>
+          <select
+            id="variantSelect"
+            style="
+              width:100%;
+              height:44px;
+              border:1px solid #d8d0c8;
+              border-radius:10px;
+              padding:0 12px;
+              font-size:15px;
+              background:#fff;
+            "
+          >
+            ${safeVariants.map(v => `
+              <option
+                value="${Number(v.price || 0)}"
+                data-stock="${Number(v.stock || 0)}"
+                data-variant-name="${safeAttr(v.name)}"
+                data-variant-id="${safeAttr(v.id)}"
+              >
+                ${escapeHtml(v.name)}
+                - TWD $${Number(v.price || 0)}
+                （庫存：${Number(v.stock || 0)}）
+              </option>
+            `).join("")}
+          </select>
+        `
+      : `
+        <div style="
+          padding:12px 14px;
+          border-radius:10px;
+          background:#fff3f3;
+          color:#c62828;
+          border:1px solid #f2c7c7;
+          font-size:14px;
+        ">
+          此商品目前已售完
         </div>
+      `
+  }
 
+  <div id="stockInfo" style="
+    margin-top:12px;
+    font-size:14px;
+    color:#666;
+  "></div>
+
+  <div id="price" style="
+    font-size:20px;
+    font-weight:bold;
+    margin:12px 0 0 0;
+    color:#2f170f;
+  "></div>
+
+</div>
         ${
   safeVariants.length > 0
     ? `
@@ -476,17 +573,68 @@ changeImage(
   })
 }
 
+// ⭐ 根據品名 / 款式產生規格清單
+function renderVariantOptionsForGroup(){
+  const groupSelect = document.getElementById("variantGroupSelect")
+  const variantSelect = document.getElementById("variantSelect")
+
+  if(!groupSelect || !variantSelect) return
+
+  const selectedGroup = groupSelect.value
+
+  let filteredVariants = []
+
+  if(selectedGroup === "__legacy__"){
+    // 舊格式規格
+    filteredVariants = safeVariants.filter(v =>
+      !String(v.group_name || "").trim()
+    )
+  }else{
+    // 新格式規格
+    filteredVariants = safeVariants.filter(v =>
+      String(v.group_name || "").trim() === selectedGroup
+    )
+  }
+
+  variantSelect.innerHTML = filteredVariants.map(v => `
+    <option
+      value="${Number(v.price || 0)}"
+      data-stock="${Number(v.stock || 0)}"
+      data-variant-name="${safeAttr(v.name)}"
+      data-variant-id="${safeAttr(v.id)}"
+    >
+      ${escapeHtml(v.name)}
+      - TWD $${Number(v.price || 0)}
+      （庫存：${Number(v.stock || 0)}）
+    </option>
+  `).join("")
+
+  updatePrice()
+}
+
 const addDetailBtn = document.getElementById("addDetailBtn")
 if(addDetailBtn){
   addDetailBtn.addEventListener("click", addDetailToCart)
 }
 
-  updatePrice()
+ const variantGroupSelect = document.getElementById("variantGroupSelect")
+const variantSelect = document.getElementById("variantSelect")
 
-  const variantSelect = document.getElementById("variantSelect")
-  if(variantSelect){
-    variantSelect.addEventListener("change", updatePrice)
-  }
+if(variantGroupSelect){
+  // ⭐ 新格式商品
+  renderVariantOptionsForGroup()
+
+  variantGroupSelect.addEventListener("change", ()=>{
+    renderVariantOptionsForGroup()
+  })
+}else{
+  // ⭐ 舊格式商品
+  updatePrice()
+}
+
+if(variantSelect){
+  variantSelect.addEventListener("change", updatePrice)
+}
 }
 
 // ⭐ 切換圖片
@@ -511,12 +659,26 @@ window.changeImage = function(url, label, el){
   }
 }
 
+
+
+
 // ⭐ 價格更新
 function updatePrice(){
   const select = document.getElementById("variantSelect")
   if(!select) return
 
   const option = select.options[select.selectedIndex]
+
+  if(!option){
+    const priceEl = document.getElementById("price")
+    const stockEl = document.getElementById("stockInfo")
+
+    if(priceEl) priceEl.innerText = ""
+    if(stockEl) stockEl.innerText = ""
+
+    return
+  }
+
   const price = Number(option.value)
   const stock = Number(option.dataset.stock || 0)
 
@@ -548,8 +710,26 @@ window.addDetailToCart = function(){
 
   const option = select.options[select.selectedIndex]
 
+if(!option){
+  alert("請先選擇規格")
+  return
+}
+
   const originalPrice = Number(select.value)
-  const variantName = option.dataset.variantName || option.text
+  const groupSelect = document.getElementById("variantGroupSelect")
+
+const groupName =
+  groupSelect && groupSelect.value !== "__legacy__"
+    ? groupSelect.value
+    : ""
+
+const pureVariantName =
+  option.dataset.variantName || option.text
+
+const variantName =
+  groupName
+    ? `${groupName} ${pureVariantName}`
+    : pureVariantName
   const variantId = option.dataset.variantId
   const stock = Number(option.dataset.stock || 0)
 

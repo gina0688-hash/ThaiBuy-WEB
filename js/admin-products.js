@@ -188,8 +188,9 @@ window.addVariant = function(){
   const id = crypto.randomUUID()
 
   variants.push({
-    id,              // 前端暫時識別用
-    dbId: null,      // 資料庫真正 id，新規格還沒有
+    id,
+    dbId: null,
+    group_name: "",
     name: "",
     price: 0,
     stock: 0,
@@ -215,28 +216,33 @@ function renderVariants(){
     const div = document.createElement("div")
     div.className = "variant"
 
-    div.innerHTML = `
-      <input
-        placeholder="規格名稱"
-        value="${v.name || ""}"
-        oninput="updateVariant('${v.id}', 'name', this.value)">
+  div.innerHTML = `
+  <input
+    placeholder="品名 / 款式（可不填）"
+    value="${v.group_name || ""}"
+    oninput="updateVariant('${v.id}', 'group_name', this.value)">
 
-      <input
-        placeholder="價格"
-        type="number"
-        min="0"
-        value="${v.price || 0}"
-        oninput="updateVariant('${v.id}', 'price', this.value)">
+  <input
+    placeholder="規格名稱"
+    value="${v.name || ""}"
+    oninput="updateVariant('${v.id}', 'name', this.value)">
 
-      <input
-        placeholder="庫存數量"
-        type="number"
-        min="0"
-        value="${v.stock || 0}"
-        oninput="updateVariant('${v.id}', 'stock', this.value)">
+  <input
+    placeholder="價格"
+    type="number"
+    min="0"
+    value="${v.price || 0}"
+    oninput="updateVariant('${v.id}', 'price', this.value)">
 
-      <button type="button" onclick="removeVariant('${v.id}')">刪除</button>
-    `
+  <input
+    placeholder="庫存數量"
+    type="number"
+    min="0"
+    value="${v.stock || 0}"
+    oninput="updateVariant('${v.id}', 'stock', this.value)">
+
+  <button type="button" onclick="removeVariant('${v.id}')">刪除</button>
+`
 
     container.appendChild(div)
   })
@@ -425,11 +431,12 @@ const shipping_method = document.getElementById("shipping_method").value.trim()
    const { error: updateVariantError } = await supabase
   .from("product_variants")
   .update({
-    name: v.name,
-    price: Number(v.price || 0),
-    stock: Number(v.stock || 0),
-    is_active: true
-  })
+  group_name: v.group_name?.trim() || null,
+  name: v.name,
+  price: Number(v.price || 0),
+  stock: Number(v.stock || 0),
+  is_active: true
+})
   .eq("id", v.dbId)
 
     if(updateVariantError){
@@ -443,8 +450,9 @@ const shipping_method = document.getElementById("shipping_method").value.trim()
   const newVariants = activeVariants.filter(v => !v.dbId)
 
   if(newVariants.length > 0){
-  const insertData = newVariants.map(v => ({
+ const insertData = newVariants.map(v => ({
   product_id: productId,
+  group_name: v.group_name?.trim() || null,
   name: v.name,
   price: Number(v.price || 0),
   stock: Number(v.stock || 0),
@@ -672,7 +680,10 @@ for(const p of data){
       p.name || "",
       p.description || "",
       p.product_series?.name || "",
-            ...(variantRows || []).map(v => v.name || "")
+            ...(variantRows || []).flatMap(v => [
+  v.group_name || "",
+  v.name || ""
+])
     ].join(" ").toLowerCase()
 
     if(!textPool.includes(keyword.toLowerCase())){
@@ -685,7 +696,7 @@ div.className = "product-item"
 
 const isExpanded = expandedProducts.has(p.id)
 const variantLines = (variantRows || []).map(v =>
-  `- ${v.name} / ${v.price} / 庫存：${v.stock || 0}`
+  `- ${v.group_name ? `${v.group_name} / ` : ""}${v.name} / ${v.price} / 庫存：${v.stock || 0}`
 )
 const hasMoreThanThree = variantLines.length > 3
 const visibleVariantLines = isExpanded ? variantLines : variantLines.slice(0, 3)
@@ -853,8 +864,9 @@ toggleDepositAmount()
 await loadSeriesOptions(product.series_id || "")
 
 variants = vData.map(v => ({
-  id: crypto.randomUUID(), // 前端畫面用
-  dbId: v.id,              // 資料庫真正 id，一定要保留
+  id: crypto.randomUUID(),
+  dbId: v.id,
+  group_name: v.group_name || "",
   name: v.name,
   price: Number(v.price || 0),
   stock: Number(v.stock || 0),
