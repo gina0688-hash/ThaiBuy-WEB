@@ -70,6 +70,20 @@ let query = supabase
 
   const productIds = filteredProducts.map(p => p.id)
 
+  if(productIds.length === 0){
+  const container = document.getElementById("productGrid")
+
+  if(container){
+    container.innerHTML = `
+      <div style="color:#666; padding:20px;">
+        查無符合商品
+      </div>
+    `
+  }
+
+  return
+}
+
   // ⭐ 一次抓全部商品的圖片，不要每個商品查一次
   const { data: allImages, error: imageError } = await supabase
     .from("product_images")
@@ -111,94 +125,154 @@ let query = supabase
     variantMap[v.product_id].push(v)
   }
 
-  const container = document.getElementById("productGrid")
-  container.innerHTML = ""
+const currentProducts = filteredProducts
+  .filter(p => p.display_status === "current")
+  .sort((a, b) => Number(a.sort_order ?? 9999) - Number(b.sort_order ?? 9999))
 
-  for(const p of filteredProducts){
+const ongoingProducts = filteredProducts
+  .filter(p => p.display_status === "ongoing")
+ .sort((a, b) => Number(a.sort_order ?? 9999) - Number(b.sort_order ?? 9999))
 
-    const imgUrl = safeImageUrl(imageMap[p.id]?.image_url)
-    const variants = variantMap[p.id] || []
+const instockProducts = filteredProducts
+  .filter(p => p.display_status === "instock")
+ .sort((a, b) => Number(a.sort_order ?? 9999) - Number(b.sort_order ?? 9999))
 
-    const minPrice = variants.length
-      ? Math.min(...variants.map(v => Number(v.price || 0)))
-      : 0
+const container = document.getElementById("productGrid")
+container.innerHTML = ""
 
-    const maxPrice = variants.length
-      ? Math.max(...variants.map(v => Number(v.price || 0)))
-      : 0
+function renderProductCard(p, targetContainer){
 
-    const priceText = minPrice === maxPrice
-      ? `$${minPrice}`
-      : `$${minPrice} ~ $${maxPrice}`
+  const imgUrl = safeImageUrl(imageMap[p.id]?.image_url)
+  const variants = variantMap[p.id] || []
 
-    const isSoldOut = !variants || variants.length === 0 || variants.every(v => Number(v.stock || 0) <= 0)
+  const minPrice = variants.length
+    ? Math.min(...variants.map(v => Number(v.price || 0)))
+    : 0
 
-    if(currentStockStatus === "available" && isSoldOut){
-      continue
-    }
+  const maxPrice = variants.length
+    ? Math.max(...variants.map(v => Number(v.price || 0)))
+    : 0
 
-    if(currentStockStatus === "soldout" && !isSoldOut){
-      continue
-    }
+  const priceText = minPrice === maxPrice
+    ? `$${minPrice}`
+    : `$${minPrice} ~ $${maxPrice}`
 
-    const div = document.createElement("div")
-    div.className = `product-card ${isSoldOut ? "soldout" : ""}`
+  const isSoldOut =
+    !variants ||
+    variants.length === 0 ||
+    variants.every(v => Number(v.stock || 0) <= 0)
 
-    let preorderLabel = "一般預購"
+  if(currentStockStatus === "available" && isSoldOut){
+    return
+  }
 
-    if(p.preorder_type === "limited"){
-      preorderLabel = "限量預購"
-    }else if(p.preorder_type === "instock"){
-      preorderLabel = "現貨"
-    }
+  if(currentStockStatus === "soldout" && !isSoldOut){
+    return
+  }
 
-    const safeProductId = String(p.id || "")
-    const safeProductName = escapeHtml(p.name)
-    const safeBadgeClass = ["limited", "instock", "normal"].includes(p.preorder_type)
-      ? p.preorder_type
-      : "normal"
+  const div = document.createElement("div")
+  div.className = `product-card ${isSoldOut ? "soldout" : ""}`
 
-    div.innerHTML = `
-      <div class="product-img-wrap">
-        <span class="product-badge ${safeBadgeClass}">
-          ${preorderLabel}
-        </span>
+  let preorderLabel = "一般預購"
 
-        ${isSoldOut ? `<span class="soldout-badge">SOLD OUT</span>` : ""}
+  if(p.preorder_type === "limited"){
+    preorderLabel = "限量預購"
+  }else if(p.preorder_type === "instock"){
+    preorderLabel = "現貨"
+  }
 
-        <img 
-          src="${imgUrl}" 
-          class="product-img" 
-          alt="${safeProductName}"
-          loading="lazy"
-          decoding="async"
-        >
+  const safeProductId = String(p.id || "")
+  const safeProductName = escapeHtml(p.name)
 
-        <button class="add-btn" type="button">
-          查看詳情
-        </button>
-      </div>
+  const safeBadgeClass = ["limited", "instock", "normal"].includes(p.preorder_type)
+    ? p.preorder_type
+    : "normal"
 
-      <div class="product-info">
-        <div class="product-name">${safeProductName}</div>
-        <div class="product-price">${priceText}</div>
-      </div>
-    `
+  div.innerHTML = `
+    <div class="product-img-wrap">
+      <span class="product-badge ${safeBadgeClass}">
+        ${preorderLabel}
+      </span>
 
-    const detailBtn = div.querySelector(".add-btn")
-    if(detailBtn){
-      detailBtn.addEventListener("click", (event)=>{
-        event.stopPropagation()
-        goToDetail(safeProductId)
-      })
-    }
+      ${isSoldOut ? `<span class="soldout-badge">SOLD OUT</span>` : ""}
 
-    div.addEventListener("click", ()=>{
+      <img 
+        src="${imgUrl}" 
+        class="product-img" 
+        alt="${safeProductName}"
+        loading="lazy"
+        decoding="async"
+      >
+
+      <button class="add-btn" type="button">
+        查看詳情
+      </button>
+    </div>
+
+    <div class="product-info">
+      <div class="product-name">${safeProductName}</div>
+      <div class="product-price">${priceText}</div>
+    </div>
+  `
+
+  const detailBtn = div.querySelector(".add-btn")
+
+  if(detailBtn){
+    detailBtn.addEventListener("click", (event)=>{
+      event.stopPropagation()
       goToDetail(safeProductId)
     })
-
-    container.appendChild(div)
   }
+
+  div.addEventListener("click", ()=>{
+    goToDetail(safeProductId)
+  })
+
+  targetContainer.appendChild(div)
+}
+
+function renderSection(title, products){
+
+  if(!products || products.length === 0){
+    return
+  }
+
+  const section = document.createElement("section")
+  section.className = "product-section"
+
+  const titleEl = document.createElement("h2")
+  titleEl.className = "product-section-title"
+  titleEl.textContent = title
+
+  const grid = document.createElement("div")
+  grid.className = "product-section-grid"
+
+  products.forEach(p =>{
+    renderProductCard(p, grid)
+  })
+
+  // 如果經過庫存篩選後，這區一個商品都沒有，就不要顯示標題
+  if(grid.children.length === 0){
+    return
+  }
+
+  section.appendChild(titleEl)
+  section.appendChild(grid)
+
+  container.appendChild(section)
+}
+
+renderSection("目前限時填單", currentProducts)
+renderSection("持續預購", ongoingProducts)
+renderSection("現貨商品", instockProducts)
+
+if(container.children.length === 0){
+  container.innerHTML = `
+    <div style="color:#666; padding:20px;">
+      查無符合商品
+    </div>
+  `
+}
 }
 
 async function loadSeries(){

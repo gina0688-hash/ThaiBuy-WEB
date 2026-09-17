@@ -1,8 +1,4 @@
-.product-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fill, minmax(220px, 1fr));
-  gap:20px;
-}
+
 
 .product-card{
   background:white;
@@ -200,7 +196,7 @@
     padding:0 14px;
   }
 
-  .product-grid{
+  .product-section-grid{
     grid-template-columns:repeat(2, minmax(0, 1fr));
     gap:14px;
   }
@@ -256,6 +252,15 @@
     font-size:13px;
     padding:9px 12px;
   }
+
+  .product-section-title{
+    font-size:18px;
+    margin-bottom:12px;
+  }
+
+  .product-section{
+    margin-bottom:28px;
+  }
 }
 
 /* ===== 小手機 ===== */
@@ -264,7 +269,7 @@
     padding:0 10px;
   }
 
-  .product-grid{
+  .product-section-grid{
     grid-template-columns:repeat(2, minmax(0, 1fr));
     gap:10px;
   }
@@ -309,4 +314,30 @@
     font-size:12px;
     padding:8px 10px;
   }
+
+  .product-section-title{
+    font-size:17px;
+  }
+
+  .product-section{
+    margin-bottom:24px;
+  }
+}
+
+.product-section{
+  width:100%;
+  margin-bottom:36px;
+}
+
+.product-section-title{
+  font-size:20px;
+  font-weight:700;
+  margin:0 0 16px;
+  color:#4a1f1f;
+}
+
+.product-section-grid{
+  display:grid;
+  grid-template-columns:repeat(4, minmax(0, 1fr));
+  gap:18px;
 }
