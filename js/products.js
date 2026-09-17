@@ -271,9 +271,9 @@ function renderSection(title, products){
   container.appendChild(section)
 }
 
-renderSection("目前限時填單", currentProducts)
-renderSection("持續預購", ongoingProducts)
-renderSection("現貨商品", instockProducts)
+renderSection("⏰ 目前限時填單", currentProducts)
+renderSection("🛍️ 持續預購", ongoingProducts)
+renderSection("📦 現貨商品", instockProducts)
 
 if(container.children.length === 0){
   container.innerHTML = `
