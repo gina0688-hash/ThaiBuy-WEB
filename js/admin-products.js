@@ -333,6 +333,7 @@ function validateProductForm(){
   const name = document.getElementById("name").value.trim()
   const series_id = document.getElementById("series_id").value || ""
   const preorder_type = document.getElementById("preorder_type").value
+  const display_status = document.getElementById("display_status").value
   const deposit_required = document.getElementById("deposit_required").value === "true"
   const deposit_amount = Number(document.getElementById("deposit_amount").value || 0)
 
@@ -426,6 +427,7 @@ const shipping_method = document.getElementById("shipping_method").value.trim()
   description: desc,
   preorder_type,
   deposit_required,
+  display_status,
   deposit_amount,
   preorder_note,
   payment_method,
@@ -459,6 +461,7 @@ const shipping_method = document.getElementById("shipping_method").value.trim()
   description: desc,
   preorder_type,
   deposit_required,
+  display_status,
   deposit_amount,
   preorder_note,
   payment_method,
@@ -774,6 +777,14 @@ div.innerHTML = `
     ? "現貨"
     : "一般預購"
 }<br>
+首頁階段：${
+  p.display_status === "current"
+    ? "目前限時填單"
+    : p.display_status === "instock"
+    ? "現貨商品"
+    : "持續預購"
+}<br>
+
 二補設定：${
   p.second_payment_rule === "required"
     ? "需要二補"
@@ -907,6 +918,7 @@ document.getElementById("name").value = product.name || ""
 document.getElementById("sort_order").value = product.sort_order || 9999
 document.getElementById("desc").value = product.description || ""
 document.getElementById("preorder_type").value = product.preorder_type || "normal"
+document.getElementById("display_status").value = product.display_status || "ongoing"
 document.getElementById("deposit_required").value = String(product.deposit_required || false)
 document.getElementById("deposit_amount").value = product.deposit_amount || 0
 document.getElementById("preorder_note").value = product.preorder_note || ""
@@ -991,6 +1003,7 @@ document.getElementById("name").value = ""
 document.getElementById("sort_order").value = 9999
 document.getElementById("desc").value = ""
   document.getElementById("preorder_type").value = "normal"
+  document.getElementById("display_status").value = "current"
   document.getElementById("deposit_required").value = "false"
   document.getElementById("deposit_amount").value = 0
   document.getElementById("preorder_note").value = ""
