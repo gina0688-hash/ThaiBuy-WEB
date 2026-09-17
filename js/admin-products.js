@@ -402,6 +402,7 @@ const sort_order = Number(document.getElementById("sort_order").value || 9999)
 const series_id = document.getElementById("series_id").value || null
 const is_active = document.getElementById("is_active").value === "true"
   const preorder_type = document.getElementById("preorder_type").value
+  const display_status = document.getElementById("display_status").value
   const deposit_required = document.getElementById("deposit_required").value === "true"
   const deposit_amount = deposit_required
     ? Number(document.getElementById("deposit_amount").value || 0)
