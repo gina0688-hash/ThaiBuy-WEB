@@ -125,17 +125,26 @@ let query = supabase
     variantMap[v.product_id].push(v)
   }
 
-const currentProducts = filteredProducts
-  .filter(p => p.display_status === "current")
-  .sort((a, b) => Number(a.sort_order ?? 9999) - Number(b.sort_order ?? 9999))
+function sortByReleaseDate(list){
+  return [...list].sort((a, b) => {
+    const dateA = a.release_date ? new Date(a.release_date) : new Date(0)
+    const dateB = b.release_date ? new Date(b.release_date) : new Date(0)
 
-const ongoingProducts = filteredProducts
-  .filter(p => p.display_status === "ongoing")
- .sort((a, b) => Number(a.sort_order ?? 9999) - Number(b.sort_order ?? 9999))
+    return dateB - dateA
+  })
+}
 
-const instockProducts = filteredProducts
-  .filter(p => p.display_status === "instock")
- .sort((a, b) => Number(a.sort_order ?? 9999) - Number(b.sort_order ?? 9999))
+const currentProducts = sortByReleaseDate(
+  filteredProducts.filter(p => p.display_status === "current")
+)
+
+const ongoingProducts = sortByReleaseDate(
+  filteredProducts.filter(p => p.display_status === "ongoing")
+)
+
+const instockProducts = sortByReleaseDate(
+  filteredProducts.filter(p => p.display_status === "instock")
+)
 
 const container = document.getElementById("productGrid")
 container.innerHTML = ""
