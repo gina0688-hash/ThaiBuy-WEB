@@ -37,3 +37,35 @@
 .back-btn:hover{
   background:#e5e7eb;
 }
+
+.detail-countdown-box{
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:8px;
+
+  margin-bottom:14px;
+  padding:8px 12px;
+
+  border-radius:10px;
+  border:1px solid #f3c899;
+  background:#fff8f1;
+
+  font-size:13px;
+}
+
+.detail-countdown-label{
+  font-weight:700;
+  color:#b45309;
+}
+
+.detail-countdown-text{
+  font-weight:800;
+  color:#9a3412;
+  font-size:15px;
+}
+
+.detail-countdown-deadline{
+  color:#8a6b59;
+  font-size:12px;
+}

@@ -473,42 +473,23 @@ ${
     ? `
       <div
         id="detailCountdownBox"
+        class="detail-countdown-box"
         data-deadline="${safeAttr(product.preorder_deadline)}"
-        style="
-          margin-bottom:16px;
-          padding:14px 16px;
-          border-radius:12px;
-          background:#fff4e8;
-          border:1px solid #f3c899;
-        "
       >
-        <div style="
-          font-size:14px;
-          font-weight:700;
-          color:#b45309;
-          margin-bottom:6px;
-        ">
-          ⏰ 限時填單倒數
-        </div>
+        <span class="detail-countdown-label">
+          ⏰ 限時填單
+        </span>
 
-        <div
+        <span
           id="detailCountdownText"
-          style="
-            font-size:20px;
-            font-weight:800;
-            color:#9a3412;
-            margin-bottom:6px;
-          "
+          class="detail-countdown-text"
         >
           ${countdownText}
-        </div>
+        </span>
 
-        <div style="
-          font-size:13px;
-          color:#7c5a45;
-        ">
-          結單時間：${deadlineText}
-        </div>
+        <span class="detail-countdown-deadline">
+          結單：${deadlineText}
+        </span>
       </div>
     `
     : ""
