@@ -26,6 +26,65 @@ function safeImageUrl(url){
   return "https://via.placeholder.com/300"
 }
 
+function getCountdownText(deadline){
+  if(!deadline) return ""
+
+  const target = new Date(deadline).getTime()
+  const now = Date.now()
+  const diff = target - now
+
+  if(diff <= 0){
+    return "已結單"
+  }
+
+  const totalSeconds = Math.floor(diff / 1000)
+
+  const days = Math.floor(totalSeconds / 86400)
+  const hours = Math.floor((totalSeconds % 86400) / 3600)
+  const minutes = Math.floor((totalSeconds % 3600) / 60)
+  const seconds = totalSeconds % 60
+
+  if(days > 0){
+    return `剩餘 ${days}天 ${hours}時 ${minutes}分 ${seconds}秒`
+  }
+
+  return `剩餘 ${hours}時 ${minutes}分 ${seconds}秒`
+}
+
+
+let countdownTimer = null
+
+function startCountdownTimers(){
+
+  if(countdownTimer){
+    clearInterval(countdownTimer)
+  }
+
+  function updateCountdowns(){
+
+    document.querySelectorAll(".product-countdown").forEach(el=>{
+
+      const deadline = el.dataset.deadline
+
+      if(!deadline) return
+
+      const text = getCountdownText(deadline)
+
+      el.textContent = `⏰ ${text}`
+
+      if(text === "已結單"){
+        el.classList.add("ended")
+      }else{
+        el.classList.remove("ended")
+      }
+    })
+  }
+
+  updateCountdowns()
+
+  countdownTimer = setInterval(updateCountdowns, 1000)
+}
+
 let productsData = []
 let currentSeriesId = "all"
 let currentPreorderType = "all"
@@ -70,7 +129,13 @@ let query = supabase
 
   const productIds = filteredProducts.map(p => p.id)
 
-  if(productIds.length === 0){
+if(productIds.length === 0){
+
+  if(countdownTimer){
+    clearInterval(countdownTimer)
+    countdownTimer = null
+  }
+
   const container = document.getElementById("productGrid")
 
   if(container){
@@ -197,6 +262,14 @@ function renderProductCard(p, targetContainer){
     ? p.preorder_type
     : "normal"
 
+const showCountdown =
+  p.display_status === "current" &&
+  p.preorder_deadline
+
+const countdownText = showCountdown
+  ? getCountdownText(p.preorder_deadline)
+  : ""
+
   div.innerHTML = `
     <div class="product-img-wrap">
       <span class="product-badge ${safeBadgeClass}">
@@ -219,9 +292,22 @@ function renderProductCard(p, targetContainer){
     </div>
 
     <div class="product-info">
-      <div class="product-name">${safeProductName}</div>
-      <div class="product-price">${priceText}</div>
-    </div>
+  <div class="product-name">${safeProductName}</div>
+  <div class="product-price">${priceText}</div>
+
+  ${
+    showCountdown
+      ? `
+        <div
+          class="product-countdown"
+          data-deadline="${p.preorder_deadline}"
+        >
+          ⏰ ${countdownText}
+        </div>
+      `
+      : ""
+  }
+</div>
   `
 
   const detailBtn = div.querySelector(".add-btn")
@@ -282,6 +368,8 @@ if(container.children.length === 0){
     </div>
   `
 }
+startCountdownTimers()
+
 }
 
 async function loadSeries(){

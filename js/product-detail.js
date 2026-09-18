@@ -34,6 +34,44 @@ function safeAttr(str){
     .replaceAll(">", "&gt;")
 }
 
+function getCountdownText(deadline){
+  if(!deadline) return ""
+
+  const target = new Date(deadline).getTime()
+  const now = Date.now()
+  const diff = target - now
+
+  if(diff <= 0){
+    return "已結單"
+  }
+
+  const totalSeconds = Math.floor(diff / 1000)
+
+  const days = Math.floor(totalSeconds / 86400)
+  const hours = Math.floor((totalSeconds % 86400) / 3600)
+  const minutes = Math.floor((totalSeconds % 3600) / 60)
+  const seconds = totalSeconds % 60
+
+  if(days > 0){
+    return `剩餘 ${days}天 ${hours}時 ${minutes}分 ${seconds}秒`
+  }
+
+  return `剩餘 ${hours}時 ${minutes}分 ${seconds}秒`
+}
+
+function formatDeadline(deadline){
+  if(!deadline) return ""
+
+  return new Date(deadline).toLocaleString("zh-TW", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false
+  })
+}
+
 // ⭐ 取得 URL id
 const params = new URLSearchParams(window.location.search)
 const id = params.get("id")
@@ -165,6 +203,20 @@ const safePreorderNote = escapeHtml(product.preorder_note)
 const safeShippingMethod = escapeHtml(product.shipping_method)
 const safePaymentMethod = escapeHtml(product.payment_method)
 const safeDescription = escapeHtml(product.description)
+
+const showCountdown =
+  product.display_status === "current" &&
+  product.preorder_deadline
+
+const countdownText = showCountdown
+  ? getCountdownText(product.preorder_deadline)
+  : ""
+
+const deadlineText = showCountdown
+  ? formatDeadline(product.preorder_deadline)
+  : ""
+
+
 
 const container = document.getElementById("productDetail")
 
@@ -416,6 +468,53 @@ const container = document.getElementById("productDetail")
   </div>
 </div>
       
+${
+  showCountdown
+    ? `
+      <div
+        id="detailCountdownBox"
+        data-deadline="${safeAttr(product.preorder_deadline)}"
+        style="
+          margin-bottom:16px;
+          padding:14px 16px;
+          border-radius:12px;
+          background:#fff4e8;
+          border:1px solid #f3c899;
+        "
+      >
+        <div style="
+          font-size:14px;
+          font-weight:700;
+          color:#b45309;
+          margin-bottom:6px;
+        ">
+          ⏰ 限時填單倒數
+        </div>
+
+        <div
+          id="detailCountdownText"
+          style="
+            font-size:20px;
+            font-weight:800;
+            color:#9a3412;
+            margin-bottom:6px;
+          "
+        >
+          ${countdownText}
+        </div>
+
+        <div style="
+          font-size:13px;
+          color:#7c5a45;
+        ">
+          結單時間：${deadlineText}
+        </div>
+      </div>
+    `
+    : ""
+}
+
+
 
       <!-- 規格區 -->
 <div style="
@@ -601,6 +700,10 @@ const container = document.getElementById("productDetail")
 
     </div>
   `
+
+if(showCountdown){
+  startDetailCountdown(product.preorder_deadline)
+}
 
   const thumbList = document.getElementById("thumbList")
 if(thumbList){
@@ -798,6 +901,42 @@ variant: String(variantName || ""),
   }
 }
 
+
+let detailCountdownTimer = null
+
+function startDetailCountdown(deadline){
+
+  if(detailCountdownTimer){
+    clearInterval(detailCountdownTimer)
+  }
+
+  function update(){
+
+    const textEl = document.getElementById("detailCountdownText")
+    const box = document.getElementById("detailCountdownBox")
+
+    if(!textEl || !box) return
+
+    const text = getCountdownText(deadline)
+
+    textEl.textContent = text
+
+    if(text === "已結單"){
+  box.style.background = "#f3f4f6"
+  box.style.borderColor = "#d1d5db"
+  textEl.style.color = "#6b7280"
+
+  clearInterval(detailCountdownTimer)
+  detailCountdownTimer = null
+}
+  }
+
+  update()
+
+  detailCountdownTimer = setInterval(update, 1000)
+}
+
 window.goBackHome = function(){
   window.location.href = "./index.html"
 }
+
