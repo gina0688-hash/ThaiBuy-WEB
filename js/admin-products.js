@@ -334,6 +334,7 @@ function validateProductForm(){
   const series_id = document.getElementById("series_id").value || ""
   const preorder_type = document.getElementById("preorder_type").value
   const display_status = document.getElementById("display_status").value
+  const preorder_deadline = document.getElementById("preorder_deadline").value
   const deposit_required = document.getElementById("deposit_required").value === "true"
   const deposit_amount = Number(document.getElementById("deposit_amount").value || 0)
 
@@ -348,6 +349,11 @@ function validateProductForm(){
     alert("請選擇商品系列")
     return false
   }
+
+  if(display_status === "current" && !preorder_deadline){
+  alert("目前限時填單商品請設定結單日期 / 時間")
+  return false
+}
 
   if(activeVariants.length === 0){
     alert("請至少新增一個規格")
@@ -402,8 +408,17 @@ const sort_order = Number(document.getElementById("sort_order").value || 9999)
 const series_id = document.getElementById("series_id").value || null
 const is_active = document.getElementById("is_active").value === "true"
   const preorder_type = document.getElementById("preorder_type").value
-  const display_status = document.getElementById("display_status").value
-  const deposit_required = document.getElementById("deposit_required").value === "true"
+const display_status = document.getElementById("display_status").value
+
+const preorderDeadlineInput =
+  document.getElementById("preorder_deadline").value
+
+const preorder_deadline = preorderDeadlineInput
+  ? new Date(preorderDeadlineInput).toISOString()
+  : null
+
+const deposit_required =
+  document.getElementById("deposit_required").value === "true"
   const deposit_amount = deposit_required
     ? Number(document.getElementById("deposit_amount").value || 0)
     : 0
@@ -427,8 +442,9 @@ const shipping_method = document.getElementById("shipping_method").value.trim()
   sort_order,
   description: desc,
   preorder_type,
-  deposit_required,
   display_status,
+  preorder_deadline,
+  deposit_required,
   deposit_amount,
   preorder_note,
   payment_method,
@@ -461,8 +477,9 @@ const shipping_method = document.getElementById("shipping_method").value.trim()
   sort_order,
   description: desc,
   preorder_type,
-  deposit_required,
   display_status,
+  preorder_deadline,
+  deposit_required,
   deposit_amount,
   preorder_note,
   payment_method,
@@ -786,6 +803,12 @@ div.innerHTML = `
     : "持續預購"
 }<br>
 
+結單時間：${
+  p.preorder_deadline
+    ? new Date(p.preorder_deadline).toLocaleString("zh-TW")
+    : "未設定"
+}<br>
+
 二補設定：${
   p.second_payment_rule === "required"
     ? "需要二補"
@@ -920,6 +943,19 @@ document.getElementById("sort_order").value = product.sort_order || 9999
 document.getElementById("desc").value = product.description || ""
 document.getElementById("preorder_type").value = product.preorder_type || "normal"
 document.getElementById("display_status").value = product.display_status || "ongoing"
+if(product.preorder_deadline){
+  const deadline = new Date(product.preorder_deadline)
+
+  const localDeadline = new Date(
+    deadline.getTime() - deadline.getTimezoneOffset() * 60000
+  )
+    .toISOString()
+    .slice(0, 16)
+
+  document.getElementById("preorder_deadline").value = localDeadline
+}else{
+  document.getElementById("preorder_deadline").value = ""
+}
 document.getElementById("deposit_required").value = String(product.deposit_required || false)
 document.getElementById("deposit_amount").value = product.deposit_amount || 0
 document.getElementById("preorder_note").value = product.preorder_note || ""
@@ -1004,8 +1040,9 @@ document.getElementById("name").value = ""
 document.getElementById("sort_order").value = 9999
 document.getElementById("desc").value = ""
   document.getElementById("preorder_type").value = "normal"
-  document.getElementById("display_status").value = "current"
-  document.getElementById("deposit_required").value = "false"
+document.getElementById("display_status").value = "current"
+document.getElementById("preorder_deadline").value = ""
+document.getElementById("deposit_required").value = "false"
   document.getElementById("deposit_amount").value = 0
   document.getElementById("preorder_note").value = ""
 document.getElementById("payment_method").value = ""
