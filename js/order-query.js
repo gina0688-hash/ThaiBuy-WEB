@@ -86,7 +86,7 @@ async function handleQuery(){
       return
     }
 
-    renderOrders(orders)
+   renderOrders(orders, hasEmail && hasPhone)
 
   }catch(err){
     console.error(err)
@@ -97,8 +97,120 @@ async function handleQuery(){
   }
 }
 
-function renderOrders(orders){
-  queryResult.innerHTML = orders.map(order => {
+function renderOrders(orders, showCustomerSummary = false){
+
+  let customerSummaryHtml = ""
+
+  if(showCustomerSummary){
+
+    const validOrders = orders.filter(order => {
+      const items = order.items || []
+      return items.some(item => item.status !== "cancelled")
+    })
+
+   const totalOrders = validOrders.length
+
+const paidOrders = validOrders.filter(order =>
+  order.admin_status === "paid"
+)
+
+const totalSpent = paidOrders.reduce((sum, order) => {
+      const items = order.items || []
+      const money = calcOrderMoney(order, items)
+
+      let paidAmount = Number(money.totalAmount || 0)
+
+      // 二補已確認付款才算進實際消費
+      if(
+        order.need_second_payment &&
+        order.second_payment_status === "paid"
+      ){
+        paidAmount += Number(
+          order.second_payment_amount ||
+          money.secondPaymentAmount ||
+          0
+        )
+      }
+
+      // 扣除退款
+      paidAmount -= Number(
+        order.refund_amount ||
+        money.refundAmount ||
+        0
+      )
+
+      return sum + Math.max(paidAmount, 0)
+    }, 0)
+
+    customerSummaryHtml = `
+      <div style="
+        background:linear-gradient(135deg,#fff7ef,#fff);
+        border:1px solid #f1dac8;
+        border-radius:20px;
+        padding:18px 20px;
+        margin-bottom:20px;
+      ">
+        <div style="
+          font-size:17px;
+          font-weight:800;
+          color:#4f433c;
+          margin-bottom:14px;
+        ">
+          👤 我的購買紀錄
+        </div>
+
+        <div style="
+          display:grid;
+          grid-template-columns:repeat(2,minmax(0,1fr));
+          gap:12px;
+        ">
+          <div style="
+            background:#fff;
+            border:1px solid #f3e5da;
+            border-radius:14px;
+            padding:14px;
+          ">
+            <div style="font-size:13px;color:#8b776a;">
+              累積訂單
+            </div>
+
+            <div style="
+              margin-top:5px;
+              font-size:22px;
+              font-weight:800;
+              color:#3f352f;
+            ">
+              ${totalOrders} 筆
+            </div>
+          </div>
+
+          <div style="
+            background:#fff;
+            border:1px solid #f3e5da;
+            border-radius:14px;
+            padding:14px;
+          ">
+            <div style="font-size:13px;color:#8b776a;">
+              累積消費
+            </div>
+
+            <div style="
+              margin-top:5px;
+              font-size:22px;
+              font-weight:800;
+              color:#d86b27;
+            ">
+              $${totalSpent.toLocaleString()}
+            </div>
+          </div>
+        </div>
+      </div>
+    `
+  }
+
+  queryResult.innerHTML =
+    customerSummaryHtml +
+    orders.map(order => {
     const items = order.items || []
     const status = calcOrderStatus(items)
     const money = calcOrderMoney(order, items)
