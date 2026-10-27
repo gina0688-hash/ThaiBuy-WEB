@@ -2015,11 +2015,26 @@ window.sendPurchaseNotice = async function(orderId) {
         }
       );
 
-    if (sendError) {
-      console.error("寄信失敗：", sendError);
-      alert("❌ Email 寄送失敗，請查看 Console 或 Edge Function Logs。");
-      return;
+    
+if (sendError) {
+
+  console.error("寄信失敗：", sendError);
+
+  let message = sendError.message || "未知錯誤";
+
+  try {
+    if (sendError.context instanceof Response) {
+      const result = await sendError.context.clone().json();
+      message = result.error || result.message || message;
     }
+  } catch (e) {
+    console.warn("無法解析錯誤回應", e);
+  }
+
+  alert("❌ Email 寄送失敗：\n" + message);
+  return;
+}
+
 
     if (!data || data.success !== true) {
       alert(
