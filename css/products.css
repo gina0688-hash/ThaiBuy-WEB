@@ -357,3 +357,175 @@
   background:#f3f4f6;
   color:#6b7280;
 }
+
+
+/* =====================================
+   THAI BUY 首頁視覺優化
+   背景漸層 + 左側收合篩選
+===================================== */
+
+/* 只修改商品頁背景，不影響其他頁面 */
+body:has(.shop-page){
+  background:
+    radial-gradient(
+      ellipse at 92% 12%,
+      rgba(255, 187, 153, 0.18) 0%,
+      transparent 38%
+    ),
+    radial-gradient(
+      ellipse at 5% 78%,
+      rgba(255, 207, 190, 0.14) 0%,
+      transparent 42%
+    ),
+    #fff9f3;
+
+  background-attachment:fixed;
+}
+
+/* 移除商品列表標題後，縮小頂部留白 */
+.shop-page{
+  margin-top:28px;
+}
+
+/* 左側篩選卡片 */
+.shop-sidebar .sidebar-card{
+  background:rgba(255,255,255,0.90);
+  border:1px solid #f3e5dc;
+  border-radius:16px;
+  padding:18px;
+  box-shadow:0 4px 18px rgba(110,65,45,0.04);
+}
+
+/* 篩選標題與重設按鈕 */
+.sidebar-heading{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:12px;
+}
+
+.shop-sidebar .sidebar-heading h3{
+  margin:0;
+  color:#542b29;
+  font-size:16px;
+  font-weight:700;
+}
+
+.filter-reset-btn{
+  background:transparent;
+  border:none;
+  padding:5px 0;
+  color:#ad8478;
+  font-size:12px;
+  font-weight:500;
+  cursor:pointer;
+  white-space:nowrap;
+}
+
+.filter-reset-btn:hover{
+  color:#ff7a00;
+}
+
+/* 收合分類 */
+.filter-group{
+  border-top:1px solid #f2e9e3;
+}
+
+.filter-group summary{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:15px 3px;
+  font-size:14px;
+  font-weight:600;
+  color:#542b29;
+  cursor:pointer;
+  list-style:none;
+  user-select:none;
+}
+
+.filter-group summary::-webkit-details-marker{
+  display:none;
+}
+
+.filter-group summary::after{
+  content:"";
+  width:7px;
+  height:7px;
+  border-right:2px solid #aa8879;
+  border-bottom:2px solid #aa8879;
+  transform:rotate(45deg);
+  transition:transform 0.2s ease;
+  margin-right:5px;
+}
+
+.filter-group[open] summary::after{
+  transform:rotate(225deg);
+}
+
+.filter-group summary:hover{
+  color:#ff7a00;
+}
+
+/* 篩選內容間距 */
+.filter-group .sidebar-links{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  padding:0 0 12px;
+}
+
+/* 不再讓全部選項都是大方塊 */
+.filter-group .sidebar-link{
+  width:100%;
+  background:transparent;
+  border:none;
+  border-radius:8px;
+  padding:10px 12px;
+  color:#79564f;
+  font-size:13px;
+  font-weight:500;
+  text-align:left;
+  transition:background 0.2s ease;
+}
+
+.filter-group .sidebar-link:hover{
+  background:#fff1e7;
+  color:#e85d04;
+}
+
+/* 只有選中的系列才有底色 */
+.filter-group .sidebar-link.active{
+  background:#fff0e4;
+  color:#e85d04;
+  font-weight:700;
+}
+
+/* 商品區塊標題 */
+.product-section-title{
+  color:#542b29;
+  letter-spacing:0.3px;
+}
+
+/* 手機版 */
+@media(max-width:768px){
+  .shop-page{
+    margin-top:18px;
+  }
+
+  .shop-sidebar .sidebar-card{
+    padding:14px;
+    border-radius:12px;
+  }
+
+  .filter-group summary{
+    padding:12px 3px;
+    font-size:14px;
+  }
+
+  .filter-group .sidebar-link{
+    padding:9px 10px;
+    font-size:13px;
+  }
+}

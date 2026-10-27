@@ -95,46 +95,75 @@
 
 <div class="shop-page">
 
-  <h2>🛍 商品列表</h2>
-
   <div class="shop-layout">
 
-    <aside class="shop-sidebar">
-      <div class="sidebar-card">
-  <h3>商品分類</h3>
-  <div class="sidebar-links">
-    <button class="sidebar-link active" id="resetFiltersBtn" onclick="resetAllFilters()">全部商品</button>
-    <button class="sidebar-link sidebar-reset" onclick="resetAllFilters()">重設篩選</button>
-  </div>
-</div>
 
-    <div class="sidebar-card">
-  <h3>系列</h3>
-  <div class="sidebar-links" id="seriesSidebar">
-    <button class="sidebar-link active" onclick="filterBySeries('all')">全部系列</button>
-  </div>
-</div>
+<aside class="shop-sidebar">
 
-<div class="sidebar-card">
-  <h3>商品類型</h3>
-  <div class="sidebar-links">
-    <button class="sidebar-link preorder-filter active" data-preorder="all" onclick="filterByPreorderType('all')">全部</button>
-    <button class="sidebar-link preorder-filter" data-preorder="instock" onclick="filterByPreorderType('instock')">現貨</button>
-    <button class="sidebar-link preorder-filter" data-preorder="limited" onclick="filterByPreorderType('limited')">限量預購</button>
-    <button class="sidebar-link preorder-filter" data-preorder="normal" onclick="filterByPreorderType('normal')">一般預購</button>
-  </div>
-</div>
+  <div class="sidebar-card">
+    <div class="sidebar-heading">
+      <h3>商品篩選</h3>
+      <button type="button"
+              class="filter-reset-btn"
+              onclick="resetAllFilters()">
+        重設篩選
+      </button>
+    </div>
 
-      <div class="sidebar-card">
-  <h3>庫存狀態</h3>
-  <div class="sidebar-links">
-    <button class="sidebar-link stock-filter active" data-stock-filter="all" onclick="filterByStockStatus('all')">全部</button>
-    <button class="sidebar-link stock-filter" data-stock-filter="available" onclick="filterByStockStatus('available')">可購買</button>
-    <button class="sidebar-link stock-filter" data-stock-filter="soldout" onclick="filterByStockStatus('soldout')">SOLD OUT</button>
-  </div>
-</div>
+    <!-- 系列篩選 -->
+    <details class="filter-group" id="seriesFilterGroup">
+      <summary>系列分類</summary>
+      <div class="sidebar-links" id="seriesSidebar">
+        <button class="sidebar-link active"
+                onclick="filterBySeries('all')">
+          全部系列
+        </button>
+      </div>
+    </details>
 
-    </aside>
+    <!-- 商品類型 -->
+    <details class="filter-group">
+      <summary>商品類型</summary>
+      <div class="sidebar-links">
+        <button class="sidebar-link preorder-filter active"
+                data-preorder="all"
+                onclick="filterByPreorderType('all')">全部</button>
+
+        <button class="sidebar-link preorder-filter"
+                data-preorder="instock"
+                onclick="filterByPreorderType('instock')">現貨</button>
+
+        <button class="sidebar-link preorder-filter"
+                data-preorder="limited"
+                onclick="filterByPreorderType('limited')">限量預購</button>
+
+        <button class="sidebar-link preorder-filter"
+                data-preorder="normal"
+                onclick="filterByPreorderType('normal')">一般預購</button>
+      </div>
+    </details>
+
+    <!-- 庫存狀態 -->
+    <details class="filter-group">
+      <summary>庫存狀態</summary>
+      <div class="sidebar-links">
+        <button class="sidebar-link stock-filter active"
+                data-stock-filter="all"
+                onclick="filterByStockStatus('all')">全部</button>
+
+        <button class="sidebar-link stock-filter"
+                data-stock-filter="available"
+                onclick="filterByStockStatus('available')">可購買</button>
+
+        <button class="sidebar-link stock-filter"
+                data-stock-filter="soldout"
+                onclick="filterByStockStatus('soldout')">SOLD OUT</button>
+      </div>
+    </details>
+
+  </div>
+
+</aside>
 
     <section class="shop-main">
   <div id="productGrid"></div>
