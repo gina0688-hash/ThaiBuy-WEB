@@ -356,8 +356,56 @@ ${
   value="${escapeHtml(o.order_purchase_url || "")}"
   placeholder="貼上這筆訂單要給客人的下單連結"
   style="width:100%;margin:6px 0 10px 0;"
-  onchange="updateOrderPurchaseUrl('${o.id}', this.value)">
+  
+onchange="updateOrderPurchaseUrl('${o.id}', this.value)">
 <br>
+
+<!-- Email 可下單通知 -->
+<div style="
+  margin:10px 0 14px;
+  padding:12px;
+  border:1px solid #f9c9dc;
+  border-radius:10px;
+  background:#fff4f8;
+">
+
+  <div style="font-weight:bold;margin-bottom:8px;">
+    💌 可下單通知
+  </div>
+
+  <div style="font-size:13px;margin-bottom:8px;">
+    收件信箱：${escapeHtml(o.email || "未填寫")}
+  </div>
+
+  <div style="font-size:13px;margin-bottom:10px;">
+    通知狀態：
+    ${
+      o.purchase_notice_sent_at
+      ? `<span style="color:#16a34a;">✅ 已發送
+          ${new Date(o.purchase_notice_sent_at).toLocaleString("zh-TW")}
+         </span>`
+      : `<span style="color:#ea580c;">尚未發送</span>`
+    }
+  </div>
+
+  <button
+    type="button"
+    onclick="sendPurchaseNotice('${o.id}')"
+    style="
+      background:#ec4899;
+      color:white;
+      border:none;
+      padding:8px 14px;
+      border-radius:8px;
+      cursor:pointer;
+      font-weight:bold;
+    "
+  >
+    📧 發送可下單通知
+  </button>
+
+</div>
+
 
 <b>運送方式：</b>${escapeHtml(o.shipping_method || "-")}<br>
 ${
@@ -1882,3 +1930,54 @@ function setOverviewLoading(isLoading){
       : "點擊卡片可快速篩選訂單"
   }
 }
+
+
+window.sendPurchaseNotice = async function(orderId) {
+
+  const { data: order, error } = await supabase
+    .from("orders")
+    .select(`
+      id,
+      order_number,
+      email,
+      order_purchase_url,
+      purchase_notice_sent_at
+    `)
+    .eq("id", orderId)
+    .single();
+
+  if (error || !order) {
+    alert("讀取訂單失敗");
+    return;
+  }
+
+  if (!order.email) {
+    alert("這筆訂單沒有 Email！");
+    return;
+  }
+
+  if (!order.order_purchase_url) {
+    alert("請先填寫下單連結！");
+    return;
+  }
+
+  if (order.purchase_notice_sent_at) {
+    const confirmed = confirm(
+      "這筆訂單已發送過通知，確定要再次發送嗎？"
+    );
+
+    if (!confirmed) return;
+  }
+
+  const confirmed = confirm(
+    `確認通知以下客人？\n\n` +
+    `訂單：${order.order_number}\n` +
+    `Email：${order.email}\n` +
+    `下單連結：${order.order_purchase_url}`
+  );
+
+  if (!confirmed) return;
+
+  alert("按鈕檢查正常！目前尚未串接寄信服務，不會實際寄送 Email。");
+
+};
