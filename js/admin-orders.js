@@ -388,9 +388,10 @@ onchange="updateOrderPurchaseUrl('${o.id}', this.value)">
     }
   </div>
 
-  <button
-    type="button"
-    onclick="sendPurchaseNotice('${o.id}')"
+ <button
+  type="button"
+  data-notice-id="${o.id}"
+  onclick="sendPurchaseNotice('${o.id}')"
     style="
       background:#ec4899;
       color:white;
@@ -1932,7 +1933,12 @@ function setOverviewLoading(isLoading){
 }
 
 
+
 window.sendPurchaseNotice = async function(orderId) {
+
+  // =====================================
+  // 1. 讀取訂單資料
+  // =====================================
 
   const { data: order, error } = await supabase
     .from("orders")
@@ -1947,7 +1953,7 @@ window.sendPurchaseNotice = async function(orderId) {
     .single();
 
   if (error || !order) {
-    alert("讀取訂單失敗");
+    alert("讀取訂單失敗！");
     return;
   }
 
@@ -1961,23 +1967,96 @@ window.sendPurchaseNotice = async function(orderId) {
     return;
   }
 
-  if (order.purchase_notice_sent_at) {
-    const confirmed = confirm(
-      "這筆訂單已發送過通知，確定要再次發送嗎？"
-    );
+  // =====================================
+  // 2. 檢查是否已寄送
+  // =====================================
 
-    if (!confirmed) return;
+  if (order.purchase_notice_sent_at) {
+    alert("這筆訂單已發送過通知，為避免重複寄送，已停止操作。");
+    return;
   }
 
+  // =====================================
+  // 3. 發送前確認
+  // =====================================
+
   const confirmed = confirm(
-    `確認通知以下客人？\n\n` +
+    `確定要發送可下單通知嗎？\n\n` +
     `訂單：${order.order_number}\n` +
-    `Email：${order.email}\n` +
-    `下單連結：${order.order_purchase_url}`
+    `收件信箱：${order.email}\n` +
+    `下單連結：${order.order_purchase_url}\n\n` +
+    `寄件者：ThaiBuy 泰國代購`
   );
 
   if (!confirmed) return;
 
-  alert("按鈕檢查正常！目前尚未串接寄信服務，不會實際寄送 Email。");
+  // =====================================
+  // 4. 呼叫 Supabase Edge Function
+  // =====================================
+
+  const button = document.querySelector(
+    `button[data-notice-id="${orderId}"]`
+  );
+
+  if (button) {
+    button.disabled = true;
+    button.textContent = "⏳ 寄送中...";
+  }
+
+  try {
+
+    const { data, error: sendError } =
+      await supabase.functions.invoke(
+        "send-purchase-notice",
+        {
+          body: {
+            orderId: orderId
+          }
+        }
+      );
+
+    if (sendError) {
+      console.error("寄信失敗：", sendError);
+      alert("❌ Email 寄送失敗，請查看 Console 或 Edge Function Logs。");
+      return;
+    }
+
+    if (!data || data.success !== true) {
+      alert(
+        "❌ 寄送失敗：" +
+        (data?.error || "未知錯誤")
+      );
+      return;
+    }
+
+    // =====================================
+    // 5. 寄送成功
+    // =====================================
+
+    if (data.warning) {
+      alert("⚠️ " + data.warning);
+    } else {
+      alert("💗 ThaiBuy 可下單通知已成功送出！");
+    }
+
+    // 重新讀取訂單，更新通知狀態
+    await loadOrders();
+
+  } catch (err) {
+
+    console.error("Email 通知錯誤：", err);
+
+    alert(
+      "❌ 寄送時發生錯誤，請先確認寄送紀錄，避免重複寄信。"
+    );
+
+  } finally {
+
+    if (button) {
+      button.disabled = false;
+      button.textContent = "📧 發送可下單通知";
+    }
+
+  }
 
 };
