@@ -405,6 +405,40 @@ onchange="updateOrderPurchaseUrl('${o.id}', this.value)">
     📧 發送可下單通知
   </button>
 
+  
+<div style="margin-top:10px;">
+
+  <button
+    type="button"
+    onclick="loadPurchaseNoticeLogs('${o.id}')"
+    style="
+      background:white;
+      color:#be185d;
+      border:1px solid #f9c9dc;
+      padding:7px 12px;
+      border-radius:8px;
+      cursor:pointer;
+      font-weight:bold;
+    "
+  >
+    📜 查看通知紀錄
+  </button>
+
+  <div
+    id="purchase-notice-logs-${o.id}"
+    style="
+      display:none;
+      margin-top:10px;
+      padding:10px;
+      background:white;
+      border:1px solid #fbcfe8;
+      border-radius:8px;
+    "
+  ></div>
+
+</div>
+
+
 </div>
 
 
@@ -2083,6 +2117,112 @@ if (sendError) {
       button.disabled = false;
       button.textContent = "📧 發送可下單通知";
     }
+
+  }
+
+};
+
+
+
+//
+// 💌 ThaiBuy Email 通知歷史紀錄
+//
+
+window.loadPurchaseNoticeLogs = async function(orderId) {
+
+  const box = document.getElementById(
+    `purchase-notice-logs-${orderId}`
+  );
+
+  if (!box) return;
+
+  if (box.style.display === "block") {
+    box.style.display = "none";
+    return;
+  }
+
+  box.style.display = "block";
+  box.textContent = "⏳ 讀取通知紀錄中...";
+
+  try {
+
+    const { data, error } =
+      await supabase.functions.invoke(
+        "send-purchase-notice",
+        {
+          body: {
+            action: "history",
+            orderId: orderId
+          }
+        }
+      );
+
+    if (error) throw error;
+
+    if (!data || data.success !== true) {
+      throw new Error(
+        data?.error || "讀取通知紀錄失敗"
+      );
+    }
+
+    const logs = data.logs || [];
+
+    if (logs.length === 0) {
+      box.textContent = "目前沒有歷史通知紀錄";
+      return;
+    }
+
+    let html = `
+      <div style="
+        font-weight:bold;
+        color:#be185d;
+        margin-bottom:10px;
+      ">
+        💌 共發送 ${logs.length} 次
+      </div>
+    `;
+
+    logs.forEach((log, index) => {
+
+      const date = new Date(
+        log.sent_at
+      ).toLocaleString("zh-TW");
+
+      const number = logs.length - index;
+
+      html += `
+        <div style="
+          padding:10px 0;
+          border-bottom:1px solid #fce7f3;
+          font-size:13px;
+          line-height:1.8;
+        ">
+          <div style="font-weight:bold;">
+            ✅ 第 ${number} 次通知
+          </div>
+
+          <div>
+            發送時間：${escapeHtml(date)}
+          </div>
+
+          <div>
+            收件信箱：
+            ${escapeHtml(log.recipient_email)}
+          </div>
+
+          <div style="color:#16a34a;">
+            狀態：已送出
+          </div>
+        </div>
+      `;
+    });
+
+    box.innerHTML = html;
+
+  } catch (err) {
+
+    console.error("通知歷史讀取失敗：", err);
+    box.textContent = "❌ 無法讀取通知紀錄";
 
   }
 
