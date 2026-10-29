@@ -1971,10 +1971,22 @@ window.sendPurchaseNotice = async function(orderId) {
   // 2. 檢查是否已寄送
   // =====================================
 
-  if (order.purchase_notice_sent_at) {
-    alert("這筆訂單已發送過通知，為避免重複寄送，已停止操作。");
-    return;
-  }
+
+if (order.purchase_notice_sent_at) {
+
+  const resend = confirm(
+    "💌 這筆訂單已經寄送過通知！\n\n" +
+    "上次發送時間：" +
+    new Date(order.purchase_notice_sent_at)
+      .toLocaleString("zh-TW") +
+    "\n\n由於商品可能分批抵台，" +
+    "系統允許再次發送。\n\n" +
+    "確定要再次通知客人嗎？"
+  );
+
+  if (!resend) return;
+}
+
 
   // =====================================
   // 3. 發送前確認
