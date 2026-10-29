@@ -536,6 +536,62 @@ ${
 }
 
 </div>
+
+
+<!-- 💌 補款 Email 通知 -->
+<div style="
+  margin:10px 0 14px;
+  padding:12px;
+  border:1px solid #f9c9dc;
+  border-radius:10px;
+  background:#fff4f8;
+">
+
+  <div style="font-weight:bold;margin-bottom:8px;">
+    💌 補款通知
+  </div>
+
+  <div style="font-size:13px;margin-bottom:6px;">
+    收件信箱：${escapeHtml(o.email || "未填寫")}
+  </div>
+
+  <div style="font-size:13px;margin-bottom:6px;">
+    待補款金額：
+    <b style="color:#be185d;">
+      NT$ ${Number(o.second_payment_amount || 0).toLocaleString("zh-TW")}
+    </b>
+  </div>
+
+  <div style="font-size:13px;margin-bottom:10px;">
+    通知狀態：
+    ${
+      o.payment_notice_sent_at
+        ? `<span style="color:#16a34a;">
+             ✅ 已發送 ${new Date(o.payment_notice_sent_at).toLocaleString("zh-TW")}
+           </span>`
+        : `<span style="color:#ea580c;">尚未發送</span>`
+    }
+  </div>
+
+  <button
+    type="button"
+    data-payment-notice-id="${o.id}"
+    onclick="sendPaymentNotice('${o.id}')"
+    style="
+      background:#ec4899;
+      color:white;
+      border:none;
+      padding:8px 14px;
+      border-radius:8px;
+      cursor:pointer;
+      font-weight:bold;
+    "
+  >
+    📧 發送補款通知
+  </button>
+
+</div>
+
         <b>商品：</b><br>
         ${items.map(i=>{
 
@@ -2223,6 +2279,153 @@ window.loadPurchaseNoticeLogs = async function(orderId) {
 
     console.error("通知歷史讀取失敗：", err);
     box.textContent = "❌ 無法讀取通知紀錄";
+
+  }
+
+};
+
+// ==========================================
+// ThaiBuy 補款 Email 通知
+// ==========================================
+
+window.sendPaymentNotice = async function(orderId) {
+
+  // 1. 讀取訂單
+  const { data: order, error } = await supabase
+    .from("orders")
+    .select(`
+      id,
+      order_number,
+      email,
+      need_second_payment,
+      second_payment_amount,
+      second_payment_status,
+      payment_notice_sent_at
+    `)
+    .eq("id", orderId)
+    .single();
+
+  if (error || !order) {
+    alert("❌ 讀取訂單失敗");
+    return;
+  }
+
+  if (!order.email) {
+    alert("❌ 這筆訂單沒有 Email");
+    return;
+  }
+
+  // 2. 檢查補款狀態
+  const amount = Number(order.second_payment_amount || 0);
+
+  if (!order.need_second_payment || amount <= 0) {
+    alert("❌ 這筆訂單目前不需要補款");
+    return;
+  }
+
+  if (order.second_payment_status !== "unpaid") {
+    alert("❌ 這筆訂單不是尚未補款狀態");
+    return;
+  }
+
+  // 3. 已寄送過的提醒
+  if (order.payment_notice_sent_at) {
+
+    const resend = confirm(
+      "這筆訂單已經發送過補款通知。\n\n" +
+      "上次發送時間：" +
+      new Date(order.payment_notice_sent_at)
+        .toLocaleString("zh-TW") +
+      "\n\n確定要再次提醒客人嗎？"
+    );
+
+    if (!resend) return;
+  }
+
+  // 4. 發送前確認
+  const confirmed = confirm(
+    "確定要發送補款通知嗎？\n\n" +
+    "訂單：" + (order.order_number || order.id) + "\n" +
+    "收件信箱：" + order.email + "\n" +
+    "待補款金額：NT$ " + amount.toLocaleString("zh-TW") +
+    "\n\n客人將收到 ThaiBuy 訂單查詢頁連結。"
+  );
+
+  if (!confirmed) return;
+
+  // 5. 鎖定按鈕
+  const button = document.querySelector(
+    `button[data-payment-notice-id="${orderId}"]`
+  );
+
+  if (button) {
+    button.disabled = true;
+    button.textContent = "⏳ 寄送中...";
+  }
+
+  // 6. 呼叫 Supabase Edge Function
+  try {
+
+    const { data, error: sendError } =
+      await supabase.functions.invoke(
+        "send-purchase-notice",
+        {
+          body: {
+            action: "payment",
+            orderId: orderId
+          }
+        }
+      );
+
+    if (sendError) {
+
+      let message = sendError.message || "未知錯誤";
+
+      try {
+        if (sendError.context instanceof Response) {
+          const result = await sendError.context.clone().json();
+
+          message =
+            result.error ||
+            result.message ||
+            message;
+        }
+      } catch (e) {
+        console.warn("無法解析錯誤回應", e);
+      }
+
+      throw new Error(message);
+    }
+
+    if (!data || data.success !== true) {
+      throw new Error(data?.error || "寄送失敗");
+    }
+
+    // 7. 寄送成功
+    if (data.warning) {
+      alert("⚠️ " + data.warning);
+    } else {
+      alert("💗 ThaiBuy 補款通知已成功送出！");
+    }
+
+    await loadOrders();
+
+  } catch (err) {
+
+    console.error("補款通知錯誤：", err);
+
+    alert(
+      "❌ 補款通知發送失敗：" +
+      (err.message || "未知錯誤") +
+      "\n\n若寄送結果不明，請先確認 Gmail 寄件備份，避免重複寄信。"
+    );
+
+  } finally {
+
+    if (button) {
+      button.disabled = false;
+      button.textContent = "📧 發送補款通知";
+    }
 
   }
 
